@@ -1,160 +1,124 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tiage Music Masterplan 25</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
+      margin: 0;
       height: 100vh;
     }
-
     header {
-      padding: 1rem;
-      border-bottom: 1px solid #ddd;
-    }
-
-    #app {
       display: flex;
-      flex: 1;
-      overflow: hidden;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: #111;
+      color: #fff;
     }
-
-    /* Sidebar / Inhaltsverzeichnis */
+    #menuBtn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
     #sidebar {
-      width: 280px;
-      background: #f4f4f4;
-      border-right: 1px solid #ccc;
+      width: 260px;
+      background: #f5f5f5;
+      border-right: 1px solid #ddd;
       overflow-y: auto;
       transition: transform 0.3s ease;
     }
     #sidebar.hidden {
       transform: translateX(-100%);
     }
-    #toc {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    #toc li {
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      border-bottom: 1px solid #ddd;
-    }
-    #toc li:hover {
-      background: #e0e0e0;
-    }
-
-    /* Content */
     #content {
       flex: 1;
       padding: 1rem;
       overflow-y: auto;
+      transition: width 0.3s ease;
     }
-
-    /* Kapitel-Button oben rechts */
-    #menuButton {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      font-size: 1.5rem;
-      cursor: pointer;
-      z-index: 1000;
+    main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
     }
-
-    .error {
-      color: red;
-      border: 1px solid red;
-      background: #ffe5e5;
-      padding: 0.5rem;
-      margin-top: 1rem;
+    @media (max-width: 768px) {
+      #sidebar {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+      #sidebar.hidden {
+        transform: translateX(-100%);
+      }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Tiage Music Masterplan 25</h1>
+    <h3>Tiage Music Masterplan 25</h3>
+    <button id="menuBtn">☰</button>
   </header>
 
-  <div id="app">
-    <aside id="sidebar">
-      <h3 style="margin:0; padding:1rem; background:#333; color:#fff;">
-        Musik Koffer Workbench
-      </h3>
-      <ul id="toc"></ul>
-    </aside>
-    <main id="content">
+  <main>
+    <nav id="sidebar"></nav>
+    <section id="content">
       <h2>Willkommen</h2>
       <p>Bitte Kapitel wählen…</p>
-    </main>
-  </div>
-
-  <!-- Button für Menü -->
-  <button id="menuButton">☰</button>
+    </section>
+  </main>
 
   <script>
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const content = document.getElementById("content");
+
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("hidden");
+    });
+
     async function loadManifest() {
       try {
-        const response = await fetch("manifest.json?v=" + Date.now());
-        if (!response.ok) throw new Error("Manifest nicht gefunden: " + response.status);
-        const manifest = await response.json();
-        buildTOC(manifest.chapters);
-      } catch (err) {
-        showError("Fehler beim Laden des Manifests: " + err.message);
-      }
-    }
+        const res = await fetch("manifest.json?v=" + Date.now());
+        const manifest = await res.json();
 
-    function buildTOC(chapters) {
-      const toc = document.getElementById("toc");
-      toc.innerHTML = "";
-      chapters.forEach(chapter => {
-        const li = document.createElement("li");
-        li.textContent = chapter.id + " – " + chapter.title;
-        li.addEventListener("click", () => {
-          loadChapter(chapter.path);
-          // Sidebar automatisch schließen
-          document.getElementById("sidebar").classList.add("hidden");
+        sidebar.innerHTML = manifest.chapters.map(ch => 
+          `<p><a href="#" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
+        ).join("");
+
+        sidebar.querySelectorAll("a").forEach(link => {
+          link.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const path = e.target.dataset.path;
+            await loadChapter(path);
+            sidebar.classList.add("hidden"); // Sidebar automatisch schließen
+          });
         });
-        toc.appendChild(li);
-      });
+      } catch (err) {
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
+      }
     }
 
     async function loadChapter(path) {
       try {
-        const response = await fetch(path + "?v=" + Date.now());
-        if (!response.ok) throw new Error(path + " → " + response.status);
-        const text = await response.text();
-        document.getElementById("content").innerHTML = marked.parse(text);
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(`${path} → ${res.status}`);
+        const text = await res.text();
+        content.innerHTML = `<article><pre>${text}</pre></article>`;
       } catch (err) {
-        showError("Fehler beim Laden des Kapitels: " + err.message);
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
     }
 
-    function showError(msg) {
-      document.getElementById("content").innerHTML =
-        '<div class="error">' + msg + "</div>";
-    }
-
-    // Button-Handler
-    document.getElementById("menuButton").addEventListener("click", () => {
-      document.getElementById("sidebar").classList.toggle("hidden");
-    });
-
-    // Markdown Parser laden
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-    script.onload = loadManifest;
-    document.head.appendChild(script);
+    loadManifest();
   </script>
 </body>
 </html>
