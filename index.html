@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tiage Music Masterplan 25</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-  <style>
+<style>
     body {
       display: flex;
       flex-direction: column;
@@ -43,6 +43,12 @@
       overflow-y: auto;
       transition: width 0.3s ease;
     }
+
+    /* 👉 Neu hinzugefügt: wenn Sidebar versteckt, Content volle Breite */
+    #sidebar.hidden + #content {
+      width: 100%;
+    }
+
     main {
       display: flex;
       flex: 1;
@@ -60,7 +66,7 @@
         transform: translateX(-100%);
       }
     }
-  </style>
+</style>
 </head>
 <body>
   <header>
