@@ -8,10 +8,10 @@ Titel: TiageMusic Masterplan 2025 - v2.6.46 (UTF-safe)
 | Mic | XLR -> TRS | Zoom L-6 Kanal 1 | TRS | Audio |
 | Zoom L-6 AUX1 Send (Pre-Fader) | TRS | Roland E-4 Mic In | TRS | Audio |
 | Roland E-4 Mix Out | TRS Stereo | Zoom L-6 Kanal 2 | TRS Stereo | Audio |
-| Roland T-8 Out | TRS Stereo | Zoom L-6 Kanal 3 | TRS Stereo | Audio |
-| Roland J-6 Out | TRS Stereo | Zoom L-6 Kanal 4 | TRS Stereo | Audio |
-| Roland S-1 Out | TRS Stereo | Zoom L-6 Kanal 5 | TRS Stereo | Audio |
-| Texture Lab Out | TRS Stereo | Zoom L-6 Kanal 6 | TRS Stereo | Audio |
+| Roland T-8 Out | TRS Stereo | Zoom L-6 Kanal 3/4| TRS Stereo | Audio |
+| Roland J-6 Out | TRS Stereo | Zoom L-6 Kanal 5/6 | TRS Stereo | Audio |
+| Roland S-1 Out | TRS Stereo | Zoom L-6 Kanal 7/8 | TRS Stereo | Audio |
+| Texture Lab Out | TRS Stereo | Zoom L-6 Kanal 9/10 | TRS Stereo | Audio |
 | Zoom L-6 Phones | TRS | Kopfhoerer | TRS | Audio |
 | Roland-Kette (DIN Thru/Out gemergt) | 5-pol DIN | CME U6 Pro MIDI In | 5-pol DIN | MIDI |
 | Yamaha EZ-AG | MIDI Out | CME U6 Pro MIDI In | 5-pol DIN | MIDI |
