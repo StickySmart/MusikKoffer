@@ -8,17 +8,16 @@
     :root{--pad:16px}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0}
     header{padding:12px var(--pad);border-bottom:1px solid #eee}
-    .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-top:.25rem}
-    .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#d33;color:#fff;font-size:.8rem;min-width:1.2rem;justify-content:center;align-items:center}
-    .wrap{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 68px)}
-    aside{border-right:1px solid #eee;padding:12px 12px 24px 12px}
+    .wrap{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 60px)}
+    aside{border-right:1px solid #eee;padding:12px}
     main{padding:var(--pad)}
-    .card{border:1px solid #eee;border-radius:10px;padding:.75rem;margin:.5rem 0}
     .toc a{display:block;padding:8px 10px;border-radius:8px;text-decoration:none;color:inherit}
     .toc a:hover{background:#f5f5f5}
-    .active{background:#eef5ff}
+    .toc a.active{background:#eef5ff}
+    .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-top:.35rem}
+    .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#d33;color:#fff;font-size:.8rem;min-width:1.2rem;text-align:center}
     pre{white-space:pre-wrap;word-wrap:break-word;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px}
-    #reviewPanel{display:none;margin-top:12px;padding:.75rem;border:1px solid #ddd;border-radius:10px}
+    #reviewPanel{display:none;margin-top:12px;padding:.75rem;border:1px solid #ddd;border-radius:8px}
     #status{font-size:.9rem;opacity:.8}
   </style>
 </head>
@@ -27,16 +26,14 @@
   <h1 style="margin:0">Musik Koffer – Workbench</h1>
   <div id="status">Bereit.</div>
   <div class="toolbar">
-    <input id="manifestPath" style="width:32rem" value="./chapter/manifest.json" />
-    <button id="btnAuto">Alle Kapitel laden</button>
     <button id="btnOpenReview">Kommentar-Review <span id="badgeComments" class="badge">0</span></button>
     <button id="btnExportJSON2" disabled>JSON 2 erzeugen</button>
   </div>
 </header>
 
-<div class="wrap" id="layout" style="display:none">
+<div class="wrap">
   <aside>
-    <div id="toc" class="toc"></div>
+    <div id="toc" class="toc">Manifest wird geladen …</div>
   </aside>
   <main>
     <h2 id="chapterTitle">Kapitel</h2>
@@ -46,7 +43,7 @@
 </div>
 
 <script>
-/* ===== Helpers & Store ===== */
+// ===== Helpers & Store =====
 function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
 function unresolvedCount(s){ return (s.comments||[]).filter(c=>c.status==='open').length; }
 function canExportJSON2(s){ return unresolvedCount(s)===0; }
@@ -55,13 +52,13 @@ function enforceExportGuard(s){
   const btn=document.querySelector('#btnExportJSON2');
   const badge=document.querySelector('#badgeComments');
   const n=unresolvedCount(s);
-  if(badge){ badge.textContent=n; badge.style.display = n? 'inline-flex':'none'; }
+  if(badge){ badge.textContent=n; badge.style.display = n? 'inline-block':'none'; }
   if(btn){ btn.disabled=!canExportJSON2(s); btn.title = btn.disabled ? 'Export gesperrt: erst Kommentare erledigen.' : 'Bereit für JSON 2.'; }
 }
 async function fetchText(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.text(); }
 async function fetchJSON(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.json(); }
 
-/* ===== MD parsing & merge ===== */
+// ===== MD parsing minimal (data:* fences) =====
 function extractDataBlocks(md){
   const re=/```(json|yaml)\s+data:(append|upsert|remove)(?:\s+key=([A-Za-z0-9_-]+))?\s*([\s\S]*?)```/g;
   const out=[]; let m; while((m=re.exec(md))!==null){ out.push({lang:m[1],op:m[2],key:m[3]||'id',body:m[4].trim()}); } return out;
@@ -73,32 +70,38 @@ function removeMany(store,ids,key){ const set=new Set(ids); store.records=store.
 function addComment(store,{targetKey,text}){ const id='C'+Math.random().toString(36).slice(2,8); store.comments.push({id,targetKey,text,createdAt:new Date().toISOString(),status:'open'}); }
 
 async function importFromMarkdown(mdUrl){
-  const store=ensureStore();
-  const before = new Map(store.records.map(r=>[r.id, JSON.stringify(r)]));
+  const s=ensureStore();
+  const before = new Map(s.records.map(r=>[r.id, JSON.stringify(r)]));
   const md = await fetchText(mdUrl);
+
+  // Frontmatter optional
   const fm = md.match(/^---\n([\s\S]*?)\n---/);
-  if(fm){ store.meta = store.meta || {}; store.meta.frontmatter = fm[1]; }
+  if(fm){ s.meta = s.meta || {}; s.meta.frontmatter = fm[1]; }
+
+  // Fenced data-blocks
   for(const b of extractDataBlocks(md)){
     const payload = parseJSONRelaxed(b.body);
-    if(b.op==='append'){ const arr=Array.isArray(payload)?payload:[payload]; store.records.push(...arr); }
-    if(b.op==='upsert'){ const arr=Array.isArray(payload)?payload:[payload]; upsertMany(store,arr,b.key); }
-    if(b.op==='remove'){ const ids=Array.isArray(payload)?payload:[payload]; removeMany(store,ids,b.key); }
+    if(b.op==='append'){ const arr=Array.isArray(payload)?payload:[payload]; s.records.push(...arr); }
+    if(b.op==='upsert'){ const arr=Array.isArray(payload)?payload:[payload]; upsertMany(s,arr,b.key); }
+    if(b.op==='remove'){ const ids=Array.isArray(payload)?payload:[payload]; removeMany(s,ids,b.key); }
   }
+
+  // Auto-Review für Neu/Änderung/Remove
   const seen = new Set();
-  for(const rec of store.records){
+  for(const rec of s.records){
     seen.add(rec.id);
     const prev = before.get(rec.id);
     const now = JSON.stringify(rec);
-    if(prev===undefined) addComment(store,{targetKey:rec.id,text:`Neuer Datensatz: ${rec.title??rec.id} prüfen.`});
-    else if(prev!==now) addComment(store,{targetKey:rec.id,text:`Änderungen an ${rec.title??rec.id} sichten.`});
+    if(prev===undefined) addComment(s,{targetKey:rec.id,text:`Neuer Datensatz: ${rec.title??rec.id} prüfen.`});
+    else if(prev!==now) addComment(s,{targetKey:rec.id,text:`Änderungen an ${rec.title??rec.id} sichten.`});
   }
-  for(const [id] of before){ if(!seen.has(id)) addComment(store,{targetKey:id,text:`Datensatz entfernt: ${id}. Korrekt?`}); }
-  try{ localStorage.setItem('WORKBENCH_DATA', JSON.stringify(store)); }catch{}
-  enforceExportGuard(store);
+  for(const [id] of before){ if(!seen.has(id)) addComment(s,{targetKey:id,text:`Datensatz entfernt: ${id}. Korrekt?`}); }
+
+  enforceExportGuard(s);
   return {md};
 }
 
-/* ===== Review & Export ===== */
+// ===== Review & Export =====
 function openReview(){
   const s=ensureStore(); const p=document.querySelector('#reviewPanel');
   const items=(s.comments||[]).sort((a,b)=>a.status.localeCompare(b.status));
@@ -120,7 +123,6 @@ function openReview(){
 function resolveComment(id){
   const s=ensureStore(); const c=s.comments.find(x=>x.id===id); if(!c) return;
   const note=document.querySelector('#note-'+id); c.status='resolved'; c.resolverNote=note?.value||''; c.resolvedAt=new Date().toISOString();
-  try{ localStorage.setItem('WORKBENCH_DATA', JSON.stringify(s)); }catch{}
   enforceExportGuard(s); openReview();
 }
 function buildJSON2(s){ return {version:s.meta?.version||'dev',updated:new Date().toISOString(),items:s.records}; }
@@ -130,67 +132,42 @@ function exportJSON2(){
   const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement('a'),{href:url,download:'export_JSON2.json'}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 
-/* ===== AUTO MODE ===== */
-async function importAllFromManifest(manifestUrl){
-  setStatus('Manifest laden …');
-  const mf = await fetchJSON(manifestUrl);
-  const base = mf.base || './';
-  const list = (mf.chapters||[]).map(p => typeof p==='string' ? p : p.path).filter(Boolean);
-  window.DATA = { records: [], meta: {}, comments: [] };
-  let i=0;
-  for (const rel of list){
-    i++;
-    const url = rel.startsWith('http') ? rel : (base + rel);
-    setStatus('Lade Kapitel '+i+'/'+list.length+': '+url);
-    try { await importFromMarkdown(url); }
-    catch(e){ addComment(ensureStore(),{targetKey:url,text:'Fehler beim Import: '+(e?.message||e)}); }
+// ===== Build TOC & interactions =====
+async function buildTOC(){
+  try{
+    const mf = await fetchJSON('./chapter/manifest.json');
+    const base = mf.base || './';
+    const list = (mf.chapters||[]).map(p => typeof p==='string' ? p : p.path).filter(Boolean);
+    const toc = document.querySelector('#toc');
+    toc.innerHTML = list.map((rel,idx)=>{
+      const label = rel.split('/').pop();
+      const url = rel.startsWith('http') ? rel : (base + rel);
+      return `<a href="#" data-url="${url}">${(idx+1).toString().padStart(2,'0')} – ${label}</a>`;
+    }).join('');
+
+    toc.addEventListener('click', async (e)=>{
+      const a = e.target.closest('a'); if(!a) return;
+      e.preventDefault();
+      document.querySelectorAll('.toc a').forEach(el=>el.classList.remove('active'));
+      a.classList.add('active');
+      const url = a.getAttribute('data-url');
+      setStatus('Kapitel laden …');
+      const {md} = await importFromMarkdown(url);
+      document.querySelector('#chapterTitle').textContent = a.textContent;
+      document.querySelector('#chapterContent').textContent = md;
+      setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
+    });
+
+    setStatus('Bereit. Kapitel wählen …');
+  }catch(e){
+    setStatus('Fehler beim Laden des Manifest: '+(e?.message||e));
+    document.querySelector('#toc').textContent = 'Manifest konnte nicht geladen werden.';
   }
-  setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
-  enforceExportGuard(ensureStore());
 }
 
-/* ===== TOC MODE ===== */
-async function buildTOC(manifestUrl){
-  const mf = await fetchJSON(manifestUrl);
-  const base = mf.base || './';
-  const list = (mf.chapters||[]).map(p => typeof p==='string' ? p : p.path).filter(Boolean);
-  const toc = document.querySelector('#toc');
-  const wrap = document.querySelector('#layout');
-  wrap.style.display='grid';
-  toc.innerHTML = list.map((rel,idx)=>{
-    const label = rel.split('/').pop();
-    return `<a href="#" data-url="${rel.startsWith('http')?rel:(base+rel)}">${(idx+1).toString().padStart(2,'0')} – ${label}</a>`;
-  }).join('');
-  toc.addEventListener('click', async (e)=>{
-    const a = e.target.closest('a'); if(!a) return;
-    e.preventDefault();
-    document.querySelectorAll('.toc a').forEach(el=>el.classList.remove('active'));
-    a.classList.add('active');
-    const url = a.getAttribute('data-url');
-    setStatus('Kapitel laden …');
-    const {md} = await importFromMarkdown(url);
-    document.querySelector('#chapterTitle').textContent = a.textContent;
-    document.querySelector('#chapterContent').textContent = md;
-    setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
-  });
-  setStatus('Bereit. Kapitel wählen …');
-}
-
-/* ===== Boot ===== */
 document.querySelector('#btnOpenReview').addEventListener('click', openReview);
 document.querySelector('#btnExportJSON2').addEventListener('click', exportJSON2);
-document.querySelector('#btnAuto').addEventListener('click', ()=>importAllFromManifest(document.querySelector('#manifestPath').value.trim()||'./chapter/manifest.json'));
-
-window.addEventListener('DOMContentLoaded', ()=>{
-  const params = new URL(location.href).searchParams;
-  const mode = params.get('mode') || 'auto'; // 'auto' | 'toc'
-  const manifestUrl = document.querySelector('#manifestPath').value.trim() || './chapter/manifest.json';
-  if (mode === 'auto') {
-    importAllFromManifest(manifestUrl);
-  } else {
-    buildTOC(manifestUrl);
-  }
-});
+window.addEventListener('DOMContentLoaded', buildTOC);
 </script>
 </body>
 </html>
