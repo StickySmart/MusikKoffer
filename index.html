@@ -1,115 +1,160 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Musik Koffer – Workbench</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tiage Music Masterplan 25</title>
   <style>
-    body, html { margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; }
-    header { background: #222; color: #fff; padding: 0.5rem 1rem; display: flex; align-items: center; }
-    header h1 { flex: 1; font-size: 1.2rem; }
-    #container { display: flex; height: calc(100% - 50px); }
-    #sidebar { width: 280px; background: #f4f4f4; overflow-y: auto; border-right: 1px solid #ccc; }
-    #sidebar div { padding: 0.4rem; cursor: pointer; border-bottom: 1px solid #ddd; }
-    #sidebar div:hover { background: #ddd; }
-    #sidebar div.active { background: black; color: white; }
-    #main { flex: 1; padding: 1rem; overflow-y: auto; }
-    .toolbar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-    .toolbar button { padding: 0.4rem 0.8rem; cursor: pointer; }
-    .error { color: #b00020; background: #ffe5e5; padding: 0.5rem; border: 1px solid #b00020; margin: 1rem 0; white-space: pre-wrap; }
-    /* Floating Action Button */
-    #fab { position: fixed; bottom: 1rem; right: 1rem; background: #222; color: #fff; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 1rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #app {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar / Inhaltsverzeichnis */
+    #sidebar {
+      width: 280px;
+      background: #f4f4f4;
+      border-right: 1px solid #ccc;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    #sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    #toc {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #toc li {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid #ddd;
+    }
+    #toc li:hover {
+      background: #e0e0e0;
+    }
+
+    /* Content */
+    #content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    /* Kapitel-Button oben rechts */
+    #menuButton {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    .error {
+      color: red;
+      border: 1px solid red;
+      background: #ffe5e5;
+      padding: 0.5rem;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Musik Koffer Workbench</h1>
-    <div class="toolbar">
-      <button onclick="exportJSON2()">Export JSON2</button>
-      <button onclick="toggleReview()">Review</button>
-    </div>
+    <h1>Tiage Music Masterplan 25</h1>
   </header>
 
-  <div id="container">
-    <div id="sidebar">Lade Manifest …</div>
-    <div id="main">
-      <h2 id="chapterTitle">Willkommen</h2>
-      <div id="chapterContent"><p>Bitte Kapitel wählen…</p></div>
-      <div id="errorBox"></div>
-    </div>
+  <div id="app">
+    <aside id="sidebar">
+      <h3 style="margin:0; padding:1rem; background:#333; color:#fff;">
+        Musik Koffer Workbench
+      </h3>
+      <ul id="toc"></ul>
+    </aside>
+    <main id="content">
+      <h2>Willkommen</h2>
+      <p>Bitte Kapitel wählen…</p>
+    </main>
   </div>
 
-  <div id="fab" onclick="toggleSidebar()">☰</div>
+  <!-- Button für Menü -->
+  <button id="menuButton">☰</button>
 
-  <!-- Markdown Parser -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    const MANIFEST_URL = "manifest.json";
-    const sidebar = document.getElementById("sidebar");
-    const content = document.getElementById("chapterContent");
-
-    function showError(msg) {
-      document.getElementById("errorBox").innerHTML = `<div class="error">${msg}</div>`;
-      console.error(msg);
-    }
-    function clearError() {
-      document.getElementById("errorBox").innerHTML = "";
-    }
-
     async function loadManifest() {
       try {
-        const res = await fetch(MANIFEST_URL);
-        if (!res.ok) throw new Error("Manifest nicht gefunden: " + res.status);
-        const manifest = await res.json();
-        renderSidebar(manifest);
+        const response = await fetch("manifest.json?v=" + Date.now());
+        if (!response.ok) throw new Error("Manifest nicht gefunden: " + response.status);
+        const manifest = await response.json();
+        buildTOC(manifest.chapters);
       } catch (err) {
-        showError("Fehler beim Laden des Manifests:\n" + err.message);
+        showError("Fehler beim Laden des Manifests: " + err.message);
       }
     }
 
-    async function loadChapter(path, title) {
-      try {
-        const res = await fetch(path);
-        if (!res.ok) throw new Error(`${path} → ${res.status}`);
-        const text = await res.text();
-        document.getElementById("chapterTitle").textContent = title || "";
-        content.innerHTML = marked.parse(text);
-        clearError();
-      } catch (err) {
-        showError("Fehler beim Laden des Kapitels:\n" + err.message);
-      }
-    }
-
-    function renderSidebar(manifest) {
-      sidebar.innerHTML = "";
-      manifest.chapters.forEach(ch => {
-        const item = document.createElement("div");
-        item.textContent = `${ch.id} – ${ch.title}`;
-        item.onclick = () => {
-          document.querySelectorAll("#sidebar div").forEach(d => d.classList.remove("active"));
-          item.classList.add("active");
-          loadChapter(ch.path, ch.title);
-        };
-        sidebar.appendChild(item);
+    function buildTOC(chapters) {
+      const toc = document.getElementById("toc");
+      toc.innerHTML = "";
+      chapters.forEach(chapter => {
+        const li = document.createElement("li");
+        li.textContent = chapter.id + " – " + chapter.title;
+        li.addEventListener("click", () => {
+          loadChapter(chapter.path);
+          // Sidebar automatisch schließen
+          document.getElementById("sidebar").classList.add("hidden");
+        });
+        toc.appendChild(li);
       });
     }
 
-    // Toolbar actions (deine Zusatz-Funktionen)
-    function exportJSON2() {
-      alert("Export JSON2 – Funktion hier implementieren.");
-    }
-    function toggleReview() {
-      alert("Review-Panel öffnen – Funktion hier implementieren.");
-    }
-
-    // FAB action
-    function toggleSidebar() {
-      const sb = document.getElementById("sidebar");
-      sb.style.display = sb.style.display === "none" ? "block" : "none";
+    async function loadChapter(path) {
+      try {
+        const response = await fetch(path + "?v=" + Date.now());
+        if (!response.ok) throw new Error(path + " → " + response.status);
+        const text = await response.text();
+        document.getElementById("content").innerHTML = marked.parse(text);
+      } catch (err) {
+        showError("Fehler beim Laden des Kapitels: " + err.message);
+      }
     }
 
-    // Start
-    loadManifest();
+    function showError(msg) {
+      document.getElementById("content").innerHTML =
+        '<div class="error">' + msg + "</div>";
+    }
+
+    // Button-Handler
+    document.getElementById("menuButton").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("hidden");
+    });
+
+    // Markdown Parser laden
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+    script.onload = loadManifest;
+    document.head.appendChild(script);
   </script>
 </body>
 </html>
