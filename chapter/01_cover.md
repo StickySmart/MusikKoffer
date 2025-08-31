@@ -39,6 +39,3 @@ Dieses Cover liefert die **komplette Verbindungstabelle** als Einstieg.
 | Zoom L-6 Phones  | TRS          | Kopfhörer    | TRS         | Audio    | Monitoring           | Kap. 12 |
 
 ---
-
-👉 Damit hast du auf einer Seite die komplette Übersicht.  
-Jedes Kapitel im Masterplan verweist detailliert auf die jeweilige Verbindung.
