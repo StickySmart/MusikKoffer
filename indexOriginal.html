@@ -106,7 +106,6 @@
     <div>
       <button id="saveCommentBtn">Kommentar speichern</button>
       <button id="exportJSONBtn">Export alle Kapitel-Kommentare (JSON)</button>
-      <button id="importJSONBtn">Kommentare importieren (JSON)</button> <!-- Neuer Import-Button -->
     </div>
   </div>
 
@@ -117,7 +116,6 @@
     const commentInput = document.getElementById("commentInput");
     const saveCommentBtn = document.getElementById("saveCommentBtn");
     const exportJSONBtn = document.getElementById("exportJSONBtn");
-    const importJSONBtn = document.getElementById("importJSONBtn");
 
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
@@ -163,7 +161,7 @@
     saveCommentBtn.addEventListener("click", () => {
       const comment = commentInput.value;
       if (comment) {
-        // Hier können wir den Kommentar speichern (z. B. lokal speichern oder an eine API senden)
+        // Kommentar speichern (kann auch an eine API gesendet oder lokal gespeichert werden)
         alert("Kommentar gespeichert: " + comment);
       }
     });
@@ -179,31 +177,6 @@
       a.href = url;
       a.download = 'comments.json';
       a.click();
-    });
-
-    // Import JSON: Kommentare aus einer Datei importieren
-    importJSONBtn.addEventListener("click", () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            const comments = JSON.parse(e.target.result);
-            console.log('Kommentare importiert:', comments);
-            // Hier kannst du dann die importierten Kommentare auf der Seite darstellen oder weiterverarbeiten
-            alert('Kommentare wurden importiert!');
-          } catch (error) {
-            alert('Fehler beim Importieren der Datei: ' + error);
-          }
-        };
-        reader.readAsText(file);
-      });
-      input.click();
     });
 
     loadManifest();
