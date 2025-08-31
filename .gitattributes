@@ -1,0 +1,21 @@
+# Stelle sicher, dass Git LF verwendet (Unix-Style) – wichtig für Webprojekte
+
+# Standard: alle Textdateien automatisch erkennen und normalisieren
+* text=auto eol=lf
+
+# Erzwinge LF für bestimmte Dateitypen
+*.html text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+
+# Binärdateien niemals konvertieren
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
+*.ico binary
+*.pdf binary
+*.zip binary
