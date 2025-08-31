@@ -2,29 +2,60 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Musik Koffer – Workbench (2-Spalten, dedupl. TOC)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Musik Koffer – Workbench (Responsive)</title>
   <style>
-    :root{--pad:16px}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0}
-    header{padding:12px var(--pad);border-bottom:1px solid #eee}
-    .wrap{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 60px)}
-    aside{border-right:1px solid #eee;padding:12px;position:sticky;top:0;align-self:start;height:calc(100vh - 60px);overflow:auto}
-    main{padding:var(--pad)}
-    .toc a{display:block;padding:8px 10px;border-radius:8px;text-decoration:none;color:inherit}
+    :root{
+      --pad:16px;
+      --nav-w: clamp(220px, 22vw, 360px);
+      --border:#e5e7eb;
+      --bg:#fafafa;
+    }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;color:#111}
+    header{padding:12px var(--pad);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+    header h1{margin:0;font-size:1.35rem;flex:1}
+    #status{opacity:.8;font-size:.9rem}
+    #err{color:#b00020;margin-left:12px;display:none}
+    .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#d33;color:#fff;font-size:.8rem;min-width:1.2rem;text-align:center}
+
+    /* Layout */
+    .wrap{display:grid;grid-template-columns:var(--nav-w) 1fr;min-height:calc(100vh - 64px)}
+    aside{border-right:1px solid var(--border);padding:12px;position:sticky;top:64px;align-self:start;height:calc(100vh - 64px);overflow:auto;background:#fff}
+    main{padding:clamp(12px,2vw,24px)}
+
+    /* TOC */
+    .toc a{display:block;padding:10px 12px;border-radius:10px;text-decoration:none;color:inherit;line-height:1.15}
     .toc a:hover{background:#f5f5f5}
     .toc a.active{background:#eef5ff}
-    .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-top:.35rem}
-    .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#d33;color:#fff;font-size:.8rem;min-width:1.2rem;text-align:center}
-    pre{white-space:pre-wrap;word-wrap:break-word;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px}
-    #reviewPanel{display:none;margin-top:12px;padding:.75rem;border:1px solid #ddd;border-radius:8px}
-    #status{font-size:.9rem;opacity:.8}
-    #err{color:#b00020;margin-top:6px;display:none}
+
+    /* Chapter content */
+    #chapterTitle{margin:.2rem 0 0.6rem 0;font-size:1.3rem}
+    pre{white-space:pre-wrap;word-wrap:break-word;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:0.96rem;line-height:1.45}
+    #reviewPanel{display:none;margin-top:12px;padding:.75rem;border:1px solid var(--border);border-radius:12px;background:#fff}
+
+    /* Mobile: make nav a drawer */
+    #navToggler{display:none}
+    @media (max-width: 900px){
+      .wrap{grid-template-columns:1fr}
+      aside{
+        position:fixed; inset:auto 0 0 0; top:0; height:100vh; width:80vw; max-width:420px;
+        transform:translateX(-100%); transition:transform .2s ease; box-shadow:0 0 0 9999px rgba(0,0,0,.25);
+        z-index:50
+      }
+      body.nav-open aside{transform:none}
+      #navToggler{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .7rem;border:1px solid var(--border);border-radius:10px;background:#fff}
+      header h1{order:1;flex:1}
+      #navToggler{order:2}
+      .toolbar{order:3;width:100%}
+    }
   </style>
 </head>
 <body>
 <header>
-  <h1 style="margin:0">Musik Koffer – Workbench</h1>
+  <h1>Musik Koffer – Workbench</h1>
+  <button id="navToggler" aria-expanded="false" aria-controls="nav">☰ Inhalt</button>
   <div id="status">Bereit. Kapitel wählen …</div>
   <div id="err"></div>
   <div class="toolbar">
@@ -34,7 +65,7 @@
 </header>
 
 <div class="wrap">
-  <aside>
+  <aside id="nav" aria-label="Inhaltsverzeichnis">
     <div id="toc" class="toc">Manifest wird geladen …</div>
   </aside>
   <main>
@@ -47,6 +78,7 @@
 <script>
 const MANIFEST_URL = 'https://stickysmart.github.io/MusikKoffer/chapter/manifest.json';
 
+// Store & helpers
 function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
 function unresolvedCount(s){ return (s.comments||[]).filter(c=>c.status==='open').length; }
 function canExportJSON2(s){ return unresolvedCount(s)===0; }
@@ -62,6 +94,7 @@ function enforceExportGuard(s){
 async function fetchText(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.text(); }
 async function fetchJSON(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.json(); }
 
+// Parse fenced data blocks
 function extractDataBlocks(md){
   const re=/```(json|yaml)\s+data:(append|upsert|remove)(?:\s+key=([A-Za-z0-9_-]+))?\s*([\s\S]*?)```/g;
   const out=[]; let m; while((m=re.exec(md))!==null){ out.push({lang:m[1],op:m[2],key:m[3]||'id',body:m[4].trim()}); } return out;
@@ -97,19 +130,14 @@ async function importFromMarkdown(mdUrl){
   return {md};
 }
 
-// Clean helpers for labels
+// TOC label cleaning
 function cleanFileLabel(filename){
-  // strip leading digits + separators, remove extension, underscores -> spaces
-  return filename
-    .replace(/^[0-9]+[\s_\-–]*?/,'')
-    .replace(/\.md$/i,'')
-    .replace(/_/g,' ');
+  return filename.replace(/^[0-9]+[\s_\-–]*?/,'').replace(/\.md$/i,'').replace(/_/g,' ');
 }
 
 async function buildTOC(){
   try{
-    setErr('');
-    setStatus('Manifest laden …');
+    setErr(''); setStatus('Manifest laden …');
     const mf = await fetchJSON(MANIFEST_URL);
     const base = mf.base || (new URL(MANIFEST_URL, location.href)).href.replace(/manifest\.json.*$/,'');
     const raw = (mf.chapters||[]).filter(Boolean);
@@ -124,7 +152,8 @@ async function buildTOC(){
       } else {
         const path = entry.path || '';
         const url = path.startsWith('http') ? path : (base + path);
-        const label = (entry.id ? String(entry.id).padStart(2,'0')+' – ' : '') + (entry.title || cleanFileLabel(path.split('/').pop()));
+        const id  = (entry.id != null) ? String(entry.id).padStart(2,'0')+' – ' : '';
+        const label = id + (entry.title || cleanFileLabel(path.split('/').pop()));
         return {label, url};
       }
     });
@@ -142,6 +171,8 @@ async function buildTOC(){
       document.querySelector('#chapterTitle').textContent = a.textContent;
       document.querySelector('#chapterContent').textContent = md;
       setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
+      // Auto-close drawer on mobile
+      if (window.matchMedia('(max-width: 900px)').matches) toggleNav(false);
     });
 
     setStatus('Bereit. Kapitel wählen …');
@@ -152,6 +183,7 @@ async function buildTOC(){
   }
 }
 
+// Review & Export
 document.querySelector('#btnOpenReview').addEventListener('click', ()=>{
   const p=document.querySelector('#reviewPanel');
   p.style.display = p.style.display==='block' ? 'none':'block';
@@ -161,6 +193,16 @@ document.querySelector('#btnExportJSON2').addEventListener('click', ()=>{
   const blob=new Blob([JSON.stringify({version:s.meta?.version||'dev',updated:new Date().toISOString(),items:s.records},null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement('a'),{href:url,download:'export_JSON2.json'}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
 });
+
+// Drawer toggling (mobile)
+const btn = document.getElementById('navToggler');
+function toggleNav(force){
+  const open = (typeof force==='boolean') ? force : !document.body.classList.contains('nav-open');
+  document.body.classList.toggle('nav-open', open);
+  btn.setAttribute('aria-expanded', String(open));
+}
+btn.addEventListener('click', ()=>toggleNav());
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') toggleNav(false); });
 
 window.addEventListener('DOMContentLoaded', buildTOC);
 </script>
