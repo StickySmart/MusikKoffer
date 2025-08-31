@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Musik Koffer – Workbench</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:16px}
+    .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.75rem}
+    .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#d33;color:#fff;font-size:.8rem;min-width:1.2rem;justify-content:center;align-items:center}
+    #reviewPanel{display:none;padding:.75rem;border:1px solid #ddd;border-radius:10px}
+    .card{border:1px solid #eee;border-radius:10px;padding:.75rem;margin:.5rem 0}
+  </style>
+</head>
+<body>
+  <h1 style="margin:0 0 .5rem 0">Musik Koffer – Workbench</h1>
+
+  <div class="toolbar">
+    <input id="manifestPath" style="width:32rem"
+           value="./chapter/manifest.json" />
+    <button onclick="reimport()">MD neu importieren</button>
+    <button id="btnOpenReview" onclick="openReview()">Kommentar-Review
+      <span id="badgeComments" class="badge">0</span>
+    </button>
+    <button id="btnExportJSON2" onclick="exportJSON2()" disabled>JSON 2 erzeugen</button>
+  </div>
+
+  <div id="reviewPanel"></div>
+
+<script>
+/* ===== Store & Guards ===== */
+function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
+function unresolvedCount(s){ return (s.comments||[]).filter(c=>c.status==="open").length; }
+function canExportJSON2(s){ return unresolvedCount(s)===0; }
+function enforceExportGuard(s){
+  const btn=document.querySelector("#btnExportJSON2");
+  const badge=document.querySelector("#badgeComments");
+  const n=unresolvedCount(s);
+  if(badge){ badge.textContent=n; badge.style.display = n? "inline-flex":"none"; }
+  if(btn){ btn.disabled=!canExportJSON2(s); btn.title = btn.disabled ? "Export gesperrt: erst Kommentare erledigen." : "Bereit für JSON 2."; }
+}
+
+/* ===== Import-Pipeline ===== */
+async function fetchText(url){ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw new Error(url+" → "+r.status); return await r.text(); }
+async function fetchJSON(url){ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw new Error(url+" → "+r.status); return await r.json(); }
+
+function extractDataBlocks(md){
+  const re=/```(json|yaml)\s+data:(append|upsert|remove)(?:\s+key=([A-Za-z0-9_-]+))?\s*([\s\S]*?)```/g;
+  const out=[]; let m; while((m=re.exec(md))!==null){ out.push({lang:m[1],op:m[2],key:m[3]||"id",body:m[4].trim()}); } return out;
+}
+function parseJSONRelaxed(txt){ return JSON.parse(txt.replace(/\/\/.*$/mg,"").replace(/\/\*[\s\S]*?\*\//g,"")); }
+function indexBy(arr,key){ const m=new Map(); for(const o of arr) m.set(o[key],o); return m; }
+function upsertMany(store,arr,key){ const m=indexBy(store.records,key); for(const o of arr){ const k=o[key]; if(m.has(k)){ Object.assign(m.get(k),o);} else { store.records.push(o); m.set(k,o);} } }
+function removeMany(store,ids,key){ const set=new Set(ids); store.records=store.records.filter(o=>!set.has(o[key])); }
+function addComment(store,{targetKey,text}){ const id="C"+Math.random().toString(36).slice(2,8); store.comments.push({id,targetKey,text,createdAt:new Date().toISOString(),status:"open"}); }
+
+async function importFromMarkdown(mdUrl){
+  const store=ensureStore();
+  const before = new Map(store.records.map(r=>[r.id, JSON.stringify(r)]));
+  const md = await fetchText(mdUrl);
+
+  const fm = md.match(/^---\n([\s\S]*?)\n---/); // optional Frontmatter
+  if(fm){ store.meta = store.meta || {}; store.meta.frontmatter = fm[1]; }
+
+  for(const b of extractDataBlocks(md)){
+    const payload = parseJSONRelaxed(b.body); // YAML kann bei Bedarf nachgerüstet werden
+    if(b.op==="append"){ const arr=Array.isArray(payload)?payload:[payload]; store.records.push(...arr); }
+    if(b.op==="upsert"){ const arr=Array.isArray(payload)?payload:[payload]; upsertMany(store,arr,b.key); }
+    if(b.op==="remove"){ const ids=Array.isArray(payload)?payload:[payload]; removeMany(store,ids,b.key); }
+  }
+
+  // Auto-Review für Neu/Änderung/Remove
+  const seen = new Set();
+  for(const rec of store.records){
+    seen.add(rec.id);
+    const prev = before.get(rec.id);
+    const now = JSON.stringify(rec);
+    if(prev===undefined) addComment(store,{targetKey:rec.id,text:`Neuer Datensatz: ${rec.title??rec.id} prüfen.`});
+    else if(prev!==now) addComment(store,{targetKey:rec.id,text:`Änderungen an ${rec.title??rec.id} sichten.`});
+  }
+  for(const [id] of before){ if(!seen.has(id)) addComment(store,{targetKey:id,text:`Datensatz entfernt: ${id}. Korrekt?`}); }
+
+  try{ localStorage.setItem("WORKBENCH_DATA", JSON.stringify(store)); }catch{}
+  enforceExportGuard(store);
+  return store;
+}
+
+/* ===== Review-UI ===== */
+function openReview(){
+  const s=ensureStore(); const p=document.querySelector("#reviewPanel");
+  const items=(s.comments||[]).sort((a,b)=>a.status.localeCompare(b.status));
+  p.innerHTML=items.map(c=>`
+    <div class="card">
+      <div style="font-weight:700">#${c.id} – ${c.status==="open"?"🟥 Offen":"🟩 Erledigt"}</div>
+      <div style="opacity:.8">Ziel: <code>${c.targetKey??"-"}</code></div>
+      <p style="margin:.35rem 0 .5rem">${c.text}</p>
+      ${c.status==="open"
+        ? `<textarea id="note-${c.id}" placeholder="Anmerkung (optional)" style="width:100%;min-height:3rem"></textarea>
+           <div style="display:flex;gap:.5rem;margin-top:.5rem">
+             <button onclick="resolveComment('${c.id}')">Als erledigt markieren</button>
+           </div>`
+        : `<em>Erledigt am: ${c.resolvedAt??"-"}</em>`
+      }
+    </div>`).join("");
+  p.style.display="block";
+}
+function resolveComment(id){
+  const s=ensureStore(); const c=s.comments.find(x=>x.id===id); if(!c) return;
+  const note=document.querySelector(`#note-${id}`); c.status="resolved"; c.resolverNote=note?.value||""; c.resolvedAt=new Date().toISOString();
+  try{ localStorage.setItem("WORKBENCH_DATA", JSON.stringify(s)); }catch{}
+  enforceExportGuard(s); openReview();
+}
+
+/* ===== Export ===== */
+function buildJSON2(s){ return {version:s.meta?.version||"dev",updated:new Date().toISOString(),items:s.records}; }
+function exportJSON2(){
+  const s=ensureStore(); if(!canExportJSON2(s)){ alert("Export gesperrt: Es sind noch offene Kommentare vorhanden."); return; }
+  const blob=new Blob([JSON.stringify(buildJSON2(s),null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement("a"),{href:url,download:"export_JSON2.json"}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+
+/* ===== Orchestrierung ===== */
+async function reimport(){
+  const input = (new URL(location.href)).searchParams.get("manifest")
+               || document.querySelector("#manifestPath")?.value?.trim()
+               || "./chapter/manifest.json";
+  const mf = await fetchJSON(input);
+  const base = mf.base || "./";
+  const list = (mf.chapters||[]).map(p => typeof p==="string" ? p : p.path).filter(Boolean);
+
+  // frische Session
+  window.DATA = { records: [], meta: {}, comments: [] };
+
+  for (const rel of list){
+    const url = rel.startsWith("http") ? rel : (base + rel);
+    try { await importFromMarkdown(url); }
+    catch(e){ addComment(ensureStore(),{targetKey:url,text:"Fehler beim Import: "+(e?.message||e)}); }
+  }
+  enforceExportGuard(ensureStore());
+}
+</script>
+</body>
+</html>
