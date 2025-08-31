@@ -59,7 +59,7 @@
       }
     }
 
-    /* Kommentar Bereich Styles */
+    /* Kommentarbereich - Stil */
     #commentSection {
       margin-top: 20px;
       padding: 1rem;
@@ -100,7 +100,7 @@
   </main>
 
   <!-- Kommentarbereich -->
-  <div id="commentSection">
+  <div id="commentSection" style="display:none;">
     <h3>Kommentar zu diesem Kapitel</h3>
     <textarea id="commentInput" placeholder="Deine Notiz nur für dieses Kapitel..."></textarea>
     <div>
@@ -161,7 +161,7 @@
     saveCommentBtn.addEventListener("click", () => {
       const comment = commentInput.value;
       if (comment) {
-        // Hier können wir den Kommentar speichern (z. B. lokal speichern oder an eine API senden)
+        // Kommentar speichern (kann auch an eine API gesendet oder lokal gespeichert werden)
         alert("Kommentar gespeichert: " + comment);
       }
     });
