@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Musik Koffer – Workbench</title>
+  <title>Musik Koffer – Workbench (2-Spalten, fixierte Manifest-URL)</title>
   <style>
     :root{--pad:16px}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0}
@@ -19,12 +19,14 @@
     pre{white-space:pre-wrap;word-wrap:break-word;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px}
     #reviewPanel{display:none;margin-top:12px;padding:.75rem;border:1px solid #ddd;border-radius:8px}
     #status{font-size:.9rem;opacity:.8}
+    #err{color:#b00020;margin-top:6px;display:none}
   </style>
 </head>
 <body>
 <header>
   <h1 style="margin:0">Musik Koffer – Workbench</h1>
   <div id="status">Bereit.</div>
+  <div id="err"></div>
   <div class="toolbar">
     <button id="btnOpenReview">Kommentar-Review <span id="badgeComments" class="badge">0</span></button>
     <button id="btnExportJSON2" disabled>JSON 2 erzeugen</button>
@@ -43,11 +45,14 @@
 </div>
 
 <script>
-// ===== Helpers & Store =====
+// ===== Konfiguration: feste Manifest-URL (funktioniert auch im WP-iFrame)
+const MANIFEST_URL = 'https://stickysmart.github.io/MusikKoffer/chapter/manifest.json';
+
 function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
 function unresolvedCount(s){ return (s.comments||[]).filter(c=>c.status==='open').length; }
 function canExportJSON2(s){ return unresolvedCount(s)===0; }
 function setStatus(t){ const el=document.querySelector('#status'); if(el) el.textContent = t; }
+function setErr(t){ const el=document.querySelector('#err'); if(!el) return; if(t){ el.style.display='block'; el.textContent=t; } else { el.style.display='none'; el.textContent=''; } }
 function enforceExportGuard(s){
   const btn=document.querySelector('#btnExportJSON2');
   const badge=document.querySelector('#badgeComments');
@@ -58,7 +63,6 @@ function enforceExportGuard(s){
 async function fetchText(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.text(); }
 async function fetchJSON(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.json(); }
 
-// ===== MD parsing minimal (data:* fences) =====
 function extractDataBlocks(md){
   const re=/```(json|yaml)\s+data:(append|upsert|remove)(?:\s+key=([A-Za-z0-9_-]+))?\s*([\s\S]*?)```/g;
   const out=[]; let m; while((m=re.exec(md))!==null){ out.push({lang:m[1],op:m[2],key:m[3]||'id',body:m[4].trim()}); } return out;
@@ -74,11 +78,9 @@ async function importFromMarkdown(mdUrl){
   const before = new Map(s.records.map(r=>[r.id, JSON.stringify(r)]));
   const md = await fetchText(mdUrl);
 
-  // Frontmatter optional
   const fm = md.match(/^---\n([\s\S]*?)\n---/);
   if(fm){ s.meta = s.meta || {}; s.meta.frontmatter = fm[1]; }
 
-  // Fenced data-blocks
   for(const b of extractDataBlocks(md)){
     const payload = parseJSONRelaxed(b.body);
     if(b.op==='append'){ const arr=Array.isArray(payload)?payload:[payload]; s.records.push(...arr); }
@@ -86,7 +88,6 @@ async function importFromMarkdown(mdUrl){
     if(b.op==='remove'){ const ids=Array.isArray(payload)?payload:[payload]; removeMany(s,ids,b.key); }
   }
 
-  // Auto-Review für Neu/Änderung/Remove
   const seen = new Set();
   for(const rec of s.records){
     seen.add(rec.id);
@@ -101,42 +102,12 @@ async function importFromMarkdown(mdUrl){
   return {md};
 }
 
-// ===== Review & Export =====
-function openReview(){
-  const s=ensureStore(); const p=document.querySelector('#reviewPanel');
-  const items=(s.comments||[]).sort((a,b)=>a.status.localeCompare(b.status));
-  p.innerHTML=items.map(c=>`
-    <div class="card">
-      <div style="font-weight:700">#${c.id} – ${c.status==='open'?'🟥 Offen':'🟩 Erledigt'}</div>
-      <div style="opacity:.8">Ziel: <code>${c.targetKey??'-'}</code></div>
-      <p style="margin:.35rem 0 .5rem">${c.text}</p>
-      ${c.status==='open'
-        ? \`<textarea id="note-\${c.id}" placeholder="Anmerkung (optional)" style="width:100%;min-height:3rem"></textarea>
-           <div style="display:flex;gap:.5rem;margin-top:.5rem">
-             <button onclick="resolveComment('\${c.id}')">Als erledigt markieren</button>
-           </div>\`
-        : \`<em>Erledigt am: \${c.resolvedAt??'-'}</em>\`
-      }
-    </div>`).join('');
-  p.style.display='block';
-}
-function resolveComment(id){
-  const s=ensureStore(); const c=s.comments.find(x=>x.id===id); if(!c) return;
-  const note=document.querySelector('#note-'+id); c.status='resolved'; c.resolverNote=note?.value||''; c.resolvedAt=new Date().toISOString();
-  enforceExportGuard(s); openReview();
-}
-function buildJSON2(s){ return {version:s.meta?.version||'dev',updated:new Date().toISOString(),items:s.records}; }
-function exportJSON2(){
-  const s=ensureStore(); if(!canExportJSON2(s)){ alert('Export gesperrt: Es sind noch offene Kommentare vorhanden.'); return; }
-  const blob=new Blob([JSON.stringify(buildJSON2(s),null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement('a'),{href:url,download:'export_JSON2.json'}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
-}
-
-// ===== Build TOC & interactions =====
 async function buildTOC(){
   try{
-    const mf = await fetchJSON('./chapter/manifest.json');
-    const base = mf.base || './';
+    setErr('');
+    setStatus('Manifest laden …');
+    const mf = await fetchJSON(MANIFEST_URL);
+    const base = mf.base || (new URL(MANIFEST_URL, location.href)).href.replace(/manifest\.json.*$/,'');
     const list = (mf.chapters||[]).map(p => typeof p==='string' ? p : p.path).filter(Boolean);
     const toc = document.querySelector('#toc');
     toc.innerHTML = list.map((rel,idx)=>{
@@ -160,13 +131,22 @@ async function buildTOC(){
 
     setStatus('Bereit. Kapitel wählen …');
   }catch(e){
-    setStatus('Fehler beim Laden des Manifest: '+(e?.message||e));
-    document.querySelector('#toc').textContent = 'Manifest konnte nicht geladen werden.';
+    setStatus('');
+    setErr('Manifest konnte nicht geladen werden: '+(e?.message||e)+'\nTipp: Öffne '+MANIFEST_URL+' im neuen Tab. Falls 404 → Pages/Dateipfad prüfen.');
+    document.querySelector('#toc').textContent = 'Manifest-Fehler.';
   }
 }
 
-document.querySelector('#btnOpenReview').addEventListener('click', openReview);
-document.querySelector('#btnExportJSON2').addEventListener('click', exportJSON2);
+document.querySelector('#btnOpenReview').addEventListener('click', ()=>{
+  const p=document.querySelector('#reviewPanel');
+  p.style.display = p.style.display==='block' ? 'none':'block';
+});
+document.querySelector('#btnExportJSON2').addEventListener('click', ()=>{
+  const s=ensureStore(); if(!canExportJSON2(s)){ alert('Export gesperrt: Es sind noch offene Kommentare vorhanden.'); return; }
+  const blob=new Blob([JSON.stringify({version:s.meta?.version||'dev',updated:new Date().toISOString(),items:s.records},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement('a'),{href:url,download:'export_JSON2.json'}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+});
+
 window.addEventListener('DOMContentLoaded', buildTOC);
 </script>
 </body>
