@@ -1,50 +1,109 @@
-<!doctype html>
+html = """<!doctype html>
 <html lang="de">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Musik Koffer – Workbench (BW, Hard Overrides)</title>
+  <title>Musik Koffer – Workbench (Clean Black/White)</title>
   <style>
-    /* ---- HARD RESET (overrides WP/themes) ---- */
-    html, body { background:#fff !important; color:#000 !important; margin:0; padding:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
-    *, *::before, *::after { box-sizing:border-box; }
-    /* Containers */
-    header, .wrap, main, aside, pre, #reviewPanel, #toc { background:#fff !important; color:#000 !important; }
-    /* Borders */
-    header, aside, pre, #reviewPanel { border:1px solid #000 !important; }
-    /* Buttons */
-    button { background:#fff; color:#000; border:1px solid #000; }
-    button:disabled { opacity:.6 }
-    /* Layout */
-    :root { --pad:16px; --nav-w: clamp(220px, 22vw, 360px); }
-    header { display:flex; gap:8px; align-items:center; padding:12px var(--pad); border-width:0 0 1px 0 !important; }
-    header h1 { margin:0; font-size:1.35rem; flex:1 }
-    #status { font-size:.9rem }
-    #err { color:#b00020 !important; white-space:pre-wrap; display:none }
-    .badge { display:none; margin-left:.4rem; padding:.1rem .4rem; border:1px solid #000; background:#000; color:#fff }
-    .wrap { display:grid; grid-template-columns:var(--nav-w) 1fr; min-height:calc(100vh - 64px) }
-    aside { position:sticky; top:64px; height:calc(100vh - 64px); overflow:auto; padding:12px }
-    main { padding:clamp(12px,2vw,24px) }
-    .toc a { display:block; padding:12px; text-decoration:none; color:#000; border-bottom:1px solid #000 }
-    .toc a:hover, .toc a.active { background:#000 !important; color:#fff !important; }
-    #chapterTitle { margin:.2rem 0 .6rem 0; font-size:1.3rem }
-    pre { white-space:pre-wrap; word-wrap:break-word; padding:16px; line-height:1.45 }
-    /* Global FAB – always visible */
-    #navFab {
-      position:fixed; right:16px; bottom:16px; z-index:2147483647;
-      padding:.65rem 1rem; border:2px solid #000; background:#000; color:#fff; font-weight:700;
-      box-shadow:none; cursor:pointer; border-radius:8px;
-      pointer-events:auto;
+    :root {
+      --pad:16px;
+      --nav-w: clamp(220px, 22vw, 360px);
+      --border:#000000;
+      --bg:#ffffff;  /* Weiß */
+      --text:#000000; /* Schwarz */
     }
-    #navFab:focus { outline:2px solid #111; outline-offset:2px }
-    /* Mobile drawer behaviour */
+    *{box-sizing:border-box}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+    }
+    header{
+      padding:12px var(--pad);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      background:#fff;
+      color:#000;
+    }
+    header h1{margin:0;font-size:1.35rem;flex:1}
+    #status{font-size:.9rem;color:#000}
+    #err{color:#b00020;margin-left:12px;display:none;white-space:pre-wrap}
+    .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#000;color:#fff;font-size:.8rem;min-width:1.2rem;text-align:center}
+    .wrap{display:grid;grid-template-columns:var(--nav-w) 1fr;min-height:calc(100vh - 64px)}
+    aside{
+      border-right:1px solid #000;
+      padding:12px;
+      position:sticky;
+      top:64px;
+      align-self:start;
+      height:calc(100vh - 64px);
+      overflow:auto;
+      background:#fff;
+      color:#000;
+    }
+    main{padding:clamp(12px,2vw,24px);background:#fff;color:#000}
+    .toc a{
+      display:block;
+      padding:10px 12px;
+      text-decoration:none;
+      color:#000;
+      line-height:1.15;
+      border-bottom:1px solid #000;
+    }
+    .toc a:hover{background:#000;color:#fff}
+    .toc a.active{background:#000;color:#fff}
+    #chapterTitle{margin:.2rem 0 0.6rem 0;font-size:1.3rem;color:#000}
+    pre{
+      white-space:pre-wrap;
+      word-wrap:break-word;
+      background:#fff;
+      border:1px solid #000;
+      padding:16px;
+      font-size:0.96rem;
+      line-height:1.45;
+      color:#000;
+    }
+    #reviewPanel{
+      display:none;
+      margin-top:12px;
+      padding:.75rem;
+      border:1px solid #000;
+      background:#fff;
+      color:#000;
+    }
+    #navFab{
+      position:fixed;
+      right:16px;
+      top:96px;
+      z-index:1000;
+      padding:.6rem .85rem;
+      border:1px solid #000;
+      background:#fff;
+      color:#000;
+      font-weight:600;
+      cursor:pointer;
+    }
+    #navFab:focus{outline:2px solid #111; outline-offset:2px}
     @media (max-width: 900px){
-      .wrap { grid-template-columns:1fr }
-      aside {
-        position:fixed; inset:auto 0 0 0; top:0; height:100vh; width:82vw; max-width:430px;
-        transform:translateX(-100%); transition:transform .2s ease; box-shadow:0 0 0 9999px rgba(0,0,0,.25); z-index:1000;
+      .wrap{grid-template-columns:1fr}
+      aside{
+        position:fixed;
+        inset:auto 0 0 0;
+        top:0;
+        height:100vh;
+        width:80vw;
+        max-width:420px;
+        transform:translateX(-100%);
+        transition:transform .2s ease;
+        box-shadow:0 0 0 9999px rgba(0,0,0,.25);
+        z-index:50
       }
-      body.nav-open aside { transform:none }
+      body.nav-open aside{transform:none}
     }
   </style>
 </head>
@@ -58,10 +117,7 @@
     <button id="btnExportJSON2" disabled>JSON 2 erzeugen</button>
   </div>
 </header>
-
-<!-- Floating global button -->
-<button id="navFab" aria-expanded="false" aria-controls="nav" aria-label="Inhaltsverzeichnis öffnen oder schließen">☰ Inhalt</button>
-
+<button id="navFab" aria-expanded="false" aria-controls="nav">☰ Inhalt</button>
 <div class="wrap">
   <aside id="nav" aria-label="Inhaltsverzeichnis">
     <div id="toc" class="toc">Manifest wird geladen …</div>
@@ -69,29 +125,28 @@
   <main>
     <h2 id="chapterTitle">Kapitel</h2>
     <pre id="chapterContent">Bitte Kapitel im Inhaltsverzeichnis wählen…</pre>
-    <div id="reviewPanel" style="display:none"></div>
+    <div id="reviewPanel"></div>
   </main>
 </div>
-
 <script>
-// --- Config ---
+// Config
 const MANIFEST_URL = 'https://stickysmart.github.io/MusikKoffer/chapter/manifest.json';
-const REPO_ROOT = MANIFEST_URL.replace(/\/chapter\/manifest\.json.*$/, '/');
+const REPO_ROOT = MANIFEST_URL.replace(/\\/chapter\\/manifest\\.json.*$/, '/');
 
 function resolveUrl(path){
   if(!path) return '';
-  if(/^https?:\/\//i.test(path)) return path;
-  if(path.startsWith('/')) return REPO_ROOT.replace(/\/$/,'') + path;
-  return REPO_ROOT + path.replace(/^\/?/,''); 
+  if(/^https?:\\/\\//i.test(path)) return path;
+  if(path.startsWith('/')) return REPO_ROOT.replace(/\\/$/,'') + path;
+  return REPO_ROOT + path.replace(/^\\/?/,''); 
 }
 function pagesToRaw(url){
-  const m = url.match(/^https?:\/\/([^\/]+)\.github\.io\/([^\/]+)\/(.+)$/i);
+  const m = url.match(/^https?:\\/\\/([^\\/]+)\\.github\\.io\\/([^\\/]+)\\/(.+)$/i);
   if(!m) return url;
   const user=m[1], repo=m[2], rest=m[3];
   return `https://raw.githubusercontent.com/${user}/${repo}/main/${rest}`;
 }
 
-// --- Store & helpers ---
+// Store & helpers
 function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
 function unresolvedCount(s){ return (s.comments||[]).filter(c=>c.status==='open').length; }
 function canExportJSON2(s){ return unresolvedCount(s)===0; }
@@ -107,12 +162,12 @@ function enforceExportGuard(s){
 async function fetchText(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.text(); }
 async function fetchJSON(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.json(); }
 
-// --- MD parsing ---
+// Parse data blocks
 function extractDataBlocks(md){
-  const re=/```(json|yaml)\s+data:(append|upsert|remove)(?:\s+key=([A-Za-z0-9_-]+))?\s*([\s\S]*?)```/g;
+  const re=/```(json|yaml)\\s+data:(append|upsert|remove)(?:\\s+key=([A-Za-z0-9_-]+))?\\s*([\\s\\S]*?)```/g;
   const out=[]; let m; while((m=re.exec(md))!==null){ out.push({lang:m[1],op:m[2],key:m[3]||'id',body:m[4].trim()}); } return out;
 }
-function parseJSONRelaxed(txt){ return JSON.parse(txt.replace(/\/\/.*$/mg,'').replace(/\/\*[\s\S]*?\*\//g,'')); }
+function parseJSONRelaxed(txt){ return JSON.parse(txt.replace(/\\/\\/.*$/mg,'').replace(/\\/\\*[\\s\\S]*?\\*\\//g,'')); }
 function indexBy(arr,key){ const m=new Map(); for(const o of arr) m.set(o[key],o); return m; }
 function upsertMany(store,arr,key){ const m=indexBy(store.records,key); for(const o of arr){ const k=o[key]; if(m.has(k)){ Object.assign(m.get(k),o);} else { store.records.push(o); m.set(k,o);} } }
 function removeMany(store,ids,key){ const set=new Set(ids); store.records=store.records.filter(o=>!set.has(o[key])); }
@@ -131,12 +186,12 @@ async function importFromMarkdown(mdUrl){
       md = await fetchText(raw);
       setErr('Laden fehlgeschlagen: '+mdUrl+' → RAW-Fallback genutzt.');
     }catch(e2){
-      setErr('Laden fehlgeschlagen: '+mdUrl+'\nund RAW-Fallback: '+raw+'\n('+ (e2?.message||e2) +')');
+      setErr('Laden fehlgeschlagen: '+mdUrl+'\\nund RAW-Fallback: '+raw+'\\n('+ (e2?.message||e2) +')');
       throw e2;
     }
   }
 
-  const fm = md.match(/^---\n([\s\S]*?)\n---/);
+  const fm = md.match(/^---\\n([\\s\\S]*?)\\n---/);
   if(fm){ s.meta = s.meta || {}; s.meta.frontmatter = fm[1]; }
 
   for(const b of extractDataBlocks(md)){
@@ -159,9 +214,9 @@ async function importFromMarkdown(mdUrl){
   return {md};
 }
 
-// --- TOC ---
+// TOC
 function cleanFileLabel(filename){
-  return filename.replace(/^[0-9]+[\s_\-–]*?/,'').replace(/\.md$/i,'').replace(/_/g,' ');
+  return filename.replace(/^[0-9]+[\\s_\\-–]*?/,'').replace(/\\.md$/i,'').replace(/_/g,' ');
 }
 async function buildTOC(){
   try{
@@ -201,8 +256,6 @@ async function buildTOC(){
         setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
       }catch(err){}
       if (window.matchMedia('(max-width: 900px)').matches) toggleNav(false);
-      // Fokus auf Kapitel
-      document.querySelector('#chapterTitle').scrollIntoView({behavior:'smooth',block:'start'});
     });
 
     setStatus('Bereit. Kapitel wählen …');
@@ -213,7 +266,7 @@ async function buildTOC(){
   }
 }
 
-// --- Review & Export ---
+// Review & Export
 document.querySelector('#btnOpenReview').addEventListener('click', ()=>{
   const p=document.querySelector('#reviewPanel');
   p.style.display = p.style.display==='block' ? 'none':'block';
@@ -224,25 +277,22 @@ document.querySelector('#btnExportJSON2').addEventListener('click', ()=>{
   const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement('a'),{href:url,download:'export_JSON2.json'}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
 });
 
-// --- FAB toggle ---
+// Drawer toggle
 const fab = document.getElementById('navFab');
 function toggleNav(force){
   const open = (typeof force==='boolean') ? force : !document.body.classList.contains('nav-open');
   document.body.classList.toggle('nav-open', open);
   fab?.setAttribute('aria-expanded', String(open));
-  if(open){ document.querySelector('#toc')?.scrollIntoView({behavior:'smooth', block:'nearest'}); }
 }
-fab?.addEventListener('click', (e)=>{ e.stopPropagation(); toggleNav(); });
+fab?.addEventListener('click', ()=>toggleNav());
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') toggleNav(false); });
-document.addEventListener('click', (e)=>{
-  if(document.body.classList.contains('nav-open')){
-    const a = document.getElementById('nav');
-    if(a && !a.contains(e.target) && e.target!==fab){ toggleNav(false); }
-  }
-});
 
-// --- Boot ---
+// Boot
 window.addEventListener('DOMContentLoaded', buildTOC);
 </script>
 </body>
 </html>
+"""
+path = Path("/mnt/data/index_full_bw.html")
+path.write_text(html, encoding="utf-8")
+str(path)
