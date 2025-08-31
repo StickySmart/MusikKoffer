@@ -1,0 +1,44 @@
+from pathlib import Path
+
+# Manifest Content
+manifest_content = """{
+  "version": "2.6.46",
+  "updated": "2025-08-31",
+  "base": "https://raw.githubusercontent.com/stickysmart/MusikKoffer/main/",
+  "chapters": [
+    "chapter/01_cover.md",
+    "chapter/02_first_steps_audio.md",
+    "chapter/03_first_steps_midi.md",
+    "chapter/04_workflows_zoom_l6.md",
+    "chapter/05_signal_verkabelung.md",
+    "chapter/06_midi_programmierung_cme_rk006.md",
+    "chapter/07_zoom_l6_szenen.md",
+    "chapter/08_rk006_presets.md",
+    "chapter/09_ez_ag_trigger.md",
+    "chapter/10_rk006_webapp_setup.md",
+    "chapter/11_rk006_sysex_quickguide.md",
+    "chapter/12_midi_workflows.md",
+    "chapter/13_programmierung_skripting.md",
+    "chapter/14_ergaenzungen.md",
+    "chapter/15_abschlusstabellen.md",
+    "chapter/16_einleitung_ueberblick.md",
+    "chapter/17_midi_verkabelung_final.md",
+    "chapter/18_rk006_webapp_guide.md",
+    "chapter/19_rk006_presets_detailed.md",
+    "chapter/20_ez_ag_bund_trigger.md",
+    "chapter/21_rk006_sysex_for_commander.md",
+    "chapter/22_zoom_l6_szenen_details.md",
+    "chapter/23_roland_s1_kurzreferenz.md",
+    "chapter/24_texture_lab_kurzreferenz.md",
+    "chapter/25_midi_commander_integration.md",
+    "chapter/26_praxis_workflows.md",
+    "chapter/27_tabellen_referenzen.md"
+  ]
+}
+"""
+
+# Save to file
+manifest_path = Path("/mnt/data/manifest.json")
+manifest_path.write_text(manifest_content, encoding="utf-8")
+
+manifest_path
