@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Musik Koffer – Workbench (2-Spalten, fixierte Manifest-URL)</title>
+  <title>Musik Koffer – Workbench (2-Spalten, dedupl. TOC)</title>
   <style>
     :root{--pad:16px}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0}
     header{padding:12px var(--pad);border-bottom:1px solid #eee}
     .wrap{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 60px)}
-    aside{border-right:1px solid #eee;padding:12px}
+    aside{border-right:1px solid #eee;padding:12px;position:sticky;top:0;align-self:start;height:calc(100vh - 60px);overflow:auto}
     main{padding:var(--pad)}
     .toc a{display:block;padding:8px 10px;border-radius:8px;text-decoration:none;color:inherit}
     .toc a:hover{background:#f5f5f5}
@@ -25,7 +25,7 @@
 <body>
 <header>
   <h1 style="margin:0">Musik Koffer – Workbench</h1>
-  <div id="status">Bereit.</div>
+  <div id="status">Bereit. Kapitel wählen …</div>
   <div id="err"></div>
   <div class="toolbar">
     <button id="btnOpenReview">Kommentar-Review <span id="badgeComments" class="badge">0</span></button>
@@ -45,7 +45,6 @@
 </div>
 
 <script>
-// ===== Konfiguration: feste Manifest-URL (funktioniert auch im WP-iFrame)
 const MANIFEST_URL = 'https://stickysmart.github.io/MusikKoffer/chapter/manifest.json';
 
 function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
@@ -77,17 +76,14 @@ async function importFromMarkdown(mdUrl){
   const s=ensureStore();
   const before = new Map(s.records.map(r=>[r.id, JSON.stringify(r)]));
   const md = await fetchText(mdUrl);
-
   const fm = md.match(/^---\n([\s\S]*?)\n---/);
   if(fm){ s.meta = s.meta || {}; s.meta.frontmatter = fm[1]; }
-
   for(const b of extractDataBlocks(md)){
     const payload = parseJSONRelaxed(b.body);
     if(b.op==='append'){ const arr=Array.isArray(payload)?payload:[payload]; s.records.push(...arr); }
     if(b.op==='upsert'){ const arr=Array.isArray(payload)?payload:[payload]; upsertMany(s,arr,b.key); }
     if(b.op==='remove'){ const ids=Array.isArray(payload)?payload:[payload]; removeMany(s,ids,b.key); }
   }
-
   const seen = new Set();
   for(const rec of s.records){
     seen.add(rec.id);
@@ -97,9 +93,17 @@ async function importFromMarkdown(mdUrl){
     else if(prev!==now) addComment(s,{targetKey:rec.id,text:`Änderungen an ${rec.title??rec.id} sichten.`});
   }
   for(const [id] of before){ if(!seen.has(id)) addComment(s,{targetKey:id,text:`Datensatz entfernt: ${id}. Korrekt?`}); }
-
   enforceExportGuard(s);
   return {md};
+}
+
+// Clean helpers for labels
+function cleanFileLabel(filename){
+  // strip leading digits + separators, remove extension, underscores -> spaces
+  return filename
+    .replace(/^[0-9]+[\s_\-–]*?/,'')
+    .replace(/\.md$/i,'')
+    .replace(/_/g,' ');
 }
 
 async function buildTOC(){
@@ -108,13 +112,24 @@ async function buildTOC(){
     setStatus('Manifest laden …');
     const mf = await fetchJSON(MANIFEST_URL);
     const base = mf.base || (new URL(MANIFEST_URL, location.href)).href.replace(/manifest\.json.*$/,'');
-    const list = (mf.chapters||[]).map(p => typeof p==='string' ? p : p.path).filter(Boolean);
+    const raw = (mf.chapters||[]).filter(Boolean);
     const toc = document.querySelector('#toc');
-    toc.innerHTML = list.map((rel,idx)=>{
-      const label = rel.split('/').pop();
-      const url = rel.startsWith('http') ? rel : (base + rel);
-      return `<a href="#" data-url="${url}">${(idx+1).toString().padStart(2,'0')} – ${label}</a>`;
-    }).join('');
+
+    const items = raw.map((entry, idx)=>{
+      if (typeof entry === 'string') {
+        const file = entry.split('/').pop();
+        const label = `${String(idx+1).padStart(2,'0')} – ${cleanFileLabel(file)}`;
+        const url = entry.startsWith('http') ? entry : (base + entry);
+        return {label, url};
+      } else {
+        const path = entry.path || '';
+        const url = path.startsWith('http') ? path : (base + path);
+        const label = (entry.id ? String(entry.id).padStart(2,'0')+' – ' : '') + (entry.title || cleanFileLabel(path.split('/').pop()));
+        return {label, url};
+      }
+    });
+
+    toc.innerHTML = items.map(it=>`<a href="#" data-url="${it.url}">${it.label}</a>`).join('');
 
     toc.addEventListener('click', async (e)=>{
       const a = e.target.closest('a'); if(!a) return;
@@ -132,7 +147,7 @@ async function buildTOC(){
     setStatus('Bereit. Kapitel wählen …');
   }catch(e){
     setStatus('');
-    setErr('Manifest konnte nicht geladen werden: '+(e?.message||e)+'\nTipp: Öffne '+MANIFEST_URL+' im neuen Tab. Falls 404 → Pages/Dateipfad prüfen.');
+    setErr('Manifest konnte nicht geladen werden: '+(e?.message||e));
     document.querySelector('#toc').textContent = 'Manifest-Fehler.';
   }
 }
