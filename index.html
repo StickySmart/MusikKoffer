@@ -2,15 +2,14 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tiage Music Masterplan 25</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-<style>
+  <style>
     body {
       display: flex;
       flex-direction: column;
       margin: 0;
       height: 100vh;
+      font-family: Arial, sans-serif;
     }
     header {
       display: flex;
@@ -59,17 +58,15 @@
         transform: translateX(-100%);
       }
     }
-</style>
-
+  </style>
 </head>
 <body>
   <header>
-    <h3>Tiage Music Masterplan 25</h3>
+    <h1>Tiage Music Masterplan 25</h1>
     <button id="menuBtn">☰</button>
   </header>
-
   <main>
-    <nav id="sidebar"></nav>
+    <nav id="sidebar">Lade Manifest …</nav>
     <section id="content">
       <h2>Willkommen</h2>
       <p>Bitte Kapitel wählen…</p>
@@ -90,16 +87,16 @@
         const res = await fetch("manifest.json?v=" + Date.now());
         const manifest = await res.json();
 
-        sidebar.innerHTML = manifest.chapters.map(ch => 
+        sidebar.innerHTML = manifest.chapters.map(ch =>
           `<p><a href="#" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
         ).join("");
 
         sidebar.querySelectorAll("a").forEach(link => {
-          link.addEventListener("click", async (e) => {
+          link.addEventListener("click", async e => {
             e.preventDefault();
             const path = e.target.dataset.path;
             await loadChapter(path);
-            sidebar.classList.add("hidden"); // Sidebar automatisch schließen
+            sidebar.classList.add("hidden"); // mobil automatisch schließen
           });
         });
       } catch (err) {
