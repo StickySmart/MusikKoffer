@@ -28,7 +28,6 @@
   <div id="reviewPanel"></div>
 
 <script>
-/* ===== Store & Guards ===== */
 function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
 function unresolvedCount(s){ return (s.comments||[]).filter(c=>c.status==="open").length; }
 function canExportJSON2(s){ return unresolvedCount(s)===0; }
@@ -40,7 +39,6 @@ function enforceExportGuard(s){
   if(btn){ btn.disabled=!canExportJSON2(s); btn.title = btn.disabled ? "Export gesperrt: erst Kommentare erledigen." : "Bereit für JSON 2."; }
 }
 
-/* ===== Import-Pipeline ===== */
 async function fetchText(url){ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw new Error(url+" → "+r.status); return await r.text(); }
 async function fetchJSON(url){ const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw new Error(url+" → "+r.status); return await r.json(); }
 
@@ -58,18 +56,14 @@ async function importFromMarkdown(mdUrl){
   const store=ensureStore();
   const before = new Map(store.records.map(r=>[r.id, JSON.stringify(r)]));
   const md = await fetchText(mdUrl);
-
-  const fm = md.match(/^---\n([\s\S]*?)\n---/); // optional Frontmatter
+  const fm = md.match(/^---\n([\s\S]*?)\n---/);
   if(fm){ store.meta = store.meta || {}; store.meta.frontmatter = fm[1]; }
-
   for(const b of extractDataBlocks(md)){
-    const payload = parseJSONRelaxed(b.body); // YAML kann bei Bedarf nachgerüstet werden
+    const payload = parseJSONRelaxed(b.body);
     if(b.op==="append"){ const arr=Array.isArray(payload)?payload:[payload]; store.records.push(...arr); }
     if(b.op==="upsert"){ const arr=Array.isArray(payload)?payload:[payload]; upsertMany(store,arr,b.key); }
     if(b.op==="remove"){ const ids=Array.isArray(payload)?payload:[payload]; removeMany(store,ids,b.key); }
   }
-
-  // Auto-Review für Neu/Änderung/Remove
   const seen = new Set();
   for(const rec of store.records){
     seen.add(rec.id);
@@ -79,13 +73,11 @@ async function importFromMarkdown(mdUrl){
     else if(prev!==now) addComment(store,{targetKey:rec.id,text:`Änderungen an ${rec.title??rec.id} sichten.`});
   }
   for(const [id] of before){ if(!seen.has(id)) addComment(store,{targetKey:id,text:`Datensatz entfernt: ${id}. Korrekt?`}); }
-
   try{ localStorage.setItem("WORKBENCH_DATA", JSON.stringify(store)); }catch{}
   enforceExportGuard(store);
   return store;
 }
 
-/* ===== Review-UI ===== */
 function openReview(){
   const s=ensureStore(); const p=document.querySelector("#reviewPanel");
   const items=(s.comments||[]).sort((a,b)=>a.status.localeCompare(b.status));
@@ -111,7 +103,6 @@ function resolveComment(id){
   enforceExportGuard(s); openReview();
 }
 
-/* ===== Export ===== */
 function buildJSON2(s){ return {version:s.meta?.version||"dev",updated:new Date().toISOString(),items:s.records}; }
 function exportJSON2(){
   const s=ensureStore(); if(!canExportJSON2(s)){ alert("Export gesperrt: Es sind noch offene Kommentare vorhanden."); return; }
@@ -119,18 +110,12 @@ function exportJSON2(){
   const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement("a"),{href:url,download:"export_JSON2.json"}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 
-/* ===== Orchestrierung ===== */
 async function reimport(){
-  const input = (new URL(location.href)).searchParams.get("manifest")
-               || document.querySelector("#manifestPath")?.value?.trim()
-               || "./chapter/manifest.json";
+  const input = document.querySelector("#manifestPath")?.value?.trim() || "./chapter/manifest.json";
   const mf = await fetchJSON(input);
   const base = mf.base || "./";
   const list = (mf.chapters||[]).map(p => typeof p==="string" ? p : p.path).filter(Boolean);
-
-  // frische Session
   window.DATA = { records: [], meta: {}, comments: [] };
-
   for (const rel of list){
     const url = rel.startsWith("http") ? rel : (base + rel);
     try { await importFromMarkdown(url); }
