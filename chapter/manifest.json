@@ -1,44 +1,141 @@
-from pathlib import Path
-
-# Manifest Content
-manifest_content = """{
+{
   "version": "2.6.46",
   "updated": "2025-08-31",
-  "base": "https://raw.githubusercontent.com/stickysmart/MusikKoffer/main/",
   "chapters": [
-    "chapter/01_cover.md",
-    "chapter/02_first_steps_audio.md",
-    "chapter/03_first_steps_midi.md",
-    "chapter/04_workflows_zoom_l6.md",
-    "chapter/05_signal_verkabelung.md",
-    "chapter/06_midi_programmierung_cme_rk006.md",
-    "chapter/07_zoom_l6_szenen.md",
-    "chapter/08_rk006_presets.md",
-    "chapter/09_ez_ag_trigger.md",
-    "chapter/10_rk006_webapp_setup.md",
-    "chapter/11_rk006_sysex_quickguide.md",
-    "chapter/12_midi_workflows.md",
-    "chapter/13_programmierung_skripting.md",
-    "chapter/14_ergaenzungen.md",
-    "chapter/15_abschlusstabellen.md",
-    "chapter/16_einleitung_ueberblick.md",
-    "chapter/17_midi_verkabelung_final.md",
-    "chapter/18_rk006_webapp_guide.md",
-    "chapter/19_rk006_presets_detailed.md",
-    "chapter/20_ez_ag_bund_trigger.md",
-    "chapter/21_rk006_sysex_for_commander.md",
-    "chapter/22_zoom_l6_szenen_details.md",
-    "chapter/23_roland_s1_kurzreferenz.md",
-    "chapter/24_texture_lab_kurzreferenz.md",
-    "chapter/25_midi_commander_integration.md",
-    "chapter/26_praxis_workflows.md",
-    "chapter/27_tabellen_referenzen.md"
+    {
+      "id": "01",
+      "title": "Cover",
+      "path": "chapter/01_cover.md"
+    },
+    {
+      "id": "02",
+      "title": "First Steps - Audio",
+      "path": "chapter/02_first_steps_audio.md"
+    },
+    {
+      "id": "03",
+      "title": "First Steps - MIDI",
+      "path": "chapter/03_first_steps_midi.md"
+    },
+    {
+      "id": "04",
+      "title": "Workflows Zoom L-6",
+      "path": "chapter/04_workflows_zoom_l6.md"
+    },
+    {
+      "id": "05",
+      "title": "Signal & Verkabelung (Kurz)",
+      "path": "chapter/05_signal_verkabelung.md"
+    },
+    {
+      "id": "06",
+      "title": "MIDI-Programmierung CME & RK-006",
+      "path": "chapter/06_midi_programmierung_cme_rk006.md"
+    },
+    {
+      "id": "07",
+      "title": "Zoom L-6 Szenen",
+      "path": "chapter/07_zoom_l6_szenen.md"
+    },
+    {
+      "id": "08",
+      "title": "RK-006 Presets",
+      "path": "chapter/08_rk006_presets.md"
+    },
+    {
+      "id": "09",
+      "title": "EZ-AG Trigger",
+      "path": "chapter/09_ez_ag_trigger.md"
+    },
+    {
+      "id": "10",
+      "title": "RK-006 WebApp Setup",
+      "path": "chapter/10_rk006_webapp_setup.md"
+    },
+    {
+      "id": "11",
+      "title": "RK-006 SysEx Quick Guide",
+      "path": "chapter/11_rk006_sysex_quickguide.md"
+    },
+    {
+      "id": "12",
+      "title": "MIDI Workflows",
+      "path": "chapter/12_midi_workflows.md"
+    },
+    {
+      "id": "13",
+      "title": "Programmierung & Skripting",
+      "path": "chapter/13_programmierung_skripting.md"
+    },
+    {
+      "id": "14",
+      "title": "Ergänzungen",
+      "path": "chapter/14_ergaenzungen.md"
+    },
+    {
+      "id": "15",
+      "title": "Abschlusstabellen",
+      "path": "chapter/15_abschlusstabellen.md"
+    },
+    {
+      "id": "16",
+      "title": "Einleitung & Überblick",
+      "path": "chapter/16_einleitung_ueberblick.md"
+    },
+    {
+      "id": "17",
+      "title": "MIDI-Verkabelung final",
+      "path": "chapter/17_midi_verkabelung_final.md"
+    },
+    {
+      "id": "18",
+      "title": "RK-006 WebApp Guide (Android)",
+      "path": "chapter/18_rk006_webapp_guide.md"
+    },
+    {
+      "id": "19",
+      "title": "RK-006 Presets (detailed)",
+      "path": "chapter/19_rk006_presets_detailed.md"
+    },
+    {
+      "id": "20",
+      "title": "EZ-AG Bund-Trigger",
+      "path": "chapter/20_ez_ag_bund_trigger.md"
+    },
+    {
+      "id": "21",
+      "title": "SysEx für Midi Commander",
+      "path": "chapter/21_rk006_sysex_for_commander.md"
+    },
+    {
+      "id": "22",
+      "title": "Zoom L-6 Szenen Details",
+      "path": "chapter/22_zoom_l6_szenen_details.md"
+    },
+    {
+      "id": "23",
+      "title": "Roland S-1 Kurzreferenz",
+      "path": "chapter/23_roland_s1_kurzreferenz.md"
+    },
+    {
+      "id": "24",
+      "title": "Texture Lab Kurzreferenz",
+      "path": "chapter/24_texture_lab_kurzreferenz.md"
+    },
+    {
+      "id": "25",
+      "title": "Midi Commander Integration",
+      "path": "chapter/25_midi_commander_integration.md"
+    },
+    {
+      "id": "26",
+      "title": "Praxis Workflows",
+      "path": "chapter/26_praxis_workflows.md"
+    },
+    {
+      "id": "27",
+      "title": "Tabellen & Referenzen",
+      "path": "chapter/27_tabellen_referenzen.md"
+    }
   ]
 }
-"""
-
-# Save to file
-manifest_path = Path("/mnt/data/manifest.json")
-manifest_path.write_text(manifest_content, encoding="utf-8")
-
-manifest_path
