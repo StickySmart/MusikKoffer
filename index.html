@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Musik Koffer – Workbench (Responsive + RAW-Fallback)</title>
+  <title>Musik Koffer – Workbench (Responsive + RAW-Fallback + Black FAB)</title>
   <style>
     :root{
       --pad:16px;
@@ -35,13 +35,16 @@
     pre{white-space:pre-wrap;word-wrap:break-word;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:0.96rem;line-height:1.45}
     #reviewPanel{display:none;margin-top:12px;padding:.75rem;border:1px solid var(--border);border-radius:12px;background:#fff}
 
-    /* Mobile: drawer + floating FAB */
+    /* Global floating "Inhalt"-Button: always visible, black/white */
     #navFab{
-      position:fixed; right:12px; top:110px; z-index:1000;
-      padding:.55rem .8rem; border:1px solid var(--border); border-radius:12px; background:#fff;
-      box-shadow:0 2px 10px rgba(0,0,0,.06); display:none;
+      position:fixed; right:16px; top:96px; z-index:1000;
+      padding:.6rem .85rem; border:none; border-radius:12px;
+      background:#000; color:#fff; font-weight:600;
+      box-shadow:0 6px 18px rgba(0,0,0,.18);
+      cursor:pointer;
     }
-    #navToggler{display:none}
+    #navFab:focus{outline:2px solid #111; outline-offset:2px}
+    /* Drawer on small screens */
     @media (max-width: 900px){
       .wrap{grid-template-columns:1fr}
       aside{
@@ -49,9 +52,6 @@
         transform:translateX(-100%); transition:transform .2s ease; box-shadow:0 0 0 9999px rgba(0,0,0,.25); z-index:50
       }
       body.nav-open aside{transform:none}
-      #navFab{display:inline-flex; align-items:center; gap:.4rem}
-      header h1{order:1;flex:1}
-      .toolbar{order:3;width:100%}
     }
   </style>
 </head>
@@ -66,7 +66,8 @@
   </div>
 </header>
 
-<button id="navFab" aria-expanded="false" aria-controls="nav">☰ Inhalt</button>
+<!-- Single global FAB (always visible, black/white) -->
+<button id="navFab" aria-expanded="false" aria-controls="nav" aria-label="Inhaltsverzeichnis öffnen oder schließen">☰ Inhalt</button>
 
 <div class="wrap">
   <aside id="nav" aria-label="Inhaltsverzeichnis">
@@ -84,15 +85,12 @@
 const MANIFEST_URL = 'https://stickysmart.github.io/MusikKoffer/chapter/manifest.json';
 const REPO_ROOT = MANIFEST_URL.replace(/\/chapter\/manifest\.json.*$/, '/');
 
-// Build absolute URL from manifest path; avoid double "chapter/chapter"
 function resolveUrl(path){
   if(!path) return '';
   if(/^https?:\/\//i.test(path)) return path;
   if(path.startsWith('/')) return REPO_ROOT.replace(/\/$/,'') + path;
-  return REPO_ROOT + path.replace(/^\/?/,''); // attach relative to repo root
+  return REPO_ROOT + path.replace(/^\/?/,''); 
 }
-
-// Convert GitHub Pages URL to RAW for fallback
 function pagesToRaw(url){
   const m = url.match(/^https?:\/\/([^\/]+)\.github\.io\/([^\/]+)\/(.+)$/i);
   if(!m) return url;
@@ -116,7 +114,7 @@ function enforceExportGuard(s){
 async function fetchText(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.text(); }
 async function fetchJSON(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.json(); }
 
-// ---- MD parsing (data:* fences) ----
+// ---- MD parsing ----
 function extractDataBlocks(md){
   const re=/```(json|yaml)\s+data:(append|upsert|remove)(?:\s+key=([A-Za-z0-9_-]+))?\s*([\s\S]*?)```/g;
   const out=[]; let m; while((m=re.exec(md))!==null){ out.push({lang:m[1],op:m[2],key:m[3]||'id',body:m[4].trim()}); } return out;
@@ -168,7 +166,7 @@ async function importFromMarkdown(mdUrl){
   return {md};
 }
 
-// ---- TOC helpers ----
+// ---- TOC ----
 function cleanFileLabel(filename){
   return filename.replace(/^[0-9]+[\s_\-–]*?/,'').replace(/\.md$/i,'').replace(/_/g,' ');
 }
@@ -210,7 +208,7 @@ async function buildTOC(){
         document.querySelector('#chapterContent').textContent = md;
         setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
       }catch(err){
-        // Fehler wird in setErr angezeigt; Status bleibt
+        /* setErr schon gesetzt */
       }
       if (window.matchMedia('(max-width: 900px)').matches) toggleNav(false);
     });
@@ -234,7 +232,7 @@ document.querySelector('#btnExportJSON2').addEventListener('click', ()=>{
   const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement('a'),{href:url,download:'export_JSON2.json'}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
 });
 
-// ---- Drawer toggling (mobile) ----
+// ---- Global FAB toggle ----
 const fab = document.getElementById('navFab');
 function toggleNav(force){
   const open = (typeof force==='boolean') ? force : !document.body.classList.contains('nav-open');
