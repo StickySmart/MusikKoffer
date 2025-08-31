@@ -1,42 +1,110 @@
-<!doctype html>
+from pathlib import Path
+
+html = """<!doctype html>
 <html lang="de">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Musik Koffer – Workbench (Black/White)</title>
+  <title>Musik Koffer – Workbench (Clean Black/White)</title>
   <style>
-    :root{
+    :root {
       --pad:16px;
       --nav-w: clamp(220px, 22vw, 360px);
-      --border:#000;
-      --bg:#ffffff; /* jetzt reines Weiß */
+      --border:#000000;
+      --bg:#ffffff;  /* Weiß */
+      --text:#000000; /* Schwarz */
     }
     *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;color:#000;background:#fff}
-    header{padding:12px var(--pad);border-bottom:1px solid #000;display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#fff;color:#000}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+    }
+    header{
+      padding:12px var(--pad);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      background:#fff;
+      color:#000;
+    }
     header h1{margin:0;font-size:1.35rem;flex:1}
-    #status{opacity:.85;font-size:.9rem;color:#000}
+    #status{font-size:.9rem;color:#000}
     #err{color:#b00020;margin-left:12px;display:none;white-space:pre-wrap}
     .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
     .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#000;color:#fff;font-size:.8rem;min-width:1.2rem;text-align:center}
     .wrap{display:grid;grid-template-columns:var(--nav-w) 1fr;min-height:calc(100vh - 64px)}
-    aside{border-right:1px solid #000;padding:12px;position:sticky;top:64px;align-self:start;height:calc(100vh - 64px);overflow:auto;background:#fff;color:#000}
+    aside{
+      border-right:1px solid #000;
+      padding:12px;
+      position:sticky;
+      top:64px;
+      align-self:start;
+      height:calc(100vh - 64px);
+      overflow:auto;
+      background:#fff;
+      color:#000;
+    }
     main{padding:clamp(12px,2vw,24px);background:#fff;color:#000}
-    .toc a{display:block;padding:10px 12px;border-radius:0;text-decoration:none;color:#000;line-height:1.15;border-bottom:1px solid #000}
+    .toc a{
+      display:block;
+      padding:10px 12px;
+      text-decoration:none;
+      color:#000;
+      line-height:1.15;
+      border-bottom:1px solid #000;
+    }
     .toc a:hover{background:#000;color:#fff}
     .toc a.active{background:#000;color:#fff}
     #chapterTitle{margin:.2rem 0 0.6rem 0;font-size:1.3rem;color:#000}
-    pre{white-space:pre-wrap;word-wrap:break-word;background:#fff;border:1px solid #000;border-radius:0;padding:16px;font-size:0.96rem;line-height:1.45;color:#000}
-    #reviewPanel{display:none;margin-top:12px;padding:.75rem;border:1px solid #000;border-radius:0;background:#fff;color:#000}
+    pre{
+      white-space:pre-wrap;
+      word-wrap:break-word;
+      background:#fff;
+      border:1px solid #000;
+      padding:16px;
+      font-size:0.96rem;
+      line-height:1.45;
+      color:#000;
+    }
+    #reviewPanel{
+      display:none;
+      margin-top:12px;
+      padding:.75rem;
+      border:1px solid #000;
+      background:#fff;
+      color:#000;
+    }
     #navFab{
-      position:fixed; right:16px; top:96px; z-index:1000;
-      padding:.6rem .85rem; border:1px solid #000; border-radius:0; background:#000; color:#fff; font-weight:600;
-      box-shadow:none; cursor:pointer;
+      position:fixed;
+      right:16px;
+      top:96px;
+      z-index:1000;
+      padding:.6rem .85rem;
+      border:1px solid #000;
+      background:#000;
+      color:#fff;
+      font-weight:600;
+      cursor:pointer;
     }
     #navFab:focus{outline:2px solid #111; outline-offset:2px}
     @media (max-width: 900px){
       .wrap{grid-template-columns:1fr}
-      aside{position:fixed; inset:auto 0 0 0; top:0; height:100vh; width:80vw; max-width:420px; transform:translateX(-100%); transition:transform .2s ease; box-shadow:0 0 0 9999px rgba(0,0,0,.25); z-index:50}
+      aside{
+        position:fixed;
+        inset:auto 0 0 0;
+        top:0;
+        height:100vh;
+        width:80vw;
+        max-width:420px;
+        transform:translateX(-100%);
+        transition:transform .2s ease;
+        box-shadow:0 0 0 9999px rgba(0,0,0,.25);
+        z-index:50
+      }
       body.nav-open aside{transform:none}
     }
   </style>
@@ -63,7 +131,170 @@
   </main>
 </div>
 <script>
-// ... (JavaScript bleibt unverändert, wie in der letzten funktionierenden Version mit RAW-Fallback)
+// Config
+const MANIFEST_URL = 'https://stickysmart.github.io/MusikKoffer/chapter/manifest.json';
+const REPO_ROOT = MANIFEST_URL.replace(/\\/chapter\\/manifest\\.json.*$/, '/');
+
+function resolveUrl(path){
+  if(!path) return '';
+  if(/^https?:\\/\\//i.test(path)) return path;
+  if(path.startsWith('/')) return REPO_ROOT.replace(/\\/$/,'') + path;
+  return REPO_ROOT + path.replace(/^\\/?/,''); 
+}
+function pagesToRaw(url){
+  const m = url.match(/^https?:\\/\\/([^\\/]+)\\.github\\.io\\/([^\\/]+)\\/(.+)$/i);
+  if(!m) return url;
+  const user=m[1], repo=m[2], rest=m[3];
+  return `https://raw.githubusercontent.com/${user}/${repo}/main/${rest}`;
+}
+
+// Store & helpers
+function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
+function unresolvedCount(s){ return (s.comments||[]).filter(c=>c.status==='open').length; }
+function canExportJSON2(s){ return unresolvedCount(s)===0; }
+function setStatus(t){ const el=document.querySelector('#status'); if(el) el.textContent = t; }
+function setErr(t){ const el=document.querySelector('#err'); if(!el) return; if(t){ el.style.display='block'; el.textContent=t; } else { el.style.display='none'; el.textContent=''; } }
+function enforceExportGuard(s){
+  const btn=document.querySelector('#btnExportJSON2');
+  const badge=document.querySelector('#badgeComments');
+  const n=unresolvedCount(s);
+  if(badge){ badge.textContent=n; badge.style.display = n? 'inline-block':'none'; }
+  if(btn){ btn.disabled=!canExportJSON2(s); btn.title = btn.disabled ? 'Export gesperrt: erst Kommentare erledigen.' : 'Bereit für JSON 2.'; }
+}
+async function fetchText(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.text(); }
+async function fetchJSON(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.json(); }
+
+// Parse data blocks
+function extractDataBlocks(md){
+  const re=/```(json|yaml)\\s+data:(append|upsert|remove)(?:\\s+key=([A-Za-z0-9_-]+))?\\s*([\\s\\S]*?)```/g;
+  const out=[]; let m; while((m=re.exec(md))!==null){ out.push({lang:m[1],op:m[2],key:m[3]||'id',body:m[4].trim()}); } return out;
+}
+function parseJSONRelaxed(txt){ return JSON.parse(txt.replace(/\\/\\/.*$/mg,'').replace(/\\/\\*[\\s\\S]*?\\*\\//g,'')); }
+function indexBy(arr,key){ const m=new Map(); for(const o of arr) m.set(o[key],o); return m; }
+function upsertMany(store,arr,key){ const m=indexBy(store.records,key); for(const o of arr){ const k=o[key]; if(m.has(k)){ Object.assign(m.get(k),o);} else { store.records.push(o); m.set(k,o);} } }
+function removeMany(store,ids,key){ const set=new Set(ids); store.records=store.records.filter(o=>!set.has(o[key])); }
+function addComment(store,{targetKey,text}){ const id='C'+Math.random().toString(36).slice(2,8); store.comments.push({id,targetKey,text,createdAt:new Date().toISOString(),status:'open'}); }
+
+async function importFromMarkdown(mdUrl){
+  const s=ensureStore();
+  const before = new Map(s.records.map(r=>[r.id, JSON.stringify(r)]));
+
+  let md;
+  try {
+    md = await fetchText(mdUrl);
+  } catch (e) {
+    const raw = pagesToRaw(mdUrl);
+    try{
+      md = await fetchText(raw);
+      setErr('Laden fehlgeschlagen: '+mdUrl+' → RAW-Fallback genutzt.');
+    }catch(e2){
+      setErr('Laden fehlgeschlagen: '+mdUrl+'\\nund RAW-Fallback: '+raw+'\\n('+ (e2?.message||e2) +')');
+      throw e2;
+    }
+  }
+
+  const fm = md.match(/^---\\n([\\s\\S]*?)\\n---/);
+  if(fm){ s.meta = s.meta || {}; s.meta.frontmatter = fm[1]; }
+
+  for(const b of extractDataBlocks(md)){
+    const payload = parseJSONRelaxed(b.body);
+    if(b.op==='append'){ const arr=Array.isArray(payload)?payload:[payload]; s.records.push(...arr); }
+    if(b.op==='upsert'){ const arr=Array.isArray(payload)?payload:[payload]; upsertMany(s,arr,b.key); }
+    if(b.op==='remove'){ const ids=Array.isArray(payload)?payload:[payload]; removeMany(s,ids,b.key); }
+  }
+
+  const seen = new Set();
+  for(const rec of s.records){
+    seen.add(rec.id);
+    const prev = before.get(rec.id);
+    const now = JSON.stringify(rec);
+    if(prev===undefined) addComment(s,{targetKey:rec.id,text:`Neuer Datensatz: ${rec.title??rec.id} prüfen.`});
+    else if(prev!==now) addComment(s,{targetKey:rec.id,text:`Änderungen an ${rec.title??rec.id} sichten.`});
+  }
+  for(const [id] of before){ if(!seen.has(id)) addComment(s,{targetKey:id,text:`Datensatz entfernt: ${id}. Korrekt?`}); }
+  enforceExportGuard(s);
+  return {md};
+}
+
+// TOC
+function cleanFileLabel(filename){
+  return filename.replace(/^[0-9]+[\\s_\\-–]*?/,'').replace(/\\.md$/i,'').replace(/_/g,' ');
+}
+async function buildTOC(){
+  try{
+    setErr(''); setStatus('Manifest laden …');
+    const mf = await fetchJSON(MANIFEST_URL);
+    const raw = (mf.chapters||[]).filter(Boolean);
+    const toc = document.querySelector('#toc');
+
+    const items = raw.map((entry, idx)=>{
+      if (typeof entry === 'string') {
+        const file = entry.split('/').pop();
+        const label = `${String(idx+1).padStart(2,'0')} – ${cleanFileLabel(file)}`;
+        const url = resolveUrl(entry);
+        return {label, url};
+      } else {
+        const path = entry.path || '';
+        const url = resolveUrl(path);
+        const id  = (entry.id != null) ? String(entry.id).padStart(2,'0')+' – ' : '';
+        const label = id + (entry.title || cleanFileLabel(path.split('/').pop()));
+        return {label, url};
+      }
+    });
+
+    toc.innerHTML = items.map(it=>`<a href="#" data-url="${it.url}">${it.label}</a>`).join('');
+
+    toc.addEventListener('click', async (e)=>{
+      const a = e.target.closest('a'); if(!a) return;
+      e.preventDefault();
+      document.querySelectorAll('.toc a').forEach(el=>el.classList.remove('active'));
+      a.classList.add('active');
+      const url = a.getAttribute('data-url');
+      setStatus('Kapitel laden …');
+      try{
+        const {md} = await importFromMarkdown(url);
+        document.querySelector('#chapterTitle').textContent = a.textContent;
+        document.querySelector('#chapterContent').textContent = md;
+        setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
+      }catch(err){}
+      if (window.matchMedia('(max-width: 900px)').matches) toggleNav(false);
+    });
+
+    setStatus('Bereit. Kapitel wählen …');
+  }catch(e){
+    setStatus('');
+    setErr('Manifest konnte nicht geladen werden: '+(e?.message||e));
+    document.querySelector('#toc').textContent = 'Manifest-Fehler.';
+  }
+}
+
+// Review & Export
+document.querySelector('#btnOpenReview').addEventListener('click', ()=>{
+  const p=document.querySelector('#reviewPanel');
+  p.style.display = p.style.display==='block' ? 'none':'block';
+});
+document.querySelector('#btnExportJSON2').addEventListener('click', ()=>{
+  const s=ensureStore(); if(!canExportJSON2(s)){ alert('Export gesperrt: Es sind noch offene Kommentare vorhanden.'); return; }
+  const blob=new Blob([JSON.stringify({version:s.meta?.version||'dev',updated:new Date().toISOString(),items:s.records},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement('a'),{href:url,download:'export_JSON2.json'}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+});
+
+// Drawer toggle
+const fab = document.getElementById('navFab');
+function toggleNav(force){
+  const open = (typeof force==='boolean') ? force : !document.body.classList.contains('nav-open');
+  document.body.classList.toggle('nav-open', open);
+  fab?.setAttribute('aria-expanded', String(open));
+}
+fab?.addEventListener('click', ()=>toggleNav());
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') toggleNav(false); });
+
+// Boot
+window.addEventListener('DOMContentLoaded', buildTOC);
 </script>
 </body>
 </html>
+"""
+path = Path("/mnt/data/index_full_bw.html")
+path.write_text(html, encoding="utf-8")
+str(path)
