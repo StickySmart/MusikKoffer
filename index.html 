@@ -292,8 +292,3 @@ window.addEventListener('DOMContentLoaded', buildTOC);
 </script>
 </body>
 </html>
-"""
-path = Path("/mnt/data/index_full_bw.html")
-path.write_text(html, encoding="utf-8")
-str(path)
-
