@@ -2,10 +2,6 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
   <style>
     body {
@@ -61,144 +57,32 @@
       #sidebar.hidden {
         transform: translateX(-100%);
       }
-	  /* Kommentar Bereich Styles */
+    }
+
+    /* Kommentar Bereich Styles */
     #commentSection {
       margin-top: 20px;
       padding: 1rem;
       background-color: #f0f0f0;
       border: 1px solid #ddd;
     }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Tiage Music Masterplan 25</h1>
-    <button id="menuBtn">☰</button>
-  </header>
-  <main>
-    <nav id="sidebar">Lade Manifest …</nav>
-    <section id="content">
-      <h2>Willkommen</h2>
-      <p>Bitte Kapitel wählen…</p>
-    </section>
-  </main>
-
-  <script>
-    const sidebar = document.getElementById("sidebar");
-    const menuBtn = document.getElementById("menuBtn");
-    const content = document.getElementById("content");
-
-    menuBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("hidden");
-    });
-
-    async function loadManifest() {
-      try {
-        const res = await fetch("manifest.json?v=" + Date.now());
-        const manifest = await res.json();
-
-        sidebar.innerHTML = manifest.chapters.map(ch =>
-          `<p><a href="#" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
-        ).join("");
-
-        sidebar.querySelectorAll("a").forEach(link => {
-          link.addEventListener("click", async e => {
-            e.preventDefault();
-            const path = e.target.dataset.path;
-            await loadChapter(path);
-            sidebar.classList.add("hidden"); // mobil automatisch schließen
-          });
-        });
-      } catch (err) {
-        content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
-      }
-    }
-#commentSection textarea {
+    #commentSection textarea {
       width: 100%;
       height: 100px;
       margin-bottom: 10px;
       padding: 10px;
       font-size: 14px;
-	    }
+    }
     #commentSection button {
-	
-	
-	
-	
-	
-    async function loadChapter(path) {
-      try {
-        const res = await fetch(path);
-        if (!res.ok) throw new Error(`${path} → ${res.status}`);
-        const text = await res.text();
-        content.innerHTML = `<article><pre>${text}</pre></article>`;
-      } catch (err) {
-        content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
-      }
-    }
-
-    loadManifest();
-  </script>
-</body>
-</html>
-  <title>Tiage Music Masterplan 25</title>
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      margin: 0;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      background: #111;
-      color: #fff;
-    }
-    #menuBtn {
-      background: none;
-      border: none;
+      padding: 10px;
+      background-color: #333;
       color: white;
-      font-size: 1.5rem;
+      border: none;
       cursor: pointer;
-		margin-top: 10px;			   
+      margin-top: 10px;
     }
     #commentSection button:hover {
-	
-	#sidebar {
-      width: 260px;
-      background: #f5f5f5;
-      border-right: 1px solid #ddd;
-      overflow-y: auto;
-      transition: transform 0.3s ease;
-    }
-    #sidebar.hidden {
-      transform: translateX(-100%);
-    }
-    #content {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-    }
-    main {
-      display: flex;
-      flex: 1;
-      height: calc(100vh - 60px);
-    }
-    @media (max-width: 768px) {
-      #sidebar {
-        position: absolute;
-        top: 60px;
-        left: 0;
-        height: calc(100vh - 60px);
-        z-index: 10;
-      }
-      #sidebar.hidden {
-        transform: translateX(-100%);
-      }
+      background-color: #555;
     }
   </style>
 </head>
@@ -215,7 +99,7 @@
     </section>
   </main>
 
-<!-- Kommentarbereich -->
+  <!-- Kommentarbereich -->
   <div id="commentSection" style="display:none;">
     <h3>Kommentar zu diesem Kapitel</h3>
     <textarea id="commentInput" placeholder="Deine Notiz nur für dieses Kapitel..."></textarea>
@@ -223,14 +107,15 @@
       <button id="saveCommentBtn">Kommentar speichern</button>
       <button id="exportJSONBtn">Export alle Kapitel-Kommentare (JSON)</button>
     </div>
-  </div>						   
-	const commentInput = document.getElementById("commentInput");
-    const saveCommentBtn = document.getElementById("saveCommentBtn");
-    const exportJSONBtn = document.getElementById("exportJSONBtn");																		   
+  </div>
+
   <script>
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
+    const commentInput = document.getElementById("commentInput");
+    const saveCommentBtn = document.getElementById("saveCommentBtn");
+    const exportJSONBtn = document.getElementById("exportJSONBtn");
 
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
@@ -264,7 +149,8 @@
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
         content.innerHTML = `<article><pre>${text}</pre></article>`;
-// Kommentarbereich nach Laden des Kapitels anzeigen
+
+        // Kommentarbereich nach Laden des Kapitels anzeigen
         commentInput.value = ''; // Eingabefeld zurücksetzen
         document.getElementById("commentSection").style.display = "block";
       } catch (err) {
@@ -272,13 +158,15 @@
       }
     }
 
-	saveCommentBtn.addEventListener("click", () => {
+    saveCommentBtn.addEventListener("click", () => {
       const comment = commentInput.value;
       if (comment) {
         // Hier können wir den Kommentar speichern (z. B. lokal speichern oder an eine API senden)
         alert("Kommentar gespeichert: " + comment);
-      }												
-		exportJSONBtn.addEventListener("click", () => {
+      }
+    });
+
+    exportJSONBtn.addEventListener("click", () => {
       // Exportiere alle Kommentare als JSON
       const comments = [
         { chapter: '06', comment: commentInput.value } // Beispiel für Kommentare
@@ -289,7 +177,8 @@
       a.href = url;
       a.download = 'comments.json';
       a.click();
-    });								 
+    });
+
     loadManifest();
   </script>
 </body>
