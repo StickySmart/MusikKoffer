@@ -65,6 +65,7 @@
       padding: 1rem;
       background-color: #f0f0f0;
       border: 1px solid #ddd;
+      display: none; /* Zuerst versteckt */
     }
     #commentSection textarea {
       width: 100%;
@@ -100,13 +101,13 @@
   </main>
 
   <!-- Kommentarbereich -->
-  <div id="commentSection" style="display:none;">
+  <div id="commentSection">
     <h3>Kommentar zu diesem Kapitel</h3>
     <textarea id="commentInput" placeholder="Deine Notiz nur für dieses Kapitel..."></textarea>
     <div>
       <button id="saveCommentBtn">Kommentar speichern</button>
       <button id="exportJSONBtn">Export alle Kapitel-Kommentare (JSON)</button>
-      <button id="importJSONBtn">Kommentare importieren (JSON)</button> <!-- Neuer Import-Button -->
+      <button id="importJSONBtn">Kommentare importieren (JSON)</button> <!-- Import-Button hinzugefügt -->
     </div>
   </div>
 
@@ -154,7 +155,7 @@
 
         // Kommentarbereich nach Laden des Kapitels anzeigen
         commentInput.value = ''; // Eingabefeld zurücksetzen
-        document.getElementById("commentSection").style.display = "block";
+        document.getElementById("commentSection").style.display = "block"; // Kommentarbereich sichtbar machen
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
@@ -163,7 +164,7 @@
     saveCommentBtn.addEventListener("click", () => {
       const comment = commentInput.value;
       if (comment) {
-        // Hier können wir den Kommentar speichern (z. B. lokal speichern oder an eine API senden)
+        // Kommentar speichern (kann an eine API gesendet oder lokal gespeichert werden)
         alert("Kommentar gespeichert: " + comment);
       }
     });
@@ -195,7 +196,7 @@
           try {
             const comments = JSON.parse(e.target.result);
             console.log('Kommentare importiert:', comments);
-            // Hier kannst du dann die importierten Kommentare auf der Seite darstellen oder weiterverarbeiten
+            // Hier kannst du die importierten Kommentare anzeigen oder verarbeiten
             alert('Kommentare wurden importiert!');
           } catch (error) {
             alert('Fehler beim Importieren der Datei: ' + error);
