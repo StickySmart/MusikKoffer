@@ -5,7 +5,7 @@
     { "id": "02", "title": "First Steps Audio", "path": "chapter/02_first_steps_audio.md" },
     { "id": "03", "title": "First Steps MIDI", "path": "chapter/03_first_steps_midi.md" },
     { "id": "04", "title": "Workflows Zoom L6", "path": "chapter/04_workflows_zoom_l_6.md" },
-{ "id": "05", "title": "Signal und Verkabelung Kurz", "path": "chapter/05_teil_1_signal_verkabelung_kurz.md" }
+{ "id": "05", "title": "Signal und Verkabelung Kurz", "path": "chapter/05_teil_1_signal_verkabelung_kurz.md" },
     { "id": "06", "title": "MIDI Programmierung CME RK006", "path": "chapter/06_midi_programmierung_cme_rk_006.md" },
     { "id": "07", "title": "Zoom L6 Szenen", "path": "chapter/07_zoom_l_6_szenen.md" },
     { "id": "08", "title": "RK006 Presets", "path": "chapter/08_rk_006_presets.md" },
