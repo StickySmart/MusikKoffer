@@ -3,35 +3,54 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Musik Koffer – Workbench (Responsive • URL-Fix)</title>
+  <title>Musik Koffer – Workbench (Responsive + RAW-Fallback)</title>
   <style>
-    :root{ --pad:16px; --nav-w: clamp(220px, 22vw, 360px); --border:#e5e7eb; --bg:#fafafa; }
+    :root{
+      --pad:16px;
+      --nav-w: clamp(220px, 22vw, 360px);
+      --border:#e5e7eb;
+      --bg:#fafafa;
+    }
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;color:#111}
     header{padding:12px var(--pad);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
     header h1{margin:0;font-size:1.35rem;flex:1}
-    #status{opacity:.8;font-size:.9rem}
+    #status{opacity:.85;font-size:.9rem}
     #err{color:#b00020;margin-left:12px;display:none;white-space:pre-wrap}
     .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
     .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#d33;color:#fff;font-size:.8rem;min-width:1.2rem;text-align:center}
+
+    /* Layout */
     .wrap{display:grid;grid-template-columns:var(--nav-w) 1fr;min-height:calc(100vh - 64px)}
     aside{border-right:1px solid var(--border);padding:12px;position:sticky;top:64px;align-self:start;height:calc(100vh - 64px);overflow:auto;background:#fff}
     main{padding:clamp(12px,2vw,24px)}
+
+    /* TOC */
     .toc a{display:block;padding:10px 12px;border-radius:10px;text-decoration:none;color:inherit;line-height:1.15}
     .toc a:hover{background:#f5f5f5}
     .toc a.active{background:#eef5ff}
+
+    /* Chapter content */
     #chapterTitle{margin:.2rem 0 0.6rem 0;font-size:1.3rem}
     pre{white-space:pre-wrap;word-wrap:break-word;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:0.96rem;line-height:1.45}
     #reviewPanel{display:none;margin-top:12px;padding:.75rem;border:1px solid var(--border);border-radius:12px;background:#fff}
+
+    /* Mobile: drawer + floating FAB */
+    #navFab{
+      position:fixed; right:12px; top:110px; z-index:1000;
+      padding:.55rem .8rem; border:1px solid var(--border); border-radius:12px; background:#fff;
+      box-shadow:0 2px 10px rgba(0,0,0,.06); display:none;
+    }
     #navToggler{display:none}
     @media (max-width: 900px){
       .wrap{grid-template-columns:1fr}
-      aside{ position:fixed; inset:auto 0 0 0; top:0; height:100vh; width:80vw; max-width:420px;
-             transform:translateX(-100%); transition:transform .2s ease; box-shadow:0 0 0 9999px rgba(0,0,0,.25); z-index:50 }
+      aside{
+        position:fixed; inset:auto 0 0 0; top:0; height:100vh; width:80vw; max-width:420px;
+        transform:translateX(-100%); transition:transform .2s ease; box-shadow:0 0 0 9999px rgba(0,0,0,.25); z-index:50
+      }
       body.nav-open aside{transform:none}
-      #navToggler{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .7rem;border:1px solid var(--border);border-radius:10px;background:#fff}
+      #navFab{display:inline-flex; align-items:center; gap:.4rem}
       header h1{order:1;flex:1}
-      #navToggler{order:2}
       .toolbar{order:3;width:100%}
     }
   </style>
@@ -39,7 +58,6 @@
 <body>
 <header>
   <h1>Musik Koffer – Workbench</h1>
-  <button id="navToggler" aria-expanded="false" aria-controls="nav">☰ Inhalt</button>
   <div id="status">Bereit. Kapitel wählen …</div>
   <div id="err"></div>
   <div class="toolbar">
@@ -47,6 +65,8 @@
     <button id="btnExportJSON2" disabled>JSON 2 erzeugen</button>
   </div>
 </header>
+
+<button id="navFab" aria-expanded="false" aria-controls="nav">☰ Inhalt</button>
 
 <div class="wrap">
   <aside id="nav" aria-label="Inhaltsverzeichnis">
@@ -60,18 +80,27 @@
 </div>
 
 <script>
+// ---- Config ----
 const MANIFEST_URL = 'https://stickysmart.github.io/MusikKoffer/chapter/manifest.json';
+const REPO_ROOT = MANIFEST_URL.replace(/\/chapter\/manifest\.json.*$/, '/');
 
-// Robust URL-Resolver: aus MANIFEST_URL das Repo-Root bestimmen
-const REPO_ROOT = MANIFEST_URL.replace(/\/chapter\/manifest\.json.*$/, '/'); // → https://.../MusikKoffer/
+// Build absolute URL from manifest path; avoid double "chapter/chapter"
 function resolveUrl(path){
   if(!path) return '';
-  if(/^https?:\/\//i.test(path)) return path;         // schon absolut
-  if(path.startsWith('/')) return REPO_ROOT.replace(/\/$/,'') + path; // absolute Repo-Route
-  // Wenn Manifest-Pfad bereits "chapter/..." enthält, nicht doppeln:
-  return REPO_ROOT + path.replace(/^\/?/,'');          // → root + relative Pfad
+  if(/^https?:\/\//i.test(path)) return path;
+  if(path.startsWith('/')) return REPO_ROOT.replace(/\/$/,'') + path;
+  return REPO_ROOT + path.replace(/^\/?/,''); // attach relative to repo root
 }
 
+// Convert GitHub Pages URL to RAW for fallback
+function pagesToRaw(url){
+  const m = url.match(/^https?:\/\/([^\/]+)\.github\.io\/([^\/]+)\/(.+)$/i);
+  if(!m) return url;
+  const user=m[1], repo=m[2], rest=m[3];
+  return `https://raw.githubusercontent.com/${user}/${repo}/main/${rest}`;
+}
+
+// ---- Store & helpers ----
 function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
 function unresolvedCount(s){ return (s.comments||[]).filter(c=>c.status==='open').length; }
 function canExportJSON2(s){ return unresolvedCount(s)===0; }
@@ -87,6 +116,7 @@ function enforceExportGuard(s){
 async function fetchText(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.text(); }
 async function fetchJSON(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.json(); }
 
+// ---- MD parsing (data:* fences) ----
 function extractDataBlocks(md){
   const re=/```(json|yaml)\s+data:(append|upsert|remove)(?:\s+key=([A-Za-z0-9_-]+))?\s*([\s\S]*?)```/g;
   const out=[]; let m; while((m=re.exec(md))!==null){ out.push({lang:m[1],op:m[2],key:m[3]||'id',body:m[4].trim()}); } return out;
@@ -100,15 +130,31 @@ function addComment(store,{targetKey,text}){ const id='C'+Math.random().toString
 async function importFromMarkdown(mdUrl){
   const s=ensureStore();
   const before = new Map(s.records.map(r=>[r.id, JSON.stringify(r)]));
-  const md = await fetchText(mdUrl);
+
+  let md;
+  try {
+    md = await fetchText(mdUrl);
+  } catch (e) {
+    const raw = pagesToRaw(mdUrl);
+    try{
+      md = await fetchText(raw);
+      setErr('Laden fehlgeschlagen: '+mdUrl+' → RAW-Fallback genutzt.');
+    }catch(e2){
+      setErr('Laden fehlgeschlagen: '+mdUrl+'\nund RAW-Fallback: '+raw+'\n('+ (e2?.message||e2) +')');
+      throw e2;
+    }
+  }
+
   const fm = md.match(/^---\n([\s\S]*?)\n---/);
   if(fm){ s.meta = s.meta || {}; s.meta.frontmatter = fm[1]; }
+
   for(const b of extractDataBlocks(md)){
     const payload = parseJSONRelaxed(b.body);
     if(b.op==='append'){ const arr=Array.isArray(payload)?payload:[payload]; s.records.push(...arr); }
     if(b.op==='upsert'){ const arr=Array.isArray(payload)?payload:[payload]; upsertMany(s,arr,b.key); }
     if(b.op==='remove'){ const ids=Array.isArray(payload)?payload:[payload]; removeMany(s,ids,b.key); }
   }
+
   const seen = new Set();
   for(const rec of s.records){
     seen.add(rec.id);
@@ -122,6 +168,7 @@ async function importFromMarkdown(mdUrl){
   return {md};
 }
 
+// ---- TOC helpers ----
 function cleanFileLabel(filename){
   return filename.replace(/^[0-9]+[\s_\-–]*?/,'').replace(/\.md$/i,'').replace(/_/g,' ');
 }
@@ -163,7 +210,7 @@ async function buildTOC(){
         document.querySelector('#chapterContent').textContent = md;
         setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
       }catch(err){
-        setErr('Laden fehlgeschlagen:\n'+(err?.message||err));
+        // Fehler wird in setErr angezeigt; Status bleibt
       }
       if (window.matchMedia('(max-width: 900px)').matches) toggleNav(false);
     });
@@ -176,7 +223,7 @@ async function buildTOC(){
   }
 }
 
-// Review & Export
+// ---- Review & Export ----
 document.querySelector('#btnOpenReview').addEventListener('click', ()=>{
   const p=document.querySelector('#reviewPanel');
   p.style.display = p.style.display==='block' ? 'none':'block';
@@ -187,16 +234,17 @@ document.querySelector('#btnExportJSON2').addEventListener('click', ()=>{
   const url=URL.createObjectURL(blob); const a=Object.assign(document.createElement('a'),{href:url,download:'export_JSON2.json'}); a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
 });
 
-// Drawer toggling (mobile)
-const btn = document.getElementById('navToggler');
+// ---- Drawer toggling (mobile) ----
+const fab = document.getElementById('navFab');
 function toggleNav(force){
   const open = (typeof force==='boolean') ? force : !document.body.classList.contains('nav-open');
   document.body.classList.toggle('nav-open', open);
-  btn.setAttribute('aria-expanded', String(open));
+  fab?.setAttribute('aria-expanded', String(open));
 }
-btn.addEventListener('click', ()=>toggleNav());
+fab?.addEventListener('click', ()=>toggleNav());
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') toggleNav(false); });
 
+// ---- Boot ----
 window.addEventListener('DOMContentLoaded', buildTOC);
 </script>
 </body>
