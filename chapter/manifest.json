@@ -1,141 +1,32 @@
 {
-  "version": "2.6.46",
-  "updated": "2025-08-31",
+  "version": "1.0.0",
   "chapters": [
-    {
-      "id": "01",
-      "title": "Cover",
-      "path": "chapter/01_cover.md"
-    },
-    {
-      "id": "02",
-      "title": "First Steps - Audio",
-      "path": "chapter/02_first_steps_audio.md"
-    },
-    {
-      "id": "03",
-      "title": "First Steps - MIDI",
-      "path": "chapter/03_first_steps_midi.md"
-    },
-    {
-      "id": "04",
-      "title": "Workflows Zoom L-6",
-      "path": "chapter/04_workflows_zoom_l6.md"
-    },
-    {
-      "id": "05",
-      "title": "Signal & Verkabelung (Kurz)",
-      "path": "chapter/05_signal_verkabelung.md"
-    },
-    {
-      "id": "06",
-      "title": "MIDI-Programmierung CME & RK-006",
-      "path": "chapter/06_midi_programmierung_cme_rk006.md"
-    },
-    {
-      "id": "07",
-      "title": "Zoom L-6 Szenen",
-      "path": "chapter/07_zoom_l6_szenen.md"
-    },
-    {
-      "id": "08",
-      "title": "RK-006 Presets",
-      "path": "chapter/08_rk006_presets.md"
-    },
-    {
-      "id": "09",
-      "title": "EZ-AG Trigger",
-      "path": "chapter/09_ez_ag_trigger.md"
-    },
-    {
-      "id": "10",
-      "title": "RK-006 WebApp Setup",
-      "path": "chapter/10_rk006_webapp_setup.md"
-    },
-    {
-      "id": "11",
-      "title": "RK-006 SysEx Quick Guide",
-      "path": "chapter/11_rk006_sysex_quickguide.md"
-    },
-    {
-      "id": "12",
-      "title": "MIDI Workflows",
-      "path": "chapter/12_midi_workflows.md"
-    },
-    {
-      "id": "13",
-      "title": "Programmierung & Skripting",
-      "path": "chapter/13_programmierung_skripting.md"
-    },
-    {
-      "id": "14",
-      "title": "Ergänzungen",
-      "path": "chapter/14_ergaenzungen.md"
-    },
-    {
-      "id": "15",
-      "title": "Abschlusstabellen",
-      "path": "chapter/15_abschlusstabellen.md"
-    },
-    {
-      "id": "16",
-      "title": "Einleitung & Überblick",
-      "path": "chapter/16_einleitung_ueberblick.md"
-    },
-    {
-      "id": "17",
-      "title": "MIDI-Verkabelung final",
-      "path": "chapter/17_midi_verkabelung_final.md"
-    },
-    {
-      "id": "18",
-      "title": "RK-006 WebApp Guide (Android)",
-      "path": "chapter/18_rk006_webapp_guide.md"
-    },
-    {
-      "id": "19",
-      "title": "RK-006 Presets (detailed)",
-      "path": "chapter/19_rk006_presets_detailed.md"
-    },
-    {
-      "id": "20",
-      "title": "EZ-AG Bund-Trigger",
-      "path": "chapter/20_ez_ag_bund_trigger.md"
-    },
-    {
-      "id": "21",
-      "title": "SysEx für Midi Commander",
-      "path": "chapter/21_rk006_sysex_for_commander.md"
-    },
-    {
-      "id": "22",
-      "title": "Zoom L-6 Szenen Details",
-      "path": "chapter/22_zoom_l6_szenen_details.md"
-    },
-    {
-      "id": "23",
-      "title": "Roland S-1 Kurzreferenz",
-      "path": "chapter/23_roland_s1_kurzreferenz.md"
-    },
-    {
-      "id": "24",
-      "title": "Texture Lab Kurzreferenz",
-      "path": "chapter/24_texture_lab_kurzreferenz.md"
-    },
-    {
-      "id": "25",
-      "title": "Midi Commander Integration",
-      "path": "chapter/25_midi_commander_integration.md"
-    },
-    {
-      "id": "26",
-      "title": "Praxis Workflows",
-      "path": "chapter/26_praxis_workflows.md"
-    },
-    {
-      "id": "27",
-      "title": "Tabellen & Referenzen",
-      "path": "chapter/27_tabellen_referenzen.md"
-    }
+    { "id": "01", "title": "Cover", "path": "docs/01_cover.md" },
+    { "id": "02", "title": "First Steps - Audio", "path": "docs/02_first_steps_audio.md" },
+    { "id": "03", "title": "First Steps - MIDI", "path": "docs/03_first_steps_midi.md" },
+    { "id": "04", "title": "Workflows Zoom L-6", "path": "docs/04_workflows_zoom_l-6.md" },
+    { "id": "05", "title": "Signal & Verkabelung (Kurz)", "path": "docs/05_signal_verkabelung_kurz.md" },
+    { "id": "06", "title": "MIDI-Programmierung CME & RK-006", "path": "docs/06_midi_programmierung_cme_rk006.md" },
+    { "id": "07", "title": "Zoom L-6 Szenen", "path": "docs/07_zoom_l6_szenen.md" },
+    { "id": "08", "title": "RK-006 Presets", "path": "docs/08_rk006_presets.md" },
+    { "id": "09", "title": "EZ-AG Trigger", "path": "docs/09_ez_ag_trigger.md" },
+    { "id": "10", "title": "RK-006 WebApp Setup", "path": "docs/10_rk006_webapp_setup.md" },
+    { "id": "11", "title": "RK-006 SysEx Quick Guide", "path": "docs/11_rk006_sysex_quickguide.md" },
+    { "id": "12", "title": "RK-006 Presets MIDI", "path": "docs/12_rk006_presets_midi.md" },
+    { "id": "13", "title": "RK-006 Scenes", "path": "docs/13_rk006_scenes.md" },
+    { "id": "14", "title": "RK-006 Analog Sync", "path": "docs/14_rk006_analog_sync.md" },
+    { "id": "15", "title": "RK-006 CV Setup", "path": "docs/15_rk006_cv_setup.md" },
+    { "id": "16", "title": "RK-006 DIN Sync", "path": "docs/16_rk006_din_sync.md" },
+    { "id": "17", "title": "RK-006 USB Setup", "path": "docs/17_rk006_usb_setup.md" },
+    { "id": "18", "title": "RK-006 Audio Routing", "path": "docs/18_rk006_audio_routing.md" },
+    { "id": "19", "title": "RK-006 SysEx Export", "path": "docs/19_rk006_sysex_export.md" },
+    { "id": "20", "title": "RK-006 SysEx Import", "path": "docs/20_rk006_sysex_import.md" },
+    { "id": "21", "title": "RK-006 MIDI Clock", "path": "docs/21_rk006_midi_clock.md" },
+    { "id": "22", "title": "RK-006 Preset Patterns", "path": "docs/22_rk006_preset_patterns.md" },
+    { "id": "23", "title": "RK-006 Scenes Presets", "path": "docs/23_rk006_scenes_presets.md" },
+    { "id": "24", "title": "RK-006 Config", "path": "docs/24_rk006_config.md" },
+    { "id": "25", "title": "RK-006 Setup Guide", "path": "docs/25_rk006_setup_guide.md" },
+    { "id": "26", "title": "Textural Manual", "path": "docs/26_textural_manual.md" },
+    { "id": "27", "title": "Tabellen & Referenzen", "path": "docs/27_tabellen_referenzen.md" }
   ]
 }
