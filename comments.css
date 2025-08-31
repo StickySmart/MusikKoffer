@@ -1,0 +1,28 @@
+#commentSection {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+}
+
+#commentSection textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+
+#commentSection button {
+  padding: 8px 12px;
+  margin-right: 10px;
+  background: #333;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#commentSection button:hover {
+  background: #555;
+}
