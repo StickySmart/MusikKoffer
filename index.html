@@ -3,47 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Musik Koffer – Workbench (Responsive)</title>
+  <title>Musik Koffer – Workbench (Responsive • URL-Fix)</title>
   <style>
-    :root{
-      --pad:16px;
-      --nav-w: clamp(220px, 22vw, 360px);
-      --border:#e5e7eb;
-      --bg:#fafafa;
-    }
+    :root{ --pad:16px; --nav-w: clamp(220px, 22vw, 360px); --border:#e5e7eb; --bg:#fafafa; }
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;color:#111}
     header{padding:12px var(--pad);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
     header h1{margin:0;font-size:1.35rem;flex:1}
     #status{opacity:.8;font-size:.9rem}
-    #err{color:#b00020;margin-left:12px;display:none}
+    #err{color:#b00020;margin-left:12px;display:none;white-space:pre-wrap}
     .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
     .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#d33;color:#fff;font-size:.8rem;min-width:1.2rem;text-align:center}
-
-    /* Layout */
     .wrap{display:grid;grid-template-columns:var(--nav-w) 1fr;min-height:calc(100vh - 64px)}
     aside{border-right:1px solid var(--border);padding:12px;position:sticky;top:64px;align-self:start;height:calc(100vh - 64px);overflow:auto;background:#fff}
     main{padding:clamp(12px,2vw,24px)}
-
-    /* TOC */
     .toc a{display:block;padding:10px 12px;border-radius:10px;text-decoration:none;color:inherit;line-height:1.15}
     .toc a:hover{background:#f5f5f5}
     .toc a.active{background:#eef5ff}
-
-    /* Chapter content */
     #chapterTitle{margin:.2rem 0 0.6rem 0;font-size:1.3rem}
     pre{white-space:pre-wrap;word-wrap:break-word;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:0.96rem;line-height:1.45}
     #reviewPanel{display:none;margin-top:12px;padding:.75rem;border:1px solid var(--border);border-radius:12px;background:#fff}
-
-    /* Mobile: make nav a drawer */
     #navToggler{display:none}
     @media (max-width: 900px){
       .wrap{grid-template-columns:1fr}
-      aside{
-        position:fixed; inset:auto 0 0 0; top:0; height:100vh; width:80vw; max-width:420px;
-        transform:translateX(-100%); transition:transform .2s ease; box-shadow:0 0 0 9999px rgba(0,0,0,.25);
-        z-index:50
-      }
+      aside{ position:fixed; inset:auto 0 0 0; top:0; height:100vh; width:80vw; max-width:420px;
+             transform:translateX(-100%); transition:transform .2s ease; box-shadow:0 0 0 9999px rgba(0,0,0,.25); z-index:50 }
       body.nav-open aside{transform:none}
       #navToggler{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .7rem;border:1px solid var(--border);border-radius:10px;background:#fff}
       header h1{order:1;flex:1}
@@ -78,7 +62,16 @@
 <script>
 const MANIFEST_URL = 'https://stickysmart.github.io/MusikKoffer/chapter/manifest.json';
 
-// Store & helpers
+// Robust URL-Resolver: aus MANIFEST_URL das Repo-Root bestimmen
+const REPO_ROOT = MANIFEST_URL.replace(/\/chapter\/manifest\.json.*$/, '/'); // → https://.../MusikKoffer/
+function resolveUrl(path){
+  if(!path) return '';
+  if(/^https?:\/\//i.test(path)) return path;         // schon absolut
+  if(path.startsWith('/')) return REPO_ROOT.replace(/\/$/,'') + path; // absolute Repo-Route
+  // Wenn Manifest-Pfad bereits "chapter/..." enthält, nicht doppeln:
+  return REPO_ROOT + path.replace(/^\/?/,'');          // → root + relative Pfad
+}
+
 function ensureStore(){ window.DATA = window.DATA || {records:[],meta:{},comments:[]}; return window.DATA; }
 function unresolvedCount(s){ return (s.comments||[]).filter(c=>c.status==='open').length; }
 function canExportJSON2(s){ return unresolvedCount(s)===0; }
@@ -94,7 +87,6 @@ function enforceExportGuard(s){
 async function fetchText(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.text(); }
 async function fetchJSON(url){ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw new Error(url+' → '+r.status); return await r.json(); }
 
-// Parse fenced data blocks
 function extractDataBlocks(md){
   const re=/```(json|yaml)\s+data:(append|upsert|remove)(?:\s+key=([A-Za-z0-9_-]+))?\s*([\s\S]*?)```/g;
   const out=[]; let m; while((m=re.exec(md))!==null){ out.push({lang:m[1],op:m[2],key:m[3]||'id',body:m[4].trim()}); } return out;
@@ -130,7 +122,6 @@ async function importFromMarkdown(mdUrl){
   return {md};
 }
 
-// TOC label cleaning
 function cleanFileLabel(filename){
   return filename.replace(/^[0-9]+[\s_\-–]*?/,'').replace(/\.md$/i,'').replace(/_/g,' ');
 }
@@ -139,7 +130,6 @@ async function buildTOC(){
   try{
     setErr(''); setStatus('Manifest laden …');
     const mf = await fetchJSON(MANIFEST_URL);
-    const base = mf.base || (new URL(MANIFEST_URL, location.href)).href.replace(/manifest\.json.*$/,'');
     const raw = (mf.chapters||[]).filter(Boolean);
     const toc = document.querySelector('#toc');
 
@@ -147,11 +137,11 @@ async function buildTOC(){
       if (typeof entry === 'string') {
         const file = entry.split('/').pop();
         const label = `${String(idx+1).padStart(2,'0')} – ${cleanFileLabel(file)}`;
-        const url = entry.startsWith('http') ? entry : (base + entry);
+        const url = resolveUrl(entry);
         return {label, url};
       } else {
         const path = entry.path || '';
-        const url = path.startsWith('http') ? path : (base + path);
+        const url = resolveUrl(path);
         const id  = (entry.id != null) ? String(entry.id).padStart(2,'0')+' – ' : '';
         const label = id + (entry.title || cleanFileLabel(path.split('/').pop()));
         return {label, url};
@@ -167,11 +157,14 @@ async function buildTOC(){
       a.classList.add('active');
       const url = a.getAttribute('data-url');
       setStatus('Kapitel laden …');
-      const {md} = await importFromMarkdown(url);
-      document.querySelector('#chapterTitle').textContent = a.textContent;
-      document.querySelector('#chapterContent').textContent = md;
-      setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
-      // Auto-close drawer on mobile
+      try{
+        const {md} = await importFromMarkdown(url);
+        document.querySelector('#chapterTitle').textContent = a.textContent;
+        document.querySelector('#chapterContent').textContent = md;
+        setStatus('Fertig. '+unresolvedCount(ensureStore())+' offene Kommentare.');
+      }catch(err){
+        setErr('Laden fehlgeschlagen:\n'+(err?.message||err));
+      }
       if (window.matchMedia('(max-width: 900px)').matches) toggleNav(false);
     });
 
