@@ -236,6 +236,46 @@
       });
       input.click();
     });
+// --- Import JSON2 ---
+document.getElementById("importJ2").addEventListener("click", () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+  input.addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const json2 = JSON.parse(e.target.result);
+
+        if (Array.isArray(json2)) {
+          json2.forEach(entry => {
+            console.log("Kapitel:", entry.chapter);
+            console.log("Kommentar:", entry.comment);
+            console.log("Status:", entry.status);
+            console.log("Timestamp:", entry.timestamp);
+          });
+
+          alert(
+            "JSON2 importiert!\n" +
+            json2.map(entry =>
+              `Kapitel: ${entry.chapter}\nStatus: ${entry.status}\nTimestamp: ${entry.timestamp}`
+            ).join("\n\n")
+          );
+        } else {
+          alert("Die Datei ist nicht im erwarteten JSON2-Array-Format.");
+        }
+
+      } catch (error) {
+        alert("Fehler beim Importieren der Datei: " + error);
+      }
+    };
+    reader.readAsText(file);
+  });
+  input.click();
+});
 
     loadManifest();
   </script>
