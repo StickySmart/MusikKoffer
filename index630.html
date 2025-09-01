@@ -70,13 +70,13 @@
       }
     }
 
-    /* Kommentarbereich */
+    /* Kommentarbereich - Stil */
     #commentSection {
       margin-top: 20px;
       padding: 1rem;
       background-color: #f0f0f0;
       border: 1px solid #ddd;
-      display: none;
+      display: none; /* Zuerst versteckt */
     }
     #commentSection textarea {
       width: 100%;
@@ -132,15 +132,10 @@
     const commentInput = document.getElementById("commentInput");
     const saveCommentBtn = document.getElementById("saveCommentBtn");
 
-    // Kommentar-Speicher
-    const allComments = {};
-    let currentChapter = null;
-
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
     });
 
-    // Manifest laden
     async function loadManifest() {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
@@ -155,15 +150,17 @@
             e.preventDefault();
             const path = e.target.dataset.path;
             await loadChapter(path);
-            sidebar.classList.add("hidden");
+            sidebar.classList.add("hidden"); // mobil automatisch schließen
           });
         });
+		 
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
       }
     }
+   
 
-    // Kapitel laden
+						  
     async function loadChapter(path) {
       try {
         const res = await fetch(path);
@@ -171,41 +168,27 @@
         const text = await res.text();
         content.innerHTML = `<article><pre>${text}</pre></article>`;
 
-        document.getElementById("commentSection").style.display = "block";
-        currentChapter = path;
-
-        commentInput.value = allComments[path]?.comment || "";
+        // Kommentarbereich nach Laden des Kapitels anzeigen
+        commentInput.value = ''; // Eingabefeld zurücksetzen
+        document.getElementById("commentSection").style.display = "block"; // Kommentarbereich sichtbar machen
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
     }
 
-    // Kommentar speichern
     saveCommentBtn.addEventListener("click", () => {
-      if (!currentChapter) {
-        alert("Kein Kapitel ausgewählt.");
-        return;
+      const comment = commentInput.value;
+      if (comment) {
+        alert("Kommentar gespeichert: " + comment);
       }
-
-      allComments[currentChapter] = {
-        chapter: currentChapter,
-        comment: commentInput.value,
-        status: "Offen",
-        timestamp: new Date().toISOString()
-      };
-
-      alert("Kommentar gespeichert für " + currentChapter);
     });
 
-    // Export JSON1
+    // --- Export JSON1 ---
     document.getElementById("exportJ1").addEventListener("click", () => {
-      const commentsArray = Object.values(allComments);
-      if (commentsArray.length === 0) {
-        alert("Noch keine Kommentare vorhanden.");
-        return;
-      }
-
-      const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
+      const comments = [
+        { chapter: '06', comment: commentInput.value, status: 'Offen', timestamp: new Date().toISOString() }
+      ];
+      const blob = new Blob([JSON.stringify(comments, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -213,7 +196,7 @@
       a.click();
     });
 
-    // Import JSON2 (Dummy)
+    // --- Import JSON2 ---
     document.getElementById("importJ2").addEventListener("click", () => {
       const input = document.createElement('input');
       input.type = 'file';
@@ -227,16 +210,156 @@
           try {
             const json2 = JSON.parse(e.target.result);
             console.log('JSON2 importiert:', json2);
-            alert(`JSON2 importiert!\nKapitel: ${json2.chapter}\nStatus: ${json2.status}\nTimestamp: ${json2.timestamp}`);
+            alert(`JSON2 für Kapitel ${json2.chapter} importiert!`);
+            // 👉 hier später Logik, um Kapitelinhalt mit json2.updated_content zu aktualisieren
           } catch (error) {
-            alert('Fehler beim Importieren: ' + error);
+            alert('Fehler beim Importieren der Datei: ' + error);
           }
         };
         reader.readAsText(file);
       });
       input.click();
     });
+    // --- Import JSON2 (Dummy-Workflow) ---
+    document.getElementById("importJ2").addEventListener("click", () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const json2 = JSON.parse(e.target.result);
+
+            // 👉 Dummy-Ausgabe: nur anzeigen, nichts überschreiben
+            console.log('JSON2 importiert:', json2);
+            alert(
+              `JSON2 importiert!\nKapitel: ${json2.chapter}\nStatus: ${json2.status}\nTimestamp: ${json2.timestamp}`
+            );
+
+            // Hier später: Logik, um die MD-Dateien entsprechend zu aktualisieren
+          } catch (error) {
+            alert('Fehler beim Importieren der Datei: ' + error);
+          }
+        };
+        reader.readAsText(file);
+      });
+      input.click();
+    });
+	
+	// --- Kommentar-Speicher ---
+const allComments = {}; // Objekt für alle Kapitel-Kommentare
+let currentChapter = null;
+
+// Kapitel laden
+async function loadChapter(path) {
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`${path} → ${res.status}`);
+    const text = await res.text();
+    content.innerHTML = `<article><pre>${text}</pre></article>`;
+
+    // Kommentarbereich sichtbar machen
+    document.getElementById("commentSection").style.display = "block";
+
+    // Aktuelles Kapitel merken
+    currentChapter = path;
+
+    // Vorhandenen Kommentar einfügen, falls schon gespeichert
+    commentInput.value = allComments[path]?.comment || "";
+
+  } catch (err) {
+    content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
+	 
+  }
+}
+
+// --- Kommentar-Speicher ---
+const allComments = {}; // alle Kommentare nach Kapitel
+let currentChapter = null;
+										 
+			 
+	 
+
+// Kapitel laden
+async function loadChapter(path) {
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`${path} → ${res.status}`);
+    const text = await res.text();
+    content.innerHTML = `<article><pre>${text}</pre></article>`;
+
+    // Kommentarbereich sichtbar machen
+    document.getElementById("commentSection").style.display = "block";
+	 
+
+    // Aktuelles Kapitel merken
+    currentChapter = path;
+													 
+
+    // Vorhandenen Kommentar wieder anzeigen
+    if (allComments[path]) {
+      commentInput.value = allComments[path].comment;
+    } else {
+      commentInput.value = "";
+    }
+  } catch (err) {
+    content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
+  }
+}
+
+// Kommentar speichern
+saveCommentBtn.addEventListener("click", () => {
+  if (!currentChapter) {
+    alert("Kein Kapitel ausgewählt.");
+    return;
+  }
+	 
+
+  // Kommentar-Objekt für aktuelles Kapitel setzen/überschreiben
+  allComments[currentChapter] = {
+    chapter: currentChapter,
+    comment: commentInput.value,
+    status: "Offen",
+    timestamp: new Date().toISOString()
+  };
+						
+
+  console.log("Gespeichert:", allComments); // Debug
+  alert("Kommentar gespeichert für " + currentChapter);
+});
+													
+
+// --- Export JSON1 ---
+document.getElementById("exportJ1").addEventListener("click", () => {
+  const commentsArray = Object.values(allComments);
+																												  
+			
+
+  if (commentsArray.length === 0) {
+    alert("Noch keine Kommentare vorhanden.");
+    return;
+  }
+		
+							  
+	   
+				  
+	 
+
+  console.log("Export:", commentsArray); // Debug
+  const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'comments.json';
+  a.click();
+});
+
+
+	
     loadManifest();
   </script>
 </body>
