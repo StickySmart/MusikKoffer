@@ -132,15 +132,13 @@
     const commentInput = document.getElementById("commentInput");
     const saveCommentBtn = document.getElementById("saveCommentBtn");
 
-    // Kommentar-Speicher
-    const allComments = {};
+    const allComments = {}; 
     let currentChapter = null;
 
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
     });
 
-    // Manifest laden
     async function loadManifest() {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
@@ -158,12 +156,12 @@
             sidebar.classList.add("hidden");
           });
         });
+		 
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
       }
     }
-
-    // Kapitel laden
+   
     async function loadChapter(path) {
       try {
         const res = await fetch(path);
@@ -173,38 +171,34 @@
 
         document.getElementById("commentSection").style.display = "block";
         currentChapter = path;
-
         commentInput.value = allComments[path]?.comment || "";
+
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
     }
 
-    // Kommentar speichern
     saveCommentBtn.addEventListener("click", () => {
       if (!currentChapter) {
         alert("Kein Kapitel ausgewählt.");
         return;
       }
-
       allComments[currentChapter] = {
         chapter: currentChapter,
         comment: commentInput.value,
         status: "Offen",
         timestamp: new Date().toISOString()
       };
-
       alert("Kommentar gespeichert für " + currentChapter);
     });
 
-    // Export JSON1
+    // --- Export JSON1 ---
     document.getElementById("exportJ1").addEventListener("click", () => {
       const commentsArray = Object.values(allComments);
       if (commentsArray.length === 0) {
         alert("Noch keine Kommentare vorhanden.");
         return;
       }
-
       const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -213,69 +207,38 @@
       a.click();
     });
 
-    // Import JSON2 (Dummy)
+    // --- Import JSON2 ---
     document.getElementById("importJ2").addEventListener("click", () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.addEventListener('change', async (event) => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+      input.addEventListener("change", async (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
           try {
             const json2 = JSON.parse(e.target.result);
-            console.log('JSON2 importiert:', json2);
-            alert(`JSON2 importiert!\nKapitel: ${json2.chapter}\nStatus: ${json2.status}\nTimestamp: ${json2.timestamp}`);
+
+            if (Array.isArray(json2)) {
+              alert(
+                "JSON2 importiert!\n" +
+                json2.map(entry =>
+                  `Kapitel: ${entry.chapter}\nStatus: ${entry.status}\nTimestamp: ${entry.timestamp}`
+                ).join("\n\n")
+              );
+            } else {
+              alert("Die Datei ist nicht im erwarteten JSON2-Array-Format.");
+            }
           } catch (error) {
-            alert('Fehler beim Importieren: ' + error);
+            alert("Fehler beim Importieren der Datei: " + error);
           }
         };
         reader.readAsText(file);
       });
       input.click();
     });
-// --- Import JSON2 ---
-document.getElementById("importJ2").addEventListener("click", () => {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = ".json";
-  input.addEventListener("change", async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      try {
-        const json2 = JSON.parse(e.target.result);
-
-        if (Array.isArray(json2)) {
-          json2.forEach(entry => {
-            console.log("Kapitel:", entry.chapter);
-            console.log("Kommentar:", entry.comment);
-            console.log("Status:", entry.status);
-            console.log("Timestamp:", entry.timestamp);
-          });
-
-          alert(
-            "JSON2 importiert!\n" +
-            json2.map(entry =>
-              `Kapitel: ${entry.chapter}\nStatus: ${entry.status}\nTimestamp: ${entry.timestamp}`
-            ).join("\n\n")
-          );
-        } else {
-          alert("Die Datei ist nicht im erwarteten JSON2-Array-Format.");
-        }
-
-      } catch (error) {
-        alert("Fehler beim Importieren der Datei: " + error);
-      }
-    };
-    reader.readAsText(file);
-  });
-  input.click();
-});
 
     loadManifest();
   </script>
