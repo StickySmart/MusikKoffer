@@ -246,6 +246,64 @@
       });
       input.click();
     });
+	
+	// --- Kommentar-Speicher ---
+const allComments = {}; // Objekt für alle Kapitel-Kommentare
+let currentChapter = null;
+
+// Kapitel laden
+async function loadChapter(path) {
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`${path} → ${res.status}`);
+    const text = await res.text();
+    content.innerHTML = `<article><pre>${text}</pre></article>`;
+
+    // Kommentarbereich sichtbar machen
+    document.getElementById("commentSection").style.display = "block";
+
+    // Aktuelles Kapitel merken
+    currentChapter = path;
+
+    // Vorhandenen Kommentar einfügen, falls schon gespeichert
+    commentInput.value = allComments[path]?.comment || "";
+
+  } catch (err) {
+    content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
+  }
+}
+
+// Kommentar speichern
+saveCommentBtn.addEventListener("click", () => {
+  if (!currentChapter) {
+    alert("Kein Kapitel ausgewählt.");
+    return;
+  }
+  allComments[currentChapter] = {
+    chapter: currentChapter,
+    comment: commentInput.value,
+    status: "Offen",
+    timestamp: new Date().toISOString()
+  };
+  alert("Kommentar gespeichert für " + currentChapter);
+});
+
+// --- Export JSON1 (alle Kommentare) ---
+document.getElementById("exportJ1").addEventListener("click", () => {
+  const commentsArray = Object.values(allComments);
+  if (commentsArray.length === 0) {
+    alert("Noch keine Kommentare vorhanden.");
+    return;
+  }
+  const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'comments.json';
+  a.click();
+});
+
+	
     loadManifest();
   </script>
 </body>
