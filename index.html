@@ -69,7 +69,6 @@
         transform: translateX(-100%);
       }
     }
-
     /* Kommentarbereich */
     #commentSection {
       margin-top: 20px;
@@ -156,12 +155,11 @@
             sidebar.classList.add("hidden");
           });
         });
-		 
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
       }
     }
-   
+
     async function loadChapter(path) {
       try {
         const res = await fetch(path);
@@ -207,8 +205,12 @@
       a.click();
     });
 
-    // --- Import JSON2 ---
-    document.getElementById("importJ2").addEventListener("click", () => {
+    // --- Import JSON2 (Fix: nur 1 Listener) ---
+    const importBtn = document.getElementById("importJ2");
+    importBtn.replaceWith(importBtn.cloneNode(true));
+    const freshImportBtn = document.getElementById("importJ2");
+
+    freshImportBtn.addEventListener("click", () => {
       const input = document.createElement("input");
       input.type = "file";
       input.accept = ".json";
