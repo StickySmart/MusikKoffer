@@ -1,1 +1,20 @@
-
+[
+  {
+    "chapter": "chapter/01_cover.md",
+    "comment": "Wir haben L6 in und Out vergessen um mit Pads Noten zu schicken und um Szenenwechsel zu empfangen. \",",
+    "status": "Offen",
+    "timestamp": "2025-09-01T02:54:04.984Z"
+  },
+  {
+    "chapter": "chapter/09_ez_ag_trigger.md",
+    "comment": "\"Bitte erläuterungen zur EZ und deren Modi um das zu tun was wir hier tun ",
+    "status": "Offen",
+    "timestamp": "2025-09-01T02:54:21.649Z"
+  },
+  {
+    "chapter": "chapter/06_midi_programmierung_cme_rk_006.md",
+    "comment": "Roland kette ist mit MergeBox nicht mehr existent . ",
+    "status": "Offen",
+    "timestamp": "2025-09-01T02:55:38.130Z"
+  }
+]
