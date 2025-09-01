@@ -1,125 +1,366 @@
-<script>
-  const sidebar = document.getElementById("sidebar");
-  const menuBtn = document.getElementById("menuBtn");
-  const content = document.getElementById("content");
-  const commentInput = document.getElementById("commentInput");
-  const saveCommentBtn = document.getElementById("saveCommentBtn");
-
-  // --- Kommentar-Speicher ---
-  const allComments = {}; // alle Kommentare nach Kapitel
-  let currentChapter = null;
-
-  menuBtn.addEventListener("click", () => {
-    sidebar.classList.toggle("hidden");
-  });
-
-  async function loadManifest() {
-    try {
-      const res = await fetch("manifest.json?v=" + Date.now());
-      const manifest = await res.json();
-
-      sidebar.innerHTML = manifest.chapters.map(ch =>
-        `<p><a href="#" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
-      ).join("");
-
-      sidebar.querySelectorAll("a").forEach(link => {
-        link.addEventListener("click", async e => {
-          e.preventDefault();
-          const path = e.target.dataset.path;
-          await loadChapter(path);
-          sidebar.classList.add("hidden");
-        });
-      });
-    } catch (err) {
-      content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Tiage Music Masterplan 25</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
     }
-  }
-
-  // --- Kapitel laden ---
-  async function loadChapter(path) {
-    try {
-      const res = await fetch(path);
-      if (!res.ok) throw new Error(`${path} → ${res.status}`);
-      const text = await res.text();
-      content.innerHTML = `<article><pre>${text}</pre></article>`;
-
-      // Kommentarbereich sichtbar machen
-      document.getElementById("commentSection").style.display = "block";
-
-      // Aktuelles Kapitel merken
-      currentChapter = path;
-
-      // Vorhandenen Kommentar anzeigen, falls schon gespeichert
-      commentInput.value = allComments[path]?.comment || "";
-    } catch (err) {
-      content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: #111;
+      color: #fff;
     }
-  }
-
-  // --- Kommentar speichern ---
-  saveCommentBtn.addEventListener("click", () => {
-    if (!currentChapter) {
-      alert("Kein Kapitel ausgewählt.");
-      return;
+    #menuBtn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
     }
-
-    allComments[currentChapter] = {
-      chapter: currentChapter,
-      comment: commentInput.value,
-      status: "Offen",
-      timestamp: new Date().toISOString()
-    };
-
-    console.log("Gespeichert:", allComments);
-    alert("Kommentar gespeichert für " + currentChapter);
-  });
-
-  // --- Export JSON1 ---
-  document.getElementById("exportJ1").addEventListener("click", () => {
-    const commentsArray = Object.values(allComments);
-
-    if (commentsArray.length === 0) {
-      alert("Noch keine Kommentare vorhanden.");
-      return;
+    #topButtons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    #topButtons button {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+    }
+    #sidebar {
+      width: 260px;
+      background: #f5f5f5;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    #sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    #content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
+    }
+    @media (max-width: 768px) {
+      #sidebar {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+      #sidebar.hidden {
+        transform: translateX(-100%);
+      }
     }
 
-    const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'comments.json';
-    a.click();
-  });
+    /* Kommentarbereich - Stil */
+    #commentSection {
+      margin-top: 20px;
+      padding: 1rem;
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      display: none; /* Zuerst versteckt */
+    }
+    #commentSection textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 14px;
+    }
+    #commentSection button {
+      padding: 10px;
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #commentSection button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tiage Music Masterplan 25</h1>
+    <div id="topButtons">
+      <button id="exportJ1">ExpJ1</button>
+      <button id="importJ2">ImpJ2</button>
+      <button id="menuBtn">☰</button>
+    </div>
+  </header>
 
-  // --- Import JSON2 (Simulation) ---
-  document.getElementById("importJ2").addEventListener("click", () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.addEventListener('change', async (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
+  <main>
+    <nav id="sidebar">Lade Manifest …</nav>
+    <section id="content">
+      <h2>Willkommen</h2>
+      <p>Bitte Kapitel wählen…</p>
+    </section>
+  </main>
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const json2 = JSON.parse(e.target.result);
+  <!-- Kommentarbereich -->
+  <div id="commentSection">
+    <h3>Kommentar zu diesem Kapitel</h3>
+    <textarea id="commentInput" placeholder="Deine Notiz nur für dieses Kapitel..."></textarea>
+    <div>
+      <button id="saveCommentBtn">Kommentar speichern</button>
+    </div>
+  </div>
 
-          // Simulation: Ausgabe im Browser
-          console.log("JSON2 importiert:", json2);
-          alert(
-            `JSON2 importiert!\nKapitel: ${json2.chapter}\nStatus: ${json2.status}\nTimestamp: ${json2.timestamp}`
-          );
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const content = document.getElementById("content");
+    const commentInput = document.getElementById("commentInput");
+    const saveCommentBtn = document.getElementById("saveCommentBtn");
 
-          // später: MD-Dateien anhand json2.updated_content anpassen
-        } catch (error) {
-          alert('Fehler beim Importieren der Datei: ' + error);
-        }
-      };
-      reader.readAsText(file);
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("hidden");
     });
-    input.click();
-  });
 
-  loadManifest();
-</script>
+    async function loadManifest() {
+      try {
+        const res = await fetch("manifest.json?v=" + Date.now());
+        const manifest = await res.json();
+
+        sidebar.innerHTML = manifest.chapters.map(ch =>
+          `<p><a href="#" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
+        ).join("");
+
+        sidebar.querySelectorAll("a").forEach(link => {
+          link.addEventListener("click", async e => {
+            e.preventDefault();
+            const path = e.target.dataset.path;
+            await loadChapter(path);
+            sidebar.classList.add("hidden"); // mobil automatisch schließen
+          });
+        });
+		 
+      } catch (err) {
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
+      }
+    }
+   
+
+						  
+    async function loadChapter(path) {
+      try {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(`${path} → ${res.status}`);
+        const text = await res.text();
+        content.innerHTML = `<article><pre>${text}</pre></article>`;
+
+        // Kommentarbereich nach Laden des Kapitels anzeigen
+        commentInput.value = ''; // Eingabefeld zurücksetzen
+        document.getElementById("commentSection").style.display = "block"; // Kommentarbereich sichtbar machen
+      } catch (err) {
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
+      }
+    }
+
+    saveCommentBtn.addEventListener("click", () => {
+      const comment = commentInput.value;
+      if (comment) {
+        alert("Kommentar gespeichert: " + comment);
+      }
+    });
+
+    // --- Export JSON1 ---
+    document.getElementById("exportJ1").addEventListener("click", () => {
+      const comments = [
+        { chapter: '06', comment: commentInput.value, status: 'Offen', timestamp: new Date().toISOString() }
+      ];
+      const blob = new Blob([JSON.stringify(comments, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'comments.json';
+      a.click();
+    });
+
+    // --- Import JSON2 ---
+    document.getElementById("importJ2").addEventListener("click", () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const json2 = JSON.parse(e.target.result);
+            console.log('JSON2 importiert:', json2);
+            alert(`JSON2 für Kapitel ${json2.chapter} importiert!`);
+            // 👉 hier später Logik, um Kapitelinhalt mit json2.updated_content zu aktualisieren
+          } catch (error) {
+            alert('Fehler beim Importieren der Datei: ' + error);
+          }
+        };
+        reader.readAsText(file);
+      });
+      input.click();
+    });
+    // --- Import JSON2 (Dummy-Workflow) ---
+    document.getElementById("importJ2").addEventListener("click", () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const json2 = JSON.parse(e.target.result);
+
+            // 👉 Dummy-Ausgabe: nur anzeigen, nichts überschreiben
+            console.log('JSON2 importiert:', json2);
+            alert(
+              `JSON2 importiert!\nKapitel: ${json2.chapter}\nStatus: ${json2.status}\nTimestamp: ${json2.timestamp}`
+            );
+
+            // Hier später: Logik, um die MD-Dateien entsprechend zu aktualisieren
+          } catch (error) {
+            alert('Fehler beim Importieren der Datei: ' + error);
+          }
+        };
+        reader.readAsText(file);
+      });
+      input.click();
+    });
+	
+	// --- Kommentar-Speicher ---
+const allComments = {}; // Objekt für alle Kapitel-Kommentare
+let currentChapter = null;
+
+// Kapitel laden
+async function loadChapter(path) {
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`${path} → ${res.status}`);
+    const text = await res.text();
+    content.innerHTML = `<article><pre>${text}</pre></article>`;
+
+    // Kommentarbereich sichtbar machen
+    document.getElementById("commentSection").style.display = "block";
+
+    // Aktuelles Kapitel merken
+    currentChapter = path;
+
+    // Vorhandenen Kommentar einfügen, falls schon gespeichert
+    commentInput.value = allComments[path]?.comment || "";
+
+  } catch (err) {
+    content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
+	 
+  }
+}
+
+// --- Kommentar-Speicher ---
+const allComments = {}; // alle Kommentare nach Kapitel
+let currentChapter = null;
+										 
+			 
+	 
+
+// Kapitel laden
+async function loadChapter(path) {
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`${path} → ${res.status}`);
+    const text = await res.text();
+    content.innerHTML = `<article><pre>${text}</pre></article>`;
+
+    // Kommentarbereich sichtbar machen
+    document.getElementById("commentSection").style.display = "block";
+	 
+
+    // Aktuelles Kapitel merken
+    currentChapter = path;
+													 
+
+    // Vorhandenen Kommentar wieder anzeigen
+    if (allComments[path]) {
+      commentInput.value = allComments[path].comment;
+    } else {
+      commentInput.value = "";
+    }
+  } catch (err) {
+    content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
+  }
+}
+
+// Kommentar speichern
+saveCommentBtn.addEventListener("click", () => {
+  if (!currentChapter) {
+    alert("Kein Kapitel ausgewählt.");
+    return;
+  }
+	 
+
+  // Kommentar-Objekt für aktuelles Kapitel setzen/überschreiben
+  allComments[currentChapter] = {
+    chapter: currentChapter,
+    comment: commentInput.value,
+    status: "Offen",
+    timestamp: new Date().toISOString()
+  };
+						
+
+  console.log("Gespeichert:", allComments); // Debug
+  alert("Kommentar gespeichert für " + currentChapter);
+});
+													
+
+// --- Export JSON1 ---
+document.getElementById("exportJ1").addEventListener("click", () => {
+  const commentsArray = Object.values(allComments);
+																												  
+			
+
+  if (commentsArray.length === 0) {
+    alert("Noch keine Kommentare vorhanden.");
+    return;
+  }
+		
+							  
+	   
+				  
+	 
+
+  console.log("Export:", commentsArray); // Debug
+  const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'comments.json';
+  a.click();
+});
+
+
+	
+    loadManifest();
+  </script>
+</body>
+</html>
