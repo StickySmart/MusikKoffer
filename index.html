@@ -217,7 +217,35 @@
       });
       input.click();
     });
+    // --- Import JSON2 (Dummy-Workflow) ---
+    document.getElementById("importJ2").addEventListener("click", () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const json2 = JSON.parse(e.target.result);
+
+            // 👉 Dummy-Ausgabe: nur anzeigen, nichts überschreiben
+            console.log('JSON2 importiert:', json2);
+            alert(
+              `JSON2 importiert!\nKapitel: ${json2.chapter}\nStatus: ${json2.status}\nTimestamp: ${json2.timestamp}`
+            );
+
+            // Hier später: Logik, um die MD-Dateien entsprechend zu aktualisieren
+          } catch (error) {
+            alert('Fehler beim Importieren der Datei: ' + error);
+          }
+        };
+        reader.readAsText(file);
+      });
+      input.click();
+    });
     loadManifest();
   </script>
 </body>
