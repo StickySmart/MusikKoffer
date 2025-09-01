@@ -26,6 +26,17 @@
       font-size: 1.5rem;
       cursor: pointer;
     }
+    #topButtons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    #topButtons button {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+    }
     #sidebar {
       width: 260px;
       background: #f5f5f5;
@@ -58,40 +69,18 @@
         transform: translateX(-100%);
       }
     }
-
-    /* Kommentarbereich - Stil */
-    #commentSection {
-      margin-top: 20px;
-      padding: 1rem;
-      background-color: #f0f0f0;
-      border: 1px solid #ddd;
-      display: none; /* Zuerst versteckt */
-    }
-    #commentSection textarea {
-      width: 100%;
-      height: 100px;
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 14px;
-    }
-    #commentSection button {
-      padding: 10px;
-      background-color: #333;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    #commentSection button:hover {
-      background-color: #555;
-    }
   </style>
 </head>
 <body>
   <header>
     <h1>Tiage Music Masterplan 25</h1>
-    <button id="menuBtn">☰</button>
+    <div id="topButtons">
+      <button id="exportJ1">ExpJ1</button>
+      <button id="importJ2">ImpJ2</button>
+      <button id="menuBtn">☰</button>
+    </div>
   </header>
+
   <main>
     <nav id="sidebar">Lade Manifest …</nav>
     <section id="content">
@@ -100,30 +89,17 @@
     </section>
   </main>
 
-  <!-- Kommentarbereich -->
-  <div id="commentSection">
-    <h3>Kommentar zu diesem Kapitel</h3>
-    <textarea id="commentInput" placeholder="Deine Notiz nur für dieses Kapitel..."></textarea>
-    <div>
-      <button id="saveCommentBtn">Kommentar speichern</button>
-      <button id="exportJSONBtn">Export alle Kapitel-Kommentare (JSON)</button>
-      <button id="importJSONBtn">Kommentare importieren (JSON)</button> <!-- Import-Button hinzugefügt -->
-    </div>
-  </div>
-
   <script>
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
-    const commentInput = document.getElementById("commentInput");
-    const saveCommentBtn = document.getElementById("saveCommentBtn");
-    const exportJSONBtn = document.getElementById("exportJSONBtn");
-    const importJSONBtn = document.getElementById("importJSONBtn");
 
+    // Sidebar toggeln
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
     });
 
+    // Manifest laden
     async function loadManifest() {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
@@ -146,65 +122,26 @@
       }
     }
 
+    // Kapitel laden
     async function loadChapter(path) {
       try {
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
         content.innerHTML = `<article><pre>${text}</pre></article>`;
-
-        // Kommentarbereich nach Laden des Kapitels anzeigen
-        commentInput.value = ''; // Eingabefeld zurücksetzen
-        document.getElementById("commentSection").style.display = "block"; // Kommentarbereich sichtbar machen
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
     }
 
-    saveCommentBtn.addEventListener("click", () => {
-      const comment = commentInput.value;
-      if (comment) {
-        // Kommentar speichern (kann an eine API gesendet oder lokal gespeichert werden)
-        alert("Kommentar gespeichert: " + comment);
-      }
+    // JSON1 exportieren
+    document.getElementById("exportJ1").addEventListener("click", () => {
+      alert("Export JSON1 – kommt noch (Kommentare speichern).");
     });
 
-    exportJSONBtn.addEventListener("click", () => {
-      // Exportiere alle Kommentare als JSON
-      const comments = [
-        { chapter: '06', comment: commentInput.value } // Beispiel für Kommentare
-      ];
-      const blob = new Blob([JSON.stringify(comments)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'comments.json';
-      a.click();
-    });
-
-    // Import JSON: Kommentare aus einer Datei importieren
-    importJSONBtn.addEventListener("click", () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            const comments = JSON.parse(e.target.result);
-            console.log('Kommentare importiert:', comments);
-            // Hier kannst du die importierten Kommentare anzeigen oder verarbeiten
-            alert('Kommentare wurden importiert!');
-          } catch (error) {
-            alert('Fehler beim Importieren der Datei: ' + error);
-          }
-        };
-        reader.readAsText(file);
-      });
-      input.click();
+    // JSON2 importieren
+    document.getElementById("importJ2").addEventListener("click", () => {
+      alert("Import JSON2 – kommt noch (Änderungen einspielen).");
     });
 
     loadManifest();
