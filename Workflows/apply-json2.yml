@@ -1,0 +1,13 @@
+name: Apply JSON2
+
+on:
+  push:
+    paths:
+      - 'imports/*.json'
+
+jobs:
+  apply-json2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
