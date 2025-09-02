@@ -1,13 +1,35 @@
 {
-  "chapters": [
-    { "id": "01", "title": "Cover", "path": "01_cover.md" },
-    { "id": "02", "title": "First Steps – Audio", "path": "02_audio.md" },
-    { "id": "03", "title": "First Steps – MIDI", "path": "03_midi.md" },
-    { "id": "04", "title": "Workflows Zoom L-6", "path": "04_workflows_zoom.md" },
-    { "id": "05", "title": "Signal & Verkabelung (Kurz)", "path": "05_signal.md" },
-    { "id": "06", "title": "MIDI Programmierung CME & Merge 5", "path": "06_midi_prog.md" },
-    { "id": "07", "title": "Zoom L-6 Szenen", "path": "07_zoom_scenes.md" },
-    { "id": "08", "title": "Presets (U6/Workflows)", "path": "08_presets.md" },
-    { "id": "09", "title": "EZ-AG Trigger", "path": "09_ezag.md" }
+  "project": "Tiage Music Masterplan 25",
+  "version": "1.1",
+  "xml": {
+    "setup": "tiagemusic-setup.xml",
+    "schema": "tiagemusic-setup.xsd"
+  },
+  "sections": [
+    {
+      "id": "devices",
+      "title": "Geräte",
+      "xpath": "/tiagemusic-setup/devices/device"
+    },
+    {
+      "id": "connections",
+      "title": "Verbindungen",
+      "xpath": "/tiagemusic-setup/connections/connection"
+    },
+    {
+      "id": "presets",
+      "title": "Presets",
+      "xpath": "/tiagemusic-setup/presets/preset"
+    },
+    {
+      "id": "scenes",
+      "title": "Szenen",
+      "xpath": "/tiagemusic-setup/scenes/scene"
+    },
+    {
+      "id": "workflows",
+      "title": "Workflows",
+      "xpath": "/tiagemusic-setup/workflows/workflow"
+    }
   ]
 }
