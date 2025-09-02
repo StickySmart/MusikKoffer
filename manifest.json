@@ -1,41 +1,24 @@
 {
-  "project": "Tiage Music Masterplan 25",
-  "version": "1.1",
   "chapters": [
     {
       "id": "01",
       "title": "Cover",
-      "path": "chapters/01_cover.md",
-      "type": "chapter"
+      "path": "chapters/01_cover.md"
     },
     {
       "id": "02",
       "title": "First Steps – Audio",
-      "path": "chapters/02_firststeps_audio.md",
-      "type": "chapter"
+      "path": "chapters/02_first_steps_audio.md"
     },
     {
       "id": "03",
       "title": "First Steps – MIDI",
-      "path": "chapters/03_firststeps_midi.md",
-      "type": "chapter"
+      "path": "chapters/03_first_steps_midi.md"
     },
     {
       "id": "04",
-      "title": "Workflows – Zoom L-6",
-      "path": "chapters/04_workflows_zoom_l6.md",
-      "type": "chapter"
+      "title": "Workflows Zoom L-6",
+      "path": "chapters/04_workflows_zoom_l6.md"
     }
-  ],
-  "xml": {
-    "setup": "tiagemusic-setup.xml",
-    "schema": "tiagemusic-setup.xsd"
-  },
-  "sections": [
-    { "id": "devices", "title": "Geräte", "xpath": "/tiagemusic-setup/devices/device" },
-    { "id": "connections", "title": "Verbindungen", "xpath": "/tiagemusic-setup/connections/connection" },
-    { "id": "presets", "title": "Presets", "xpath": "/tiagemusic-setup/presets/preset" },
-    { "id": "scenes", "title": "Szenen", "xpath": "/tiagemusic-setup/scenes/scene" },
-    { "id": "workflows", "title": "Workflows", "xpath": "/tiagemusic-setup/workflows/workflow" }
   ]
 }
