@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tiagemusic-setup version="1.1">
+
+  <!-- Geräte -->
+  <devices>
+    <device id="cme_u6_1" manufacturer="CME" type="MIDI Interface">
+      <name>CME U6 #1</name>
+      <ports>
+        <port id="in1"  type="MIDI In"  connector="DIN" status="active"/>
+        <port id="out1" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="out2" type="MIDI Out" connector="DIN" status="active"/>
+      </ports>
+    </device>
+
+    <device id="merge5" manufacturer="Doremidi" type="MIDI Merge Box">
+      <name>Doremidi Merge 5</name>
+      <ports>
+        <port id="in1" type="MIDI In" connector="DIN" status="active"/>
+        <port id="outA" type="MIDI Out" connector="DIN" status="active"/>
+      </ports>
+    </device>
+
+    <device id="zoom_l6" manufacturer="Zoom" type="Mixer/Recorder">
+      <name>Zoom L-6</name>
+      <ports>
+        <port id="midi_in" type="MIDI In" connector="TRS-A" status="active"/>
+        <port id="midi_out" type="MIDI Out" connector="TRS-A" status="inactive"/>
+      </ports>
+      <notes>Empfängt Program Change für Szenen und MMC für Transport.</notes>
+    </device>
+  </devices>
+
+  <!-- Presets -->
+  <presets>
+    <preset id="P01">
+      <name>S-1 Fokus</name>
+      <description>T-8 Clock an alle, J-6 spielt S-1, TL nur Clock.</description>
+    </preset>
+    <preset id="P02">
+      <name>Texture Fokus</name>
+      <description>J-6 spielt Texture Lab, S-1 bekommt nur Clock.</description>
+    </preset>
+  </presets>
+
+  <!-- Szenen -->
+  <scenes>
+    <scene id="S01">
+      <name>Jam Setup</name>
+      <description>Alle Instrumente offen, neutraler Mix.</description>
+    </scene>
+    <scene id="S02">
+      <name>Performance Fokus</name>
+      <description>Vocals im Vordergrund, Synths reduziert.</description>
+    </scene>
+  </scenes>
+
+  <!-- Workflows -->
+  <workflows>
+    <workflow id="W01">
+      <name>Jam Setup</name>
+      <presets>
+        <preset device="cme_u6_1" ref="P01"/>
+      </presets>
+      <scene device="zoom_l6" ref="S01"/>
+      <description>Spielbar mit 2 Händen, ideal für freie Sessions.</description>
+    </workflow>
+
+    <workflow id="W02">
+      <name>Performance Setup</name>
+      <presets>
+        <preset device="cme_u6_1" ref="P02"/>
+      </presets>
+      <scene device="zoom_l6" ref="S02"/>
+      <description>Performance-Modus mit Vocal-Fokus.</description>
+    </workflow>
+  </workflows>
+
+</tiagemusic-setup>

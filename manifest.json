@@ -1,32 +1,41 @@
 {
-  "version": "1.0.0",
+  "project": "Tiage Music Masterplan 25",
+  "version": "1.1",
   "chapters": [
-    { "id": "01", "title": "Cover", "path": "chapter/01_cover.md" },
-    { "id": "02", "title": "First Steps _ Audio", "path": "chapter/02_first_steps_audio.md" },
-    { "id": "03", "title": "First Steps _ MIDI", "path": "chapter/03_first_steps_midi.md" },
-    { "id": "04", "title": "Workflows Zoom L_6", "path": "chapter/04_workflows_zoom_l_6.md" },
-    { "id": "05", "title": "Signal & Verkabelung (Kurz)", "path": "chapter/05_signal_verkabelung_kurz.md" },
-    { "id": "06", "title": "MIDI_Programmierung CME & RK_006", "path": "chapter/06_midi_programmierung_cme_rk_006.md" },
-    { "id": "07", "title": "Zoom L_6 Szenen", "path": "chapter/07_zoom_l_6_szenen.md" },
-    { "id": "08", "title": "RK_006 Presets", "path": "chapter/08_rk_006_presets.md" },
-    { "id": "09", "title": "EZ_AG Trigger", "path": "chapter/09_ez_ag_trigger.md" },
-    { "id": "10", "title": "RK_006 WebApp Setup", "path": "chapter/10_rk_006_webapp_setup.md" },
-    { "id": "11", "title": "RK_006 SysEx Quick Guide", "path": "chapter/11_rk_006_sysex_quick_guide.md" },
-    { "id": "12", "title": "MIDI Workflows", "path": "chapter/12_midi_workflows.md" },
-    { "id": "13", "title": "Programmierung u. Skripting", "path": "chapter/13_programmierung_skripting.md" },
-    { "id": "14", "title": "Ergänzungen", "path": "chapter/14_ergaenzungen.md" },
-    { "id": "15", "title": "Abschlusstabellen", "path": "chapter/15_abschlusstabellen.md" },
-    { "id": "16", "title": "Einleitung Überblick", "path": "chapter/16_einleitung_ueberblick.md" },
-    { "id": "17", "title": "MIDI Verkabelung Final mit CME U6", "path": "chapter/17_midi_verkabelung_final_mit_cme_u6_pro_roland_kette_ez_l_6.md" },
-    { "id": "18", "title": "RK_006 WebApp Guide Android", "path": "chapter/18_rk_006_webapp_guide_android.md" },
-    { "id": "19", "title": "RK_006 Presets", "path": "chapter/19_rk_006_presets.md" },
-    { "id": "20", "title": "EZ_AG Bund Trigger", "path": "chapter/20_ez_ag_bund_trigger.md" },
-    { "id": "21", "title": "SysEx für RK_006 (MIDI Commander)", "path": "chapter/21_sysex_fuer_rk_006_fuer_midi_commander_buttons.md" },
-    { "id": "22", "title": "Zoom L_6 Szenen", "path": "chapter/22_zoom_l_6_szenen.md" },
-    { "id": "23", "title": "Roland S_1 Kurzreferenz", "path": "chapter/23_roland_s_1_kurzreferenz.md" },
-    { "id": "24", "title": "Texture Lab Kurzreferenz", "path": "chapter/24_texture_lab_kurzreferenz.md" },
-    { "id": "25", "title": "MIDI Commander Integration", "path": "chapter/25_midi_commander_integration_android.md" },
-    { "id": "26", "title": "Praxis Workflows", "path": "chapter/26_praxis_workflows.md" },
-    { "id": "27", "title": "Tabellen & Referenzen", "path": "chapter/27_tabellen_referenzen.md" }
+    {
+      "id": "01",
+      "title": "Cover",
+      "path": "chapters/01_cover.md",
+      "type": "chapter"
+    },
+    {
+      "id": "02",
+      "title": "First Steps – Audio",
+      "path": "chapters/02_firststeps_audio.md",
+      "type": "chapter"
+    },
+    {
+      "id": "03",
+      "title": "First Steps – MIDI",
+      "path": "chapters/03_firststeps_midi.md",
+      "type": "chapter"
+    },
+    {
+      "id": "04",
+      "title": "Workflows – Zoom L-6",
+      "path": "chapters/04_workflows_zoom_l6.md",
+      "type": "chapter"
+    }
+  ],
+  "xml": {
+    "setup": "tiagemusic-setup.xml",
+    "schema": "tiagemusic-setup.xsd"
+  },
+  "sections": [
+    { "id": "devices", "title": "Geräte", "xpath": "/tiagemusic-setup/devices/device" },
+    { "id": "connections", "title": "Verbindungen", "xpath": "/tiagemusic-setup/connections/connection" },
+    { "id": "presets", "title": "Presets", "xpath": "/tiagemusic-setup/presets/preset" },
+    { "id": "scenes", "title": "Szenen", "xpath": "/tiagemusic-setup/scenes/scene" },
+    { "id": "workflows", "title": "Workflows", "xpath": "/tiagemusic-setup/workflows/workflow" }
   ]
 }
