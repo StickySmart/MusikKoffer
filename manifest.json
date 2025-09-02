@@ -5,25 +5,25 @@
     {
       "id": "01",
       "title": "Cover",
-      "path": "docs/01_cover.md",
+      "path": "chapters/01_cover.md",
       "type": "chapter"
     },
     {
       "id": "02",
       "title": "First Steps – Audio",
-      "path": "docs/02_firststeps_audio.md",
+      "path": "chapters/02_firststeps_audio.md",
       "type": "chapter"
     },
     {
       "id": "03",
       "title": "First Steps – MIDI",
-      "path": "docs/03_firststeps_midi.md",
+      "path": "chapters/03_firststeps_midi.md",
       "type": "chapter"
     },
     {
       "id": "04",
-      "title": "Workflows Zoom L-6",
-      "path": "docs/04_workflows_zoom_l6.md",
+      "title": "Workflows – Zoom L-6",
+      "path": "chapters/04_workflows_zoom_l6.md",
       "type": "chapter"
     }
   ],
@@ -32,30 +32,10 @@
     "schema": "tiagemusic-setup.xsd"
   },
   "sections": [
-    {
-      "id": "devices",
-      "title": "Geräte",
-      "xpath": "/tiagemusic-setup/devices/device"
-    },
-    {
-      "id": "connections",
-      "title": "Verbindungen",
-      "xpath": "/tiagemusic-setup/connections/connection"
-    },
-    {
-      "id": "presets",
-      "title": "Presets",
-      "xpath": "/tiagemusic-setup/presets/preset"
-    },
-    {
-      "id": "scenes",
-      "title": "Szenen",
-      "xpath": "/tiagemusic-setup/scenes/scene"
-    },
-    {
-      "id": "workflows",
-      "title": "Workflows",
-      "xpath": "/tiagemusic-setup/workflows/workflow"
-    }
+    { "id": "devices", "title": "Geräte", "xpath": "/tiagemusic-setup/devices/device" },
+    { "id": "connections", "title": "Verbindungen", "xpath": "/tiagemusic-setup/connections/connection" },
+    { "id": "presets", "title": "Presets", "xpath": "/tiagemusic-setup/presets/preset" },
+    { "id": "scenes", "title": "Szenen", "xpath": "/tiagemusic-setup/scenes/scene" },
+    { "id": "workflows", "title": "Workflows", "xpath": "/tiagemusic-setup/workflows/workflow" }
   ]
 }
