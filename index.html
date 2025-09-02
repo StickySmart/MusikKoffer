@@ -21,13 +21,13 @@
     </section>
   </main>
 
+  <!-- 👇 GANZER SCRIPTBLOCK – nicht im Body schreiben -->
   <script>
-    // === Manifest laden (wie bisher) ===
+    // === Manifest laden ===
     async function loadManifest() {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
         const manifest = await res.json();
-
         document.getElementById("chapters").innerHTML = manifest.chapters
           .map(ch => `<p>${ch.id} – ${ch.title}</p>`)
           .join("");
@@ -42,7 +42,6 @@
       try {
         const res = await fetch("tiagemusic-setup.xml?v=" + Date.now());
         const xmlText = await res.text();
-
         const parser = new DOMParser();
         const xml = parser.parseFromString(xmlText, "application/xml");
 
