@@ -1,1 +1,70 @@
-fetch("tiagemusic-setup.xml?v=" + Date.now())
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Tiage Music Masterplan 25</title>
+</head>
+<body>
+  <h1>Tiage Music Masterplan 25</h1>
+
+  <main>
+    <!-- Manifest Bereich -->
+    <section id="manifestContent">
+      <h2>Kapitel</h2>
+      <div id="chapters">Lade Manifest …</div>
+    </section>
+
+    <!-- XML Bereich -->
+    <section id="xmlContent">
+      <h2>Setup (XML)</h2>
+      <div id="devices">Lade Setup …</div>
+    </section>
+  </main>
+
+  <script>
+    // === Manifest laden (wie bisher) ===
+    async function loadManifest() {
+      try {
+        const res = await fetch("manifest.json?v=" + Date.now());
+        const manifest = await res.json();
+
+        document.getElementById("chapters").innerHTML = manifest.chapters
+          .map(ch => `<p>${ch.id} – ${ch.title}</p>`)
+          .join("");
+      } catch (err) {
+        document.getElementById("chapters").innerHTML =
+          `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
+      }
+    }
+
+    // === XML laden ===
+    async function loadSetupXML() {
+      try {
+        const res = await fetch("tiagemusic-setup.xml?v=" + Date.now());
+        const xmlText = await res.text();
+
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(xmlText, "application/xml");
+
+        const devices = xml.getElementsByTagName("device");
+        let html = "<ul>";
+        for (let dev of devices) {
+          const name = dev.getElementsByTagName("name")[0]?.textContent || "Unbekannt";
+          const man  = dev.getElementsByTagName("manufacturer")[0]?.textContent || "";
+          html += `<li>${name} (${man})</li>`;
+        }
+        html += "</ul>";
+
+        document.getElementById("devices").innerHTML = html;
+      } catch (err) {
+        document.getElementById("devices").innerHTML =
+          `<p style="color:red">Fehler beim Laden der XML: ${err}</p>`;
+      }
+    }
+
+    // Start
+    loadManifest();
+    loadSetupXML();
+  </script>
+</body>
+</html>
