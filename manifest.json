@@ -49,5 +49,32 @@
       "title": "Zusammenfassung",
       "path": "chapters/08_zusammenfassung.md"
     }
+  ],
+  "modules": [
+    {
+      "id": "schema",
+      "source": "tiagemusic-geraetesetup.xsd",
+      "purpose": "Definiert die XML-Struktur und Validierungsregeln."
+    },
+    {
+      "id": "devices",
+      "source": "geraetesetup.xml",
+      "purpose": "Definiert die Hardwaregeräte (CME U6, Merge 5, Zoom L-6 usw.)."
+    },
+    {
+      "id": "presets",
+      "source": "presets.xml",
+      "purpose": "Beschreibt Routing-Presets und MIDI-Filter."
+    },
+    {
+      "id": "scenes",
+      "source": "scenes.xml",
+      "purpose": "Enthält Mixer-Szenen des Zoom L-6."
+    },
+    {
+      "id": "workflows",
+      "source": "workflows.xml",
+      "purpose": "Kombinationen aus Presets + Szenen mit Spielbarkeitsangaben."
+    }
   ]
 }
