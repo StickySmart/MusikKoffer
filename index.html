@@ -5,257 +5,242 @@
   <title>Tiage Music Masterplan 25</title>
   <style>
     body {
-      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
       margin: 0;
-      padding: 0;
-      background: #fff;
-      color: #000;
+      height: 100vh;
+      font-family: Arial, sans-serif;
     }
     header {
-      background: #111;
-      color: #fff;
-      padding: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 0.5rem 1rem;
+      background: #111;
+      color: #fff;
     }
-    header h1 {
-      margin: 0;
-      font-size: 1.5em;
-    }
-    #menu {
-      display: none;
-      position: absolute;
-      top: 60px;
-      left: 0;
-      background: #eee;
-      padding: 15px;
-      width: 80%;
-      max-width: 320px;
-      height: 100%;
-      overflow-y: auto;
-    }
-    #menu a {
-      display: block;
-      margin: 8px 0;
-      color: #000;
-      text-decoration: none;
-    }
-    #menu a:hover {
-      text-decoration: underline;
-    }
-    #content {
-      padding: 20px;
-    }
-    pre {
-      background: #f9f9f9;
-      border: 1px solid #ccc;
-      padding: 10px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 10px 0;
-    }
-    th, td {
-      border: 1px solid #333;
-      padding: 6px;
-      font-size: 14px;
-    }
-    #commentSection {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f9f9f9;
-      border: 1px solid #ddd;
-    }
-    #commentSection textarea {
-      width: 100%;
-      height: 100px;
-      padding: 10px;
-      font-size: 14px;
-      border: 1px solid #ddd;
-      margin-bottom: 10px;
-    }
-    #commentSection button {
-      padding: 8px 12px;
-      margin-right: 10px;
-      background: #333;
-      color: white;
+    #menuBtn {
+      background: none;
       border: none;
+      color: white;
+      font-size: 1.5rem;
       cursor: pointer;
     }
-    #commentSection button:hover {
-      background: #555;
+    #topButtons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    #topButtons button {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+    }
+    #sidebar {
+      width: 260px;
+      background: #f5f5f5;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    #sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    #content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
+    }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    @media (max-width: 768px) {
+      #sidebar {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+      #sidebar.hidden {
+        transform: translateX(-100%);
+      }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Tiage Music Masterplan 25</h1>
-    <div>
-      <button onclick="exportJson1()">ExpJ1</button>
-      <button onclick="importJson2()">ImpJ2</button>
-      <button onclick="toggleMenu()">☰</button>
+    <div id="topButtons">
+      <button id="exportJ1">ExpJ1</button>
+      <button id="importJ2">ImpJ2</button>
+      <button id="menuBtn">☰</button>
     </div>
   </header>
 
-  <div id="menu"></div>
-  <div id="content">Bitte Kapitel oder Modul wählen…</div>
+  <main>
+    <nav id="sidebar">Lade Manifest …</nav>
+    <section id="content">
+      <h2>Willkommen</h2>
+      <p>Bitte Kapitel oder Modul wählen…</p>
+    </section>
+  </main>
 
   <script>
-    let manifest = null;
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const content = document.getElementById("content");
 
-    // Menü laden
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("hidden");
+    });
+
     async function loadManifest() {
       try {
-        const response = await fetch("manifest.json");
-        manifest = await response.json();
-        renderMenu();
-      } catch (e) {
-        document.getElementById("content").innerHTML = "<p style='color:red'>Fehler beim Laden des Manifests: " + e + "</p>";
-      }
-    }
+        const res = await fetch("manifest.json?v=" + Date.now());
+        const manifest = await res.json();
 
-    function renderMenu() {
-      let menu = document.getElementById("menu");
-      let html = "<h3>Kapitel</h3>";
-      manifest.chapters.forEach(ch => {
-        html += `<a href="#" onclick="loadChapter('${ch.path}')" data-chapter="${ch.path}">${ch.id} – ${ch.title}</a>`;
-      });
-      html += "<h3>Module</h3>";
-      manifest.modules.forEach(m => {
-        html += `<a href="#" onclick="loadModule('${m.source}', '${m.purpose}')">${m.id} – ${m.purpose}</a>`;
-      });
-      menu.innerHTML = html;
-    }
-
-    function toggleMenu() {
-      let menu = document.getElementById("menu");
-      menu.style.display = (menu.style.display === "block") ? "none" : "block";
-    }
-
-    // Kapitel laden
-    async function loadChapter(path) {
-      try {
-        const resp = await fetch(path);
-        const text = await resp.text();
-        document.getElementById("content").innerHTML =
-          `<div data-chapter="${path}"><pre>${text}</pre></div>` +
-          `<div id="commentSection" data-cid="${path}">
-             <h3>Kommentare zu: ${path}</h3>
-             <textarea id="commentInput" placeholder="Kommentar eingeben..."></textarea>
-             <button onclick="saveComment('${path}')">Speichern</button>
-           </div>`;
-      } catch (e) {
-        document.getElementById("content").innerHTML =
-          `<p style="color:red">Fehler beim Laden des Kapitels: ${e}</p>`;
-      }
-    }
-
-    // Module laden
-    async function loadModule(source, purpose) {
-      try {
-        const resp = await fetch(source);
-        const text = await resp.text();
-        let parsed = parseXmlToTable(text);
-        document.getElementById("content").innerHTML =
-          `<h3>XML Modul: ${source}</h3>${parsed}`;
-      } catch (e) {
-        document.getElementById("content").innerHTML =
-          `<p style="color:red">Fehler beim Laden des Moduls: ${e}</p>`;
-      }
-    }
-
-    // Einfacher XML → Tabelle Parser
-    function parseXmlToTable(xmlText) {
-      let parser = new DOMParser();
-      let xmlDoc = parser.parseFromString(xmlText, "text/xml");
-      let rows = [];
-      xmlDoc.querySelectorAll("*").forEach(node => {
-        if (node.children.length === 0 && node.textContent.trim() !== "") {
-          rows.push(`<tr><td>${node.nodeName}</td><td>${node.textContent}</td></tr>`);
+        let html = "<h3>Kapitel</h3>";
+        if (manifest.chapters) {
+          html += manifest.chapters.map(ch =>
+            `<p><a href="#" data-type="chapter" data-path="${ch.path}" data-id="${ch.id}">${ch.id} – ${ch.title}</a></p>`
+          ).join("");
         }
-      });
-      return `<table><tr><th>Tag</th><th>Wert</th></tr>${rows.join("")}</table>`;
+
+        if (manifest.modules) {
+          html += "<h3>Module</h3>";
+          html += manifest.modules.map(mod =>
+            `<p><a href="#" data-type="module" data-path="${mod.source}" data-id="${mod.id}">${mod.id} – ${mod.purpose}</a></p>`
+          ).join("");
+        }
+
+        sidebar.innerHTML = html;
+
+        sidebar.querySelectorAll("a").forEach(link => {
+          link.addEventListener("click", async e => {
+            e.preventDefault();
+            const type = e.target.dataset.type;
+            const path = e.target.dataset.path;
+            const id = e.target.dataset.id;
+            if (type === "chapter") {
+              await loadChapter(path, id);
+            } else if (type === "module") {
+              await loadModule(path, id);
+            }
+            sidebar.classList.add("hidden");
+          });
+        });
+      } catch (err) {
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
+      }
     }
 
-    // Dummy für Kommentar-Speichern
-    function saveComment(path) {
-      let input = document.getElementById("commentInput").value;
-      alert("Kommentar gespeichert für " + path + ": " + input);
+    async function loadChapter(path, id) {
+      try {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(`${path} → ${res.status}`);
+        const text = await res.text();
+        content.innerHTML = `<article data-chapter="${id}"><pre>${text}</pre></article>`;
+      } catch (err) {
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
+      }
     }
 
-    // Export JSON1
-    function exportJson1() {
-      let data = { timestamp: new Date().toISOString(), comments: [] };
-      document.querySelectorAll("#commentSection").forEach(sec => {
-        let cid = sec.getAttribute("data-cid");
-        let val = sec.querySelector("textarea").value;
-        if (val) data.comments.push({ chapter: cid, text: val });
-      });
-      let blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-      let url = URL.createObjectURL(blob);
-      let a = document.createElement("a");
-      a.href = url;
-      a.download = "json1-export.json";
-      a.click();
+    async function loadModule(path, id) {
+      try {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(`${path} → ${res.status}`);
+        const text = await res.text();
+        const escaped = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        content.innerHTML = `<article data-chapter="${id}"><pre>${escaped}</pre></article>`;
+      } catch (err) {
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
+      }
     }
 
-    // Import JSON2 (global anwenden)
-    function importJson2() {
-      let input = document.createElement("input");
-      input.type = "file";
-      input.accept = "application/json";
-      input.onchange = e => {
-        let file = e.target.files[0];
-        let reader = new FileReader();
-        reader.onload = evt => {
-          let json2 = JSON.parse(evt.target.result);
-          applyJson2(json2);
+    // --- JSON2 Import + Revisionierung ---
+    document.getElementById("importJ2").addEventListener("click", () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const json2 = JSON.parse(e.target.result);
+            applyJson2(json2);
+          } catch (error) {
+            alert('Fehler beim Importieren von JSON2: ' + error);
+          }
         };
         reader.readAsText(file);
-      };
+      });
       input.click();
-    }
+    });
 
-    // applyJson2: global auf alle Kapitel anwenden
     function applyJson2(json2) {
-      if (!json2) {
-        alert("Keine JSON2-Daten geladen.");
-        return;
-      }
-
       let applied = 0;
-
       Object.keys(json2).forEach(chapterKey => {
         const entry = json2[chapterKey];
         if (!entry.actions) return;
 
-        // Kapitelcontainer suchen
-        const container = document.querySelector(`[data-chapter="${chapterKey}"]`);
+        const container = document.querySelector(`[data-chapter="${chapterKey}"] pre`);
         if (!container) return;
+
+        let newContent = container.textContent;
 
         entry.actions.forEach(action => {
           if (action.type === "insert_after") {
-            container.insertAdjacentHTML("beforeend", action.content_md);
+            newContent += "\n\n" + action.content_md;
             applied++;
           }
           if (action.type === "append") {
-            container.insertAdjacentHTML("beforeend", action.content_md);
+            newContent += "\n\n" + action.content_md;
             applied++;
           }
           if (action.type === "remove_section") {
-            let targets = container.querySelectorAll(action.selector);
-            targets.forEach(t => t.remove());
+            const regex = new RegExp(action.selector, "g");
+            newContent = newContent.replace(regex, "");
             applied++;
           }
+          if (action.type === "augment_blocks") {
+            // einfache textuelle Ergänzung
+            Object.entries(action.fields[0].mapping).forEach(([key, val]) => {
+              const regex = new RegExp(`(${key})`, "g");
+              newContent = newContent.replace(regex, `$1 – ${val}`);
+              applied++;
+            });
+          }
         });
+
+        // Revision speichern
+        if (applied > 0) {
+          const revFile = `${chapterKey}_rev${Date.now()}.md`;
+          downloadRevision(revFile, newContent);
+          container.textContent = newContent;
+        }
       });
 
-      document.getElementById("content").insertAdjacentHTML("beforeend",
-        `<p>${applied > 0 ? applied + " Änderungen aus JSON2 angewendet." : "Keine Änderungen aus JSON2 angewendet."}</p>`);
+      alert(applied > 0 ? `${applied} Änderungen angewendet und Revision gespeichert.` : "Keine Änderungen aus JSON2 angewendet.");
+    }
+
+    function downloadRevision(filename, content) {
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     loadManifest();
