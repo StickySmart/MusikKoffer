@@ -1,8 +1,13 @@
 {
-  "manifest_version": "1.0",
+  "manifest_version": "1.2",
   "project": "TiageMusic Gerätesetup",
-  "description": "Strukturierte Sammlung von Markdown-Kapiteln und XML-Modulen für das TiageMusic-Projekt. Validiert über tiagemusic-geraetesetup.xsd.",
-
+  "files": {
+    "schema": "tiagemusic-geraetesetup.xsd",
+    "setup": "geraetesetup.xml",
+    "presets": "presets.xml",
+    "scenes": "scenes.xml",
+    "workflows": "workflows.xml"
+  },
   "chapters": [
     {
       "id": "01",
@@ -11,8 +16,14 @@
     },
     {
       "id": "02",
-      "title": "Geräteübersicht",
-      "path": "chapters/02_geraeteuebersicht.md"
+      "title": "First Steps – MIDI & Setup",
+      "path": "chapters/04_first_steps_midi_setup.md",
+      "subchapters": [
+        {
+          "title": "Routing Performance",
+          "anchor": "#routing-performance"
+        }
+      ]
     },
     {
       "id": "03",
@@ -21,23 +32,36 @@
     },
     {
       "id": "04",
-      "title": "First Steps – MIDI & Setup",
-      "path": "chapters/04_first_steps_midi_setup.md"
+      "title": "Geräteübersicht & Texture Lab",
+      "path": "chapters/02_geraeteuebersicht.md",
+      "merge_from": [
+        "chapters/07_texture_lab.md"
+      ],
+      "subchapters": [
+        {
+          "title": "Audio",
+          "anchor": "#audio"
+        },
+        {
+          "title": "MIDI",
+          "anchor": "#midi"
+        }
+      ]
     },
     {
       "id": "05",
-      "title": "Workflows Audio (inkl. Performance)",
-      "path": "chapters/05_workflows_audio.md"
+      "title": "Workflows Audio – Recording",
+      "path": "chapters/05_workflows_audio__recording.md"
     },
     {
       "id": "06",
-      "title": "Workflows MIDI (inkl. Performance)",
-      "path": "chapters/06_workflows_midi.md"
+      "title": "Workflows Audio – Performance",
+      "path": "chapters/05_workflows_audio__performance.md"
     },
     {
       "id": "07",
-      "title": "Texture Lab Einsatz",
-      "path": "chapters/07_texture_lab.md"
+      "title": "Workflows Audio – Mixdown",
+      "path": "chapters/05_workflows_audio__mixdown.md"
     },
     {
       "id": "08",
@@ -45,32 +69,9 @@
       "path": "chapters/08_zusammenfassung.md"
     }
   ],
-
-  "modules": [
-    {
-      "id": "schema",
-      "source": "tiagemusic-geraetesetup.xsd",
-      "purpose": "Definiert die Struktur und Validierung für das Gerätesetup-XML."
-    },
-    {
-      "id": "devices",
-      "source": "geraetesetup.xml",
-      "purpose": "Definiert die Hardwaregeräte (CME U6, Merge 5, Zoom L-6, Roland/Sonicware usw.) und deren Ports."
-    },
-    {
-      "id": "presets",
-      "source": "presets.xml",
-      "purpose": "Definiert die Routing-Presets und deren Filter (Notes, Clock, PC, CC)."
-    },
-    {
-      "id": "scenes",
-      "source": "scenes.xml",
-      "purpose": "Speichert Audio-Mixer-Szenen des Zoom L-6 (z. B. Neutral, Texture Fokus, S-1 Fokus)."
-    },
-    {
-      "id": "workflows",
-      "source": "workflows.xml",
-      "purpose": "Kombinationen aus Presets und Szenen mit Spielbarkeitsangaben (hands, playable)."
-    }
+  "notes": [
+    "MIDI Routing Performance ist Unterpunkt im MIDI-Absatz (kein eigenes Kapitel).",
+    "Kapitel 04 kombiniert Geräteübersicht mit Texture Lab; enthält Audio/MIDI-Unterkapitel.",
+    "Kapitel 05 wurde aufgeteilt in Recording/Performance/Mixdown."
   ]
 }
