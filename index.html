@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body {
       display: flex;
@@ -43,10 +44,6 @@
       border-right: 1px solid #ddd;
       overflow-y: auto;
       transition: transform 0.3s ease;
-      position: fixed;
-      top: 60px;
-      bottom: 0;
-      left: 0;
     }
     #sidebar.hidden {
       transform: translateX(-100%);
@@ -55,25 +52,42 @@
       flex: 1;
       padding: 1rem;
       overflow-y: auto;
-      margin-left: 260px;
     }
     main {
       display: flex;
       flex: 1;
       height: calc(100vh - 60px);
     }
+    @media (min-width: 769px) {
+      #sidebar {
+        transform: translateX(0);
+      }
+      #content {
+        margin-left: 260px;
+      }
+    }
     @media (max-width: 768px) {
       #sidebar {
         position: absolute;
         top: 60px;
+        left: 0;
         height: calc(100vh - 60px);
         z-index: 10;
       }
       #content {
-        margin-left: 0;
+        margin-left: 0 !important;
       }
     }
-    /* Kommentarbereich */
+    pre.xml {
+      background: #222;
+      color: #eee;
+      padding: 1rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
     #commentSection {
       margin-top: 2rem;
       border-top: 1px solid #ccc;
@@ -112,25 +126,39 @@
       sidebar.classList.toggle("hidden");
     });
 
+    function commentBox(path) {
+      return `
+        <div id="commentSection">
+          <h3>Kommentar zu: ${path}</h3>
+          <textarea id="commentInput"></textarea><br/>
+          <button id="saveComment">Speichern</button>
+        </div>
+      `;
+    }
+
+    function attachCommentEvents(path) {
+      document.getElementById("saveComment").addEventListener("click", () => {
+        const text = document.getElementById("commentInput").value;
+        if (text.trim() !== "") {
+          alert("Kommentar gespeichert für " + path + ":\n" + text);
+        }
+      });
+    }
+
     async function loadManifest() {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
         const manifest = await res.json();
 
-        // Kapitel + Module im Menü
         let html = "<h3>Kapitel</h3>";
-        if (manifest.chapters) {
-          html += manifest.chapters.map(ch =>
-            `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
-          ).join("");
-        }
+        html += manifest.chapters.map(ch =>
+          `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
+        ).join("");
 
         html += "<h3>Module</h3>";
-        if (manifest.modules) {
-          html += manifest.modules.map(mod =>
-            `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
-          ).join("");
-        }
+        html += Object.entries(manifest.files).map(([id, file]) =>
+          `<p><a href="#" data-type="module" data-path="${file}">${id} – ${file}</a></p>`
+        ).join("");
 
         sidebar.innerHTML = html;
 
@@ -144,6 +172,7 @@
             } else if (type === "module") {
               await loadModule(path);
             }
+            sidebar.classList.add("hidden");
           });
         });
       } catch (err) {
@@ -156,7 +185,7 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-        const html = marked.parse(text); // Markdown Parser nutzen
+        const html = marked.parse(text);
         content.innerHTML = `<article>${html}</article>` + commentBox(path);
         attachCommentEvents(path);
       } catch (err) {
@@ -170,60 +199,21 @@
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
 
-        // XML als Baum darstellen
+        // XML Parser
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(text, "application/xml");
-        const pretty = formatXml(xmlDoc);
+        const serializer = new XMLSerializer();
+        const xmlStr = serializer.serializeToString(xmlDoc);
+        const pretty = xmlStr.replace(/></g, ">\n<");
 
-        content.innerHTML = `<article><pre>${pretty}</pre></article>` + commentBox(path);
+        content.innerHTML = `<article><h3>XML Modul: ${path}</h3><pre class="xml">${pretty}</pre></article>` + commentBox(path);
         attachCommentEvents(path);
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
     }
 
-    function formatXml(xmlDoc) {
-      const serializer = new XMLSerializer();
-      const xmlStr = serializer.serializeToString(xmlDoc);
-      return xmlStr.replace(/></g, ">\n<");
-    }
-
-    // Kommentarbereich HTML
-    function commentBox(path) {
-      return `
-        <div id="commentSection">
-          <h3>Kommentare zu: ${path}</h3>
-          <textarea id="commentInput" placeholder="Kommentar eingeben…"></textarea>
-          <button id="saveComment">Speichern</button>
-          <div id="commentList"></div>
-        </div>
-      `;
-    }
-
-    // Kommentare speichern/laden
-    const allComments = {};
-    function attachCommentEvents(path) {
-      const input = document.getElementById("commentInput");
-      const saveBtn = document.getElementById("saveComment");
-      const list = document.getElementById("commentList");
-
-      if (allComments[path]) {
-        list.innerHTML = allComments[path].map(c => `<p>💬 ${c}</p>`).join("");
-      }
-
-      saveBtn.addEventListener("click", () => {
-        const val = input.value.trim();
-        if (!val) return;
-        if (!allComments[path]) allComments[path] = [];
-        allComments[path].push(val);
-        list.innerHTML += `<p>💬 ${val}</p>`;
-        input.value = "";
-      });
-    }
-
     loadManifest();
   </script>
-  <!-- Markdown Parser -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 </html>
