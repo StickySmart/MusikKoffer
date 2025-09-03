@@ -1,56 +1,44 @@
 function applyJson2(json2) {
-  if (!json2) {
-    alert("Keine JSON2-Daten geladen.");
-    return;
-  }
-
   let applied = 0;
 
-  // Alle Kapitel in JSON2 durchgehen
   Object.keys(json2).forEach(chapterKey => {
     const entry = json2[chapterKey];
     if (!entry.actions) return;
 
+    const container = document.querySelector(`[data-chapter="${chapterKey}"] pre`);
+    if (!container) return;
+
+    let newContent = container.textContent;
+
     entry.actions.forEach(action => {
-      // Stelle sicher, dass wir den richtigen Container für das Kapitel haben
-      const container = document.querySelector(`[data-chapter="${chapterKey}"]`);
-      if (!container) return;
-
-      let text = container.innerHTML;
-
       if (action.type === "insert_after") {
-        let targetEl = container.querySelector(action.selector);
-        if (targetEl) {
-          targetEl.insertAdjacentHTML("afterend", action.content_md);
-          applied++;
-        }
-      }
-
-      if (action.type === "append") {
-        container.insertAdjacentHTML("beforeend", action.content_md);
+        // gezielt nach einer Überschrift einfügen
+        const regex = new RegExp(`(## ${action.after})`, "i");
+        newContent = newContent.replace(regex, `$1\n\n${action.content_md}`);
         applied++;
       }
 
-      if (action.type === "remove_section") {
-        let targets = container.querySelectorAll(action.selector);
-        targets.forEach(t => t.remove());
+      if (action.type === "replace_section") {
+        // Abschnitt zwischen zwei Überschriften ersetzen
+        const regex = new RegExp(`(## ${action.section}[\\s\\S]*?)(?=## |$)`, "i");
+        newContent = newContent.replace(regex, `## ${action.section}\n\n${action.content_md}`);
         applied++;
       }
 
-      if (action.type === "augment_blocks") {
-        // Spezialfall – Mapping anwenden
-        let lis = container.querySelectorAll(action.selector);
-        lis.forEach(li => {
-          let name = li.textContent.trim();
-          let extra = action.fields[0].mapping[name];
-          if (extra) {
-            li.innerHTML += ` – <em>${extra}</em>`;
-            applied++;
-          }
-        });
+      if (action.type === "append_table") {
+        // neue Tabellenzeile am Ende anhängen
+        const regex = new RegExp(`(\\|[-]+.*\\|\\n)([\\s\\S]*?)$`, "m");
+        newContent = newContent.replace(regex, `$1$2${action.content_md}\n`);
+        applied++;
       }
     });
+
+    if (applied > 0) {
+      const revFile = `${chapterKey}_rev${Date.now()}.md`;
+      downloadRevision(revFile, newContent);
+      container.textContent = newContent;
+    }
   });
 
-  alert(applied > 0 ? `${applied} Änderungen aus JSON2 angewendet.` : "Keine Änderungen aus JSON2 angewendet.");
+  alert(applied > 0 ? `${applied} Änderungen angewendet.` : "Keine Änderungen aus JSON2 angewendet.");
 }
