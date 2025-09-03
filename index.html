@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body {
       display: flex;
@@ -59,9 +58,6 @@
       height: calc(100vh - 60px);
     }
     @media (min-width: 769px) {
-      #sidebar {
-        transform: translateX(0);
-      }
       #content {
         margin-left: 260px;
       }
@@ -74,10 +70,14 @@
         height: calc(100vh - 60px);
         z-index: 10;
       }
+      #sidebar.hidden {
+        transform: translateX(-100%);
+      }
       #content {
         margin-left: 0 !important;
       }
     }
+
     pre.xml {
       background: #222;
       color: #eee;
@@ -98,6 +98,7 @@
       height: 80px;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <header>
@@ -126,43 +127,20 @@
       sidebar.classList.toggle("hidden");
     });
 
-    function commentBox(path) {
-      return `
-        <div id="commentSection">
-          <h3>Kommentar zu: ${path}</h3>
-          <textarea id="commentInput"></textarea><br/>
-          <button id="saveComment">Speichern</button>
-        </div>
-      `;
-    }
-
-    function attachCommentEvents(path) {
-      document.getElementById("saveComment").addEventListener("click", () => {
-        const text = document.getElementById("commentInput").value;
-        if (text.trim() !== "") {
-          alert("Kommentar gespeichert für " + path + ":\n" + text);
-        }
-      });
-    }
-
     async function loadManifest() {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
         const manifest = await res.json();
 
         let html = "<h3>Kapitel</h3>";
-        if (manifest.chapters) {
-          html += manifest.chapters.map(ch =>
-            `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
-          ).join("");
-        }
+        html += manifest.chapters.map(ch =>
+          `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
+        ).join("");
 
         html += "<h3>Module</h3>";
-        if (manifest.files) {
-          html += Object.entries(manifest.files).map(([id, file]) =>
-            `<p><a href="#" data-type="module" data-path="${file}">${id} – ${file}</a></p>`
-          ).join("");
-        }
+        html += manifest.modules.map(mod =>
+          `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
+        ).join("");
 
         sidebar.innerHTML = html;
 
@@ -203,16 +181,52 @@
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
 
-        // XML Parser
+        // XML parsen
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(text, "application/xml");
-        const serializer = new XMLSerializer();
-        const xmlStr = serializer.serializeToString(xmlDoc);
-        const pretty = xmlStr.replace(/></g, ">\n<");
 
-        content.innerHTML = `<article><h3>XML Modul: ${path}</h3><pre class="xml">${pretty}</pre></article>`;
+        if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+          throw new Error("Ungültiges XML in " + path);
+        }
+
+        const serializer = new XMLSerializer();
+        let xmlStr = serializer.serializeToString(xmlDoc);
+        xmlStr = xmlStr.replace(/></g, ">\n<");
+
+        content.innerHTML = `
+          <article>
+            <h3>XML Modul: ${path}</h3>
+            <pre class="xml">${xmlStr}</pre>
+          </article>
+        `;
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
+      }
+    }
+
+    // Kommentarbereich (nur Kapitel)
+    function commentBox(path) {
+      return `
+        <div id="commentSection">
+          <h3>Kommentar zu ${path}</h3>
+          <textarea id="commentInput" placeholder="Deine Notiz nur für dieses Kapitel..."></textarea>
+          <div>
+            <button id="saveCommentBtn">Kommentar speichern</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function attachCommentEvents(path) {
+      const saveBtn = document.getElementById("saveCommentBtn");
+      const input = document.getElementById("commentInput");
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+          const comment = input.value;
+          if (comment) {
+            alert("Kommentar gespeichert für " + path + ": " + comment);
+          }
+        });
       }
     }
 
