@@ -4,32 +4,131 @@
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0.5rem 1rem; background: #111; color: #fff;
+    body {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #000;
     }
-    #menuBtn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-    #topButtons { display: flex; gap: 0.5rem; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: #111;
+      color: #fff;
+    }
+    #menuBtn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    #topButtons {
+      display: flex;
+      gap: 0.5rem;
+    }
     #topButtons button {
-      background: #444; color: #fff; border: none; padding: 0.3rem 0.6rem; cursor: pointer;
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
     }
     #sidebar {
-      width: 260px; background: #f5f5f5; border-right: 1px solid #ddd;
-      overflow-y: auto; transition: transform 0.3s ease; padding: 0.5rem;
+      width: 260px;
+      background: #f5f5f5;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
     }
-    #sidebar.hidden { transform: translateX(-100%); }
-    #content { flex: 1; padding: 1rem; overflow-y: auto; }
-    main { display: flex; flex: 1; height: calc(100vh - 60px); }
+    #sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    #content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      background: #fff;
+      color: #000;
+    }
+    main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
+    }
     @media (max-width: 768px) {
-      #sidebar { position: absolute; top: 60px; left: 0; height: calc(100vh - 60px); z-index: 10; }
+      #sidebar {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+      #sidebar.hidden {
+        transform: translateX(-100%);
+      }
     }
-    table { border-collapse: collapse; margin-top: 1rem; width: 100%; }
-    th, td { border: 1px solid #aaa; padding: 4px 6px; }
-    th { background: #eee; }
-    #comments { margin-top: 2rem; border-top: 1px solid #ccc; padding-top: 1rem; }
-    #comments h3 { margin-top: 0; }
-    #comments textarea { width: 100%; height: 80px; }
+
+    /* Kommentarbereich */
+    #commentSection {
+      margin-top: 20px;
+      padding: 1rem;
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      display: none;
+    }
+    #commentSection textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 14px;
+    }
+    #commentSection button {
+      padding: 10px;
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #commentSection button:hover {
+      background-color: #555;
+    }
+
+    /* Tabellen-Stil (schwarz-weiß, mobil optimiert) */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1em 0;
+      background: #fff;
+      color: #000;
+      font-size: 14px;
+    }
+    table, th, td {
+      border: 1px solid #000;
+    }
+    th, td {
+      padding: 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #eee;
+      font-weight: bold;
+    }
+    @media (max-width: 768px) {
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
   </style>
 </head>
 <body>
@@ -50,12 +149,28 @@
     </section>
   </main>
 
+  <!-- Kommentarbereich -->
+  <div id="commentSection">
+    <h3>Kommentar zu diesem Kapitel</h3>
+    <textarea id="commentInput" placeholder="Deine Notiz nur für dieses Kapitel..."></textarea>
+    <div>
+      <button id="saveCommentBtn">Kommentar speichern</button>
+    </div>
+  </div>
+
   <script>
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
+    const commentInput = document.getElementById("commentInput");
+    const saveCommentBtn = document.getElementById("saveCommentBtn");
 
-    menuBtn.addEventListener("click", () => sidebar.classList.toggle("hidden"));
+    const allComments = {};
+    let currentChapter = null;
+
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("hidden");
+    });
 
     async function loadManifest() {
       try {
@@ -68,8 +183,8 @@
         ).join("");
 
         html += "<h3>Module</h3>";
-        html += Object.entries(manifest.files).map(([id, src]) =>
-          `<p><a href="#" data-type="module" data-path="${src}">${id} – ${src}</a></p>`
+        html += manifest.modules.map(mod =>
+          `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
         ).join("");
 
         sidebar.innerHTML = html;
@@ -97,12 +212,11 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-        content.innerHTML = `<article><pre>${text}</pre></article>
-          <div id="comments">
-            <h3>Kommentare zu: ${path}</h3>
-            <textarea placeholder="Kommentar schreiben…"></textarea><br>
-            <button onclick="alert('Kommentar gespeichert!')">Speichern</button>
-          </div>`;
+        content.innerHTML = `<article><pre>${text}</pre></article>`;
+
+        currentChapter = path;
+        commentInput.value = allComments[path]?.comment || "";
+        document.getElementById("commentSection").style.display = "block";
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
@@ -113,64 +227,100 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(text, "application/xml");
 
-        let html = `<h2>XML Modul: ${path}</h2>`;
-
-        // Geräte Setup
-        if (xmlDoc.getElementsByTagName("devices").length > 0) {
-          html += "<h3>Geräte</h3><table><tr><th>Name</th><th>Hersteller</th><th>Typ</th><th>Ports</th></tr>";
-          xmlDoc.querySelectorAll("device").forEach(dev => {
-            let ports = [...dev.querySelectorAll("port")].map(p =>
-              `${p.getAttribute("id")} (${p.getAttribute("type")} / ${p.getAttribute("connector")} / ${p.getAttribute("active")})`
-            ).join("<br>");
-            html += `<tr><td>${dev.querySelector("name")?.textContent || dev.getAttribute("name")}</td>
-                        <td>${dev.querySelector("manufacturer")?.textContent || ""}</td>
-                        <td>${dev.querySelector("type")?.textContent || ""}</td>
-                        <td>${ports}</td></tr>`;
-          });
-          html += "</table>";
+        if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+          throw new Error("Ungültiges XML in " + path);
         }
 
-        // Presets
-        if (xmlDoc.getElementsByTagName("presets").length > 0) {
-          html += "<h3>Presets</h3><ul>";
-          xmlDoc.querySelectorAll("preset").forEach(pr => {
-            html += `<li><b>${pr.getAttribute("id")}</b>: ${pr.querySelector("name")?.textContent} – ${pr.querySelector("description")?.textContent}</li>`;
-          });
-          html += "</ul>";
+        if (xmlDoc.documentElement.nodeName === "devices") {
+          renderDevices(xmlDoc);
+        } else if (xmlDoc.documentElement.nodeName === "presets") {
+          renderPresets(xmlDoc);
+        } else if (xmlDoc.documentElement.nodeName === "scenes") {
+          renderScenes(xmlDoc);
+        } else if (xmlDoc.documentElement.nodeName === "workflows") {
+          renderWorkflows(xmlDoc);
+        } else {
+          content.innerHTML = `<pre>${text}</pre>`;
         }
 
-        // Szenen
-        if (xmlDoc.getElementsByTagName("scenes").length > 0) {
-          html += "<h3>Szenen</h3><ul>";
-          xmlDoc.querySelectorAll("scene").forEach(sc => {
-            html += `<li><b>${sc.getAttribute("id")}</b>: ${sc.getAttribute("name")} – ${sc.querySelector("description")?.textContent}</li>`;
-          });
-          html += "</ul>";
-        }
-
-        // Workflows
-        if (xmlDoc.getElementsByTagName("workflows").length > 0) {
-          html += "<h3>Workflows</h3><table><tr><th>ID</th><th>Preset</th><th>Szene</th><th>Spielbarkeit</th></tr>";
-          xmlDoc.querySelectorAll("workflow").forEach(wf => {
-            html += `<tr>
-                      <td>${wf.getAttribute("id")}</td>
-                      <td>${wf.querySelector("preset")?.textContent}</td>
-                      <td>${wf.querySelector("scene")?.textContent}</td>
-                      <td>${wf.getAttribute("hands") || "?"}</td>
-                    </tr>`;
-          });
-          html += "</table>";
-        }
-
-        content.innerHTML = html;
+        document.getElementById("commentSection").style.display = "none"; // keine Kommentare bei Modulen
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
     }
+
+    function renderDevices(xmlDoc) {
+      let html = "<h2>Geräteübersicht</h2><table><tr><th>Name</th><th>Hersteller</th><th>Typ</th><th>Ports</th></tr>";
+      const devices = xmlDoc.getElementsByTagName("device");
+      for (let dev of devices) {
+        let name = dev.getElementsByTagName("name")[0]?.textContent || "-";
+        let manu = dev.getElementsByTagName("manufacturer")[0]?.textContent || "-";
+        let type = dev.getElementsByTagName("type")[0]?.textContent || "-";
+        let ports = Array.from(dev.getElementsByTagName("port")).map(p => 
+          `${p.getAttribute("id")} (${p.getAttribute("type")}, ${p.getAttribute("connector")}, active=${p.getAttribute("active")})`
+        ).join("<br>");
+        html += `<tr><td>${name}</td><td>${manu}</td><td>${type}</td><td>${ports}</td></tr>`;
+      }
+      html += "</table>";
+      content.innerHTML = html;
+    }
+
+    function renderPresets(xmlDoc) {
+      let html = "<h2>Presets</h2><ul>";
+      const presets = xmlDoc.getElementsByTagName("preset");
+      for (let pre of presets) {
+        let id = pre.getAttribute("id");
+        let name = pre.getElementsByTagName("name")[0]?.textContent || "-";
+        let desc = pre.getElementsByTagName("description")[0]?.textContent || "";
+        html += `<li><b>${id} – ${name}</b>: ${desc}</li>`;
+      }
+      html += "</ul>";
+      content.innerHTML = html;
+    }
+
+    function renderScenes(xmlDoc) {
+      let html = "<h2>Szenen</h2><ul>";
+      const scenes = xmlDoc.getElementsByTagName("scene");
+      for (let sc of scenes) {
+        let id = sc.getAttribute("id");
+        let name = sc.getAttribute("name");
+        let desc = sc.getElementsByTagName("description")[0]?.textContent || "";
+        html += `<li><b>${id} – ${name}</b>: ${desc}</li>`;
+      }
+      html += "</ul>";
+      content.innerHTML = html;
+    }
+
+    function renderWorkflows(xmlDoc) {
+      let html = "<h2>Workflows</h2><table><tr><th>ID</th><th>Preset</th><th>Szene</th><th>Spielbarkeit</th></tr>";
+      const flows = xmlDoc.getElementsByTagName("workflow");
+      for (let wf of flows) {
+        let id = wf.getAttribute("id");
+        let preset = wf.getElementsByTagName("preset")[0]?.textContent || "-";
+        let scene = wf.getElementsByTagName("scene")[0]?.textContent || "-";
+        let play = wf.getElementsByTagName("playable")[0]?.textContent || "-";
+        html += `<tr><td>${id}</td><td>${preset}</td><td>${scene}</td><td>${play}</td></tr>`;
+      }
+      html += "</table>";
+      content.innerHTML = html;
+    }
+
+    saveCommentBtn.addEventListener("click", () => {
+      if (!currentChapter) {
+        alert("Kein Kapitel ausgewählt.");
+        return;
+      }
+      allComments[currentChapter] = {
+        chapter: currentChapter,
+        comment: commentInput.value,
+        status: "Offen",
+        timestamp: new Date().toISOString()
+      };
+      alert("Kommentar gespeichert für " + currentChapter);
+    });
 
     loadManifest();
   </script>
