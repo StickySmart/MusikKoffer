@@ -182,7 +182,7 @@
         content.innerHTML = `<article><pre>${text}</pre></article>`;
         document.getElementById("commentSection").style.display = "block";
         document.getElementById("commentTitle").innerText = "Kommentare zu: " + path;
-        renderComments(path);
+       
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
@@ -226,7 +226,7 @@
       if (!comments[currentChapter]) comments[currentChapter] = [];
       comments[currentChapter].push({ status: "open", text: input });
       document.getElementById("commentInput").value = "";
-      renderComments(currentChapter);
+      
     });
 
     document.getElementById("exportJ1").addEventListener("click", () => {
