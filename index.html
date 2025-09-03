@@ -4,246 +4,197 @@
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
   <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      margin: 0;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      background: #111;
-      color: #fff;
-    }
-    #menuBtn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    #topButtons {
-      display: flex;
-      gap: 0.5rem;
-    }
-    #topButtons button {
-      background: #444;
-      color: #fff;
-      border: none;
-      padding: 0.3rem 0.6rem;
-      cursor: pointer;
-    }
-    #sidebar {
-      width: 260px;
-      background: #f5f5f5;
-      border-right: 1px solid #ddd;
-      overflow-y: auto;
-      transition: transform 0.3s ease;
-    }
-    #sidebar.hidden {
-      transform: translateX(-100%);
-    }
-    #content {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-    }
-    main {
-      display: flex;
-      flex: 1;
-      height: calc(100vh - 60px);
-    }
-    pre {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-    @media (max-width: 768px) {
-      #sidebar {
-        position: absolute;
-        top: 60px;
-        left: 0;
-        height: calc(100vh - 60px);
-        z-index: 10;
-      }
-      #sidebar.hidden {
-        transform: translateX(-100%);
-      }
-    }
+    body { font-family: monospace; margin: 0; padding: 0; background: #fff; color: #000; }
+    header { background: #111; color: #fff; padding: 10px; }
+    button { margin: 5px; padding: 5px 10px; }
+    #sidebar { background: #f4f4f4; padding: 10px; width: 250px; float: left; height: 100vh; overflow-y: auto; }
+    #content { margin-left: 260px; padding: 20px; }
+    pre { background: #fafafa; border: 1px solid #ddd; padding: 10px; white-space: pre-wrap; }
+    table { border-collapse: collapse; width: 100%; }
+    table, th, td { border: 1px solid #333; }
+    th, td { padding: 5px; text-align: left; }
   </style>
 </head>
 <body>
   <header>
     <h1>Tiage Music Masterplan 25</h1>
-    <div id="topButtons">
-      <button id="exportJ1">ExpJ1</button>
-      <button id="importJ2">ImpJ2</button>
-      <button id="menuBtn">☰</button>
-    </div>
+    <button onclick="exportJson1()">ExpJ1</button>
+    <button onclick="exportJson2()">ExpJ2</button>
+    <button onclick="importJson2()">ImpJ2</button>
   </header>
 
-  <main>
-    <nav id="sidebar">Lade Manifest …</nav>
-    <section id="content">
-      <h2>Willkommen</h2>
-      <p>Bitte Kapitel oder Modul wählen…</p>
-    </section>
-  </main>
+  <div id="sidebar">
+    <h3>Kapitel</h3>
+    <ul id="chapterList"></ul>
+    <h3>Module</h3>
+    <ul id="moduleList"></ul>
+  </div>
 
-  <script>
-    const sidebar = document.getElementById("sidebar");
-    const menuBtn = document.getElementById("menuBtn");
-    const content = document.getElementById("content");
+  <div id="content">
+    <h2>Bitte Kapitel oder Modul wählen…</h2>
+    <div id="chapterContent"></div>
+  </div>
 
-    menuBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("hidden");
-    });
+<script>
+// ======================
+// Globale Variablen
+// ======================
+let chapters = {
+  "01_cover.md": "# Cover",
+  "02_geraeteuebersicht.md": "# Geräteübersicht\n\nZoom L-6, Roland J-6, T-8, E-4, S-1",
+  "03_first_steps_audio_routing.md": "# First Steps – Audio & Routing\n\n## Geräte im Setup\n- Roland J-6\n- Roland T-8\n\n### Fixe Audio-Verkabelung\n| Gerät | Kanal | Quelle | Bemerkung |\n|-------|-------|--------|-----------|\n"
+};
+let modules = {
+  "geraetesetup.xml": "<devices><device id='U61' name='CME U6MIDI Pro'></device></devices>",
+  "tiagemusic-geraetesetup.xsd": "<xs:schema>...</xs:schema>"
+};
+let comments = {}; // { kapitel: [ {text, state} ] }
 
-    async function loadManifest() {
-      try {
-        const res = await fetch("manifest.json?v=" + Date.now());
-        const manifest = await res.json();
+// ======================
+// Init
+// ======================
+window.onload = function() {
+  renderSidebar();
+};
 
-        let html = "<h3>Kapitel</h3>";
-        if (manifest.chapters) {
-          html += manifest.chapters.map(ch =>
-            `<p><a href="#" data-type="chapter" data-path="${ch.path}" data-id="${ch.id}">${ch.id} – ${ch.title}</a></p>`
-          ).join("");
-        }
+// ======================
+// Sidebar
+// ======================
+function renderSidebar() {
+  let chList = document.getElementById("chapterList");
+  chList.innerHTML = "";
+  Object.keys(chapters).forEach(k => {
+    let li = document.createElement("li");
+    li.innerHTML = `<a href='#' onclick='loadChapter("${k}")'>${k}</a>`;
+    chList.appendChild(li);
+  });
 
-        if (manifest.modules) {
-          html += "<h3>Module</h3>";
-          html += manifest.modules.map(mod =>
-            `<p><a href="#" data-type="module" data-path="${mod.source}" data-id="${mod.id}">${mod.id} – ${mod.purpose}</a></p>`
-          ).join("");
-        }
+  let modList = document.getElementById("moduleList");
+  modList.innerHTML = "";
+  Object.keys(modules).forEach(m => {
+    let li = document.createElement("li");
+    li.innerHTML = `<a href='#' onclick='loadModule("${m}")'>${m}</a>`;
+    modList.appendChild(li);
+  });
+}
 
-        sidebar.innerHTML = html;
+// ======================
+// Kapitel laden
+// ======================
+function loadChapter(key) {
+  let cont = document.getElementById("chapterContent");
+  cont.innerHTML = `<pre>${chapters[key]}</pre>` + renderCommentSection(key);
+}
+function loadModule(name) {
+  let cont = document.getElementById("chapterContent");
+  cont.innerHTML = `<h3>XML Modul: ${name}</h3><pre>${modules[name]}</pre>`;
+}
 
-        sidebar.querySelectorAll("a").forEach(link => {
-          link.addEventListener("click", async e => {
-            e.preventDefault();
-            const type = e.target.dataset.type;
-            const path = e.target.dataset.path;
-            const id = e.target.dataset.id;
-            if (type === "chapter") {
-              await loadChapter(path, id);
-            } else if (type === "module") {
-              await loadModule(path, id);
-            }
-            sidebar.classList.add("hidden");
-          });
+// ======================
+// Kommentare rendern
+// ======================
+function renderCommentSection(chapterKey) {
+  let list = comments[chapterKey] || [];
+  let html = `<div id="commentSection">
+      <h3>Kommentare zu: ${chapterKey}</h3>
+      <textarea id="commentInput"></textarea>
+      <button onclick="saveComment('${chapterKey}')">Speichern</button>
+      <ul>` +
+      list.map(c => `<li>[${c.state}] ${c.text}</li>`).join("") +
+      `</ul></div>`;
+  return html;
+}
+function saveComment(chapterKey) {
+  let txt = document.getElementById("commentInput").value;
+  if (!txt) return;
+  if (!comments[chapterKey]) comments[chapterKey] = [];
+  comments[chapterKey].push({ text: txt, state: "open" });
+  loadChapter(chapterKey);
+}
+
+// ======================
+// Export JSON1
+// ======================
+function exportJson1() {
+  let json1 = { chapters, modules, comments };
+  downloadFile("json1-export.json", JSON.stringify(json1, null, 2));
+}
+
+// ======================
+// Export JSON2 (neu: Aktionen)
+// ======================
+function exportJson2() {
+  let json2 = {};
+  Object.keys(comments).forEach(chKey => {
+    json2[chKey] = { actions: [] };
+    comments[chKey].forEach(c => {
+      if (c.state === "open") {
+        json2[chKey].actions.push({
+          type: "insert_after",
+          after: "Geräte im Setup",
+          content_md: "- [open] " + c.text
         });
-      } catch (err) {
-        content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
       }
-    }
-
-    async function loadChapter(path, id) {
-      try {
-        const res = await fetch(path);
-        if (!res.ok) throw new Error(`${path} → ${res.status}`);
-        const text = await res.text();
-        content.innerHTML = `<article data-chapter="${id}"><pre>${text}</pre></article>`;
-      } catch (err) {
-        content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
-      }
-    }
-
-    async function loadModule(path, id) {
-      try {
-        const res = await fetch(path);
-        if (!res.ok) throw new Error(`${path} → ${res.status}`);
-        const text = await res.text();
-        const escaped = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        content.innerHTML = `<article data-chapter="${id}"><pre>${escaped}</pre></article>`;
-      } catch (err) {
-        content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
-      }
-    }
-
-    // --- JSON2 Import + Revisionierung ---
-    document.getElementById("importJ2").addEventListener("click", () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            const json2 = JSON.parse(e.target.result);
-            applyJson2(json2);
-          } catch (error) {
-            alert('Fehler beim Importieren von JSON2: ' + error);
-          }
-        };
-        reader.readAsText(file);
-      });
-      input.click();
     });
+  });
+  downloadFile("json2-export.json", JSON.stringify(json2, null, 2));
+}
 
-    function applyJson2(json2) {
-      let applied = 0;
-      Object.keys(json2).forEach(chapterKey => {
-        const entry = json2[chapterKey];
-        if (!entry.actions) return;
+// ======================
+// Import JSON2 (global)
+// ======================
+function importJson2() {
+  let inp = document.createElement("input");
+  inp.type = "file";
+  inp.accept = "application/json";
+  inp.onchange = e => {
+    let file = e.target.files[0];
+    let reader = new FileReader();
+    reader.onload = ev => {
+      let json2 = JSON.parse(ev.target.result);
+      applyJson2(json2);
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
 
-        const container = document.querySelector(`[data-chapter="${chapterKey}"] pre`);
-        if (!container) return;
+// ======================
+// Anwenden von JSON2
+// ======================
+function applyJson2(json2) {
+  let applied = 0;
+  Object.keys(json2).forEach(chKey => {
+    if (!chapters[chKey]) return;
+    let content = chapters[chKey];
+    json2[chKey].actions.forEach(action => {
+      if (action.type === "insert_after") {
+        const regex = new RegExp(`(## ${action.after})`, "i");
+        content = content.replace(regex, `$1\n${action.content_md}`);
+        applied++;
+      }
+      if (action.type === "append_table") {
+        const regex = /\|[-]+.*\|\n([\s\S]*)$/m;
+        content = content.replace(regex, match => match + action.content_md + "\n");
+        applied++;
+      }
+    });
+    chapters[chKey] = content;
+  });
+  alert(applied > 0 ? `${applied} Änderungen angewendet.` : "Keine Änderungen aus JSON2 angewendet.");
+  renderSidebar();
+}
 
-        let newContent = container.textContent;
-
-        entry.actions.forEach(action => {
-          if (action.type === "insert_after") {
-            newContent += "\n\n" + action.content_md;
-            applied++;
-          }
-          if (action.type === "append") {
-            newContent += "\n\n" + action.content_md;
-            applied++;
-          }
-          if (action.type === "remove_section") {
-            const regex = new RegExp(action.selector, "g");
-            newContent = newContent.replace(regex, "");
-            applied++;
-          }
-          if (action.type === "augment_blocks") {
-            // einfache textuelle Ergänzung
-            Object.entries(action.fields[0].mapping).forEach(([key, val]) => {
-              const regex = new RegExp(`(${key})`, "g");
-              newContent = newContent.replace(regex, `$1 – ${val}`);
-              applied++;
-            });
-          }
-        });
-
-        // Revision speichern
-        if (applied > 0) {
-          const revFile = `${chapterKey}_rev${Date.now()}.md`;
-          downloadRevision(revFile, newContent);
-          container.textContent = newContent;
-        }
-      });
-
-      alert(applied > 0 ? `${applied} Änderungen angewendet und Revision gespeichert.` : "Keine Änderungen aus JSON2 angewendet.");
-    }
-
-    function downloadRevision(filename, content) {
-      const blob = new Blob([content], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    loadManifest();
-  </script>
+// ======================
+// Hilfsfunktion: Download
+// ======================
+function downloadFile(name, content) {
+  let a = document.createElement("a");
+  let file = new Blob([content], { type: "application/json" });
+  a.href = URL.createObjectURL(file);
+  a.download = name;
+  a.click();
+}
+</script>
 </body>
 </html>
