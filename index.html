@@ -103,18 +103,25 @@
         const res = await fetch("manifest.json?v=" + Date.now());
         const manifest = await res.json();
 
-        // Kapitel + Module im Menü anzeigen
-        let html = "<h3>Kapitel</h3>";
-        html += manifest.chapters.map(ch =>
-          `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
-        ).join("");
+        let html = "";
 
-        html += "<h3>Module</h3>";
-        html += manifest.modules.map(mod =>
-          `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
-        ).join("");
+        // Kapitel anzeigen, falls vorhanden
+        if (manifest.chapters && manifest.chapters.length > 0) {
+          html += "<h3>Kapitel</h3>";
+          html += manifest.chapters.map(ch =>
+            `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
+          ).join("");
+        }
 
-        sidebar.innerHTML = html;
+        // Module anzeigen, falls vorhanden
+        if (manifest.modules && manifest.modules.length > 0) {
+          html += "<h3>Module</h3>";
+          html += manifest.modules.map(mod =>
+            `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
+          ).join("");
+        }
+
+        sidebar.innerHTML = html || "<p>Keine Kapitel/Module im Manifest gefunden.</p>";
 
         sidebar.querySelectorAll("a").forEach(link => {
           link.addEventListener("click", async e => {
@@ -126,7 +133,7 @@
             } else if (type === "module") {
               await loadModule(path);
             }
-            sidebar.classList.add("hidden"); // mobil automatisch schließen
+            sidebar.classList.add("hidden");
           });
         });
       } catch (err) {
