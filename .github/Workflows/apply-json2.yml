@@ -1,13 +1,35 @@
-name: Apply JSON2
+function applyJson2(json2) {
+  if (!currentChapter) {
+    alert("Kein Kapitel geladen.");
+    return;
+  }
 
-on:
-  push:
-    paths:
-      - 'imports/*.json'
+  // nur Dateiname extrahieren (ohne Ordner)
+  let chapterKey = currentChapter.split('/').pop();
 
-jobs:
-  apply-json2:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+  if (!json2[chapterKey]) {
+    alert("Kein passender Eintrag in JSON2 für " + chapterKey);
+    return;
+  }
+
+  let actions = json2[chapterKey].actions;
+  let text = currentText;
+
+  actions.forEach(action => {
+    if (action.type === "insert_after") {
+      let regex = new RegExp(action.target, "i");
+      text = text.replace(regex, match => match + "\n" + action.text);
+    } else if (action.type === "append") {
+      text += "\n" + action.text;
+    } else if (action.type === "remove_section") {
+      let regex = new RegExp(`# ${action.section}[\\s\\S]*?(?=\\n#|$)`, "gi");
+      text = text.replace(regex, "");
+    } else if (action.type === "search_replace") {
+      let regex = new RegExp(action.search, "gi");
+      text = text.replace(regex, action.replace);
+    }
+  });
+
+  currentText = text;
+  content.innerHTML = `<article>${text}</article>`;
+}
