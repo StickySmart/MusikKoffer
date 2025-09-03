@@ -10,6 +10,8 @@
       margin: 0;
       height: 100vh;
       font-family: Arial, sans-serif;
+      background: #fff;
+      color: #000;
     }
     header {
       display: flex;
@@ -65,9 +67,6 @@
         height: calc(100vh - 60px);
         z-index: 10;
       }
-      #sidebar.hidden {
-        transform: translateX(-100%);
-      }
     }
 
     /* Kommentarbereich */
@@ -76,6 +75,7 @@
       padding: 15px;
       background: #f9f9f9;
       border: 1px solid #ddd;
+      display: none;
     }
     #commentSection textarea {
       width: 100%;
@@ -117,24 +117,21 @@
   </main>
 
   <!-- Kommentarbereich -->
-  <div id="commentSection" style="display:none;">
-    <h3>Kommentar</h3>
-    <textarea id="commentInput" placeholder="Deine Notiz zu diesem Kapitel..."></textarea>
-    <div>
-      <button id="saveCommentBtn">Kommentar speichern</button>
-    </div>
+  <div id="commentSection">
+    <h3 id="commentTitle"></h3>
+    <textarea id="commentInput" placeholder="Kommentar eingeben..."></textarea><br>
+    <button id="saveComment">Speichern</button>
+    <div id="existingComments"></div>
   </div>
 
   <script>
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
-    const commentInput = document.getElementById("commentInput");
-    const saveCommentBtn = document.getElementById("saveCommentBtn");
 
-    let allComments = {};
     let currentChapter = null;
     let currentText = "";
+    let comments = {}; // JSON1 Rohdaten
 
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
@@ -146,18 +143,14 @@
         const manifest = await res.json();
 
         let html = "<h3>Kapitel</h3>";
-        if (manifest.chapters) {
-          html += manifest.chapters.map(ch =>
-            `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
-          ).join("");
-        }
+        html += manifest.chapters.map(ch =>
+          `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
+        ).join("");
 
         html += "<h3>Module</h3>";
-        if (manifest.modules) {
-          html += manifest.modules.map(mod =>
-            `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
-          ).join("");
-        }
+        html += Object.entries(manifest.files).map(([id, path]) =>
+          `<p><a href="#" data-type="module" data-path="${path}">${id} – ${path}</a></p>`
+        ).join("");
 
         sidebar.innerHTML = html;
 
@@ -184,11 +177,12 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-        currentText = text;
         currentChapter = path;
+        currentText = text;
         content.innerHTML = `<article><pre>${text}</pre></article>`;
         document.getElementById("commentSection").style.display = "block";
-        commentInput.value = allComments[path]?.comment || "";
+        document.getElementById("commentTitle").innerText = "Kommentare zu: " + path;
+        renderComments(path);
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
@@ -199,78 +193,61 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-
-        // XML Parser
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(text, "application/xml");
 
-        let html = `<h2>${path}</h2><table border="1" cellpadding="5" cellspacing="0">`;
+        let html = `<h3>XML Modul: ${path}</h3>`;
+        html += `<table border="1" style="border-collapse:collapse;width:100%;">`;
 
         xmlDoc.querySelectorAll("*").forEach(node => {
           if (node.children.length === 0) {
-            html += `<tr><td>${node.tagName}</td><td>${node.textContent}</td></tr>`;
+            html += `<tr><td>${node.nodeName}</td><td>${node.textContent}</td></tr>`;
           }
         });
 
         html += "</table>";
         content.innerHTML = html;
-
-        // Keine Kommentare bei Modulen
-        document.getElementById("commentSection").style.display = "none";
+        document.getElementById("commentSection").style.display = "none"; // keine Kommentare bei Modulen
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
     }
 
-    saveCommentBtn.addEventListener("click", () => {
-      if (!currentChapter) {
-        alert("Kein Kapitel ausgewählt.");
-        return;
-      }
-      allComments[currentChapter] = {
-        chapter: currentChapter,
-        comment: commentInput.value,
-        status: "Offen",
-        timestamp: new Date().toISOString()
-      };
-      alert("Kommentar gespeichert für " + currentChapter);
+    function renderComments(path) {
+      const list = comments[path] || [];
+      document.getElementById("existingComments").innerHTML = list
+        .map(c => `<p>[${c.status}] ${c.text}</p>`)
+        .join("");
+    }
+
+    document.getElementById("saveComment").addEventListener("click", () => {
+      const input = document.getElementById("commentInput").value.trim();
+      if (!input || !currentChapter) return;
+      if (!comments[currentChapter]) comments[currentChapter] = [];
+      comments[currentChapter].push({ status: "open", text: input });
+      document.getElementById("commentInput").value = "";
+      renderComments(currentChapter);
     });
 
-    // Export JSON1
     document.getElementById("exportJ1").addEventListener("click", () => {
-      const commentsArray = Object.values(allComments);
-      if (commentsArray.length === 0) {
-        alert("Noch keine Kommentare vorhanden.");
-        return;
-      }
-      const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'comments.json';
+      const blob = new Blob([JSON.stringify(comments, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "json1-export.json";
       a.click();
     });
 
-    // Import JSON2
-    document.getElementById("importJ2").addEventListener("click", () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
+    document.getElementById("importJ2").addEventListener("click", async () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json";
+      input.onchange = async e => {
+        const file = e.target.files[0];
         if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            const json2 = JSON.parse(e.target.result);
-            applyJson2(json2);
-          } catch (error) {
-            alert('Fehler beim Importieren der Datei: ' + error);
-          }
-        };
-        reader.readAsText(file);
-      });
+        const text = await file.text();
+        const json2 = JSON.parse(text);
+        applyJson2(json2);
+      };
       input.click();
     });
 
@@ -279,40 +256,21 @@
         alert("Kein Kapitel geladen.");
         return;
       }
-
-      let chapterKey = currentChapter.split('/').pop();
-      let keyWithPath = "chapters/" + chapterKey;
-
-      if (!json2[keyWithPath] || !Array.isArray(json2[keyWithPath].actions)) {
-        alert("Keine passenden Aktionen für " + keyWithPath);
+      let chapterKey = currentChapter.split("/").pop();
+      if (!json2[chapterKey]) {
+        alert("Kein passender Eintrag in JSON2 für " + chapterKey);
         return;
       }
-
-      let actions = json2[keyWithPath].actions;
+      let actions = json2[chapterKey].actions;
       let text = currentText;
 
       actions.forEach(action => {
         if (action.type === "insert_after") {
-          let regex = new RegExp(action.selector, "i");
-          text = text.replace(regex, match => match + "\n" + action.content_md);
-        } else if (action.type === "append") {
-          text += "\n" + action.content_md;
-        } else if (action.type === "remove_section") {
-          let regex = new RegExp(action.selector, "gi");
-          text = text.replace(regex, "");
-        } else if (action.type === "augment_blocks") {
-          if (action.fields && action.fields.length > 0) {
-            text += "\n\n### Erweiterte Infos\n";
-            action.fields.forEach(f => {
-              for (let [device, info] of Object.entries(f.mapping)) {
-                text += `- ${device}: ${info}\n`;
-              }
-            });
-          }
+          let regex = new RegExp(action.target, "i");
+          text = text.replace(regex, match => match + "\n" + action.text);
         }
       });
 
-      currentText = text;
       content.innerHTML = `<article><pre>${text}</pre></article>`;
     }
 
