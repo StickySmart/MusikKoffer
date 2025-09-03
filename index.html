@@ -2,165 +2,213 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Tiage Music Masterplan 25</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <title>Tiage Music Masterplan 25</title>
   <style>
-    body { font-family: monospace; margin: 0; padding: 0; background: #fff; color: #000; }
-    header { background: #111; color: #fff; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { margin: 0; font-size: 20px; }
-    .buttons button { background: #444; color: #fff; border: none; padding: 6px 10px; margin-left: 5px; cursor: pointer; }
-    .buttons button:hover { background: #666; }
-    #sidebar { background: #f5f5f5; padding: 10px; width: 240px; float: left; height: calc(100vh - 50px); overflow-y: auto; }
-    #content { margin-left: 260px; padding: 15px; white-space: pre-wrap; }
-    ul { padding-left: 20px; }
-    a { text-decoration: none; color: #0000aa; }
-    a:hover { text-decoration: underline; }
-    table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-    table, th, td { border: 1px solid #000; }
-    th, td { padding: 5px; text-align: left; }
+    body {
+      font-family: monospace, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+    }
+    header {
+      background: #111;
+      color: #fff;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    nav button {
+      margin-left: 5px;
+      padding: 6px 10px;
+      border: none;
+      background: #555;
+      color: white;
+      cursor: pointer;
+    }
+    nav button:hover {
+      background: #777;
+    }
+    #sidebar {
+      float: left;
+      width: 30%;
+      padding: 15px;
+      background: #f4f4f4;
+      min-height: 100vh;
+    }
+    #content {
+      margin-left: 30%;
+      padding: 15px;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Tiage Music Masterplan 25</h1>
+    <nav>
+      <button onclick="exportJson1()">ExpJ1</button>
+      <button onclick="exportJson2()">ExpJ2</button>
+      <button onclick="importJson2()">ImpJ2</button>
+    </nav>
+  </header>
 
-<header>
-  <h1>Tiage Music Masterplan 25</h1>
-  <div class="buttons">
-    <button onclick="exportJSON1()">ExpJ1</button>
-    <button onclick="exportJSON2()">ExpJ2</button>
-    <button onclick="importJSON2()">ImpJ2</button>
+  <div id="sidebar">
+    <h2>Kapitel</h2>
+    <ul id="chapters">
+      <li><a href="#" onclick="loadChapter('01_cover.md')">01 – Cover</a></li>
+      <li><a href="#" onclick="loadChapter('02_geraeteuebersicht.md')">02 – Geräteübersicht</a></li>
+      <li><a href="#" onclick="loadChapter('03_first_steps_audio_routing.md')">03 – First Steps – Audio & Routing</a></li>
+      <li><a href="#" onclick="loadChapter('04_first_steps_midi_setup.md')">04 – First Steps – MIDI & Setup</a></li>
+      <li><a href="#" onclick="loadChapter('05_workflows_audio.md')">05 – Workflows Audio</a></li>
+      <li><a href="#" onclick="loadChapter('06_workflows_midi.md')">06 – Workflows MIDI</a></li>
+      <li><a href="#" onclick="loadChapter('07_texture_lab.md')">07 – Texture Lab Einsatz</a></li>
+      <li><a href="#" onclick="loadChapter('08_zusammenfassung.md')">08 – Zusammenfassung</a></li>
+      <li><a href="#" onclick="loadChapter('09_outro.md')">09 – Outro</a></li>
+      <li><a href="#" onclick="loadChapter('10_anhang.md')">10 – Anhang</a></li>
+    </ul>
+
+    <h2>Module</h2>
+    <ul id="modules">
+      <li><a href="#" onclick="loadModule('geraetesetup.xml')">geraetesetup.xml</a></li>
+      <li><a href="#" onclick="loadModule('tiagemusic-geraetesetup.xsd')">tiagemusic-geraetesetup.xsd</a></li>
+      <li><a href="#" onclick="loadModule('presets.xml')">presets.xml</a></li>
+      <li><a href="#" onclick="loadModule('scenes.xml')">scenes.xml</a></li>
+      <li><a href="#" onclick="loadModule('workflows.xml')">workflows.xml</a></li>
+    </ul>
   </div>
-</header>
 
-<div id="sidebar">
-  <h3>Kapitel</h3>
-  <ul>
-    <li><a href="#" onclick="loadChapter('01_cover.md')">01 – Cover</a></li>
-    <li><a href="#" onclick="loadChapter('02_geraeteuebersicht.md')">02 – Geräteübersicht</a></li>
-    <li><a href="#" onclick="loadChapter('03_first_steps_audio_routing.md')">03 – First Steps – Audio & Routing</a></li>
-    <li><a href="#" onclick="loadChapter('04_first_steps_midi_setup.md')">04 – First Steps – MIDI & Setup</a></li>
-    <li><a href="#" onclick="loadChapter('05_workflows_audio.md')">05 – Workflows Audio</a></li>
-    <li><a href="#" onclick="loadChapter('06_workflows_midi.md')">06 – Workflows MIDI</a></li>
-    <li><a href="#" onclick="loadChapter('07_texture_lab.md')">07 – Texture Lab Einsatz</a></li>
-    <li><a href="#" onclick="loadChapter('08_summary.md')">08 – Zusammenfassung</a></li>
-    <li><a href="#" onclick="loadChapter('09_appendix.md')">09 – Anhang</a></li>
-    <li><a href="#" onclick="loadChapter('10_glossary.md')">10 – Glossar</a></li>
-  </ul>
+  <div id="content">
+    <p>Bitte Kapitel oder Modul wählen…</p>
+  </div>
 
-  <h3>Module</h3>
-  <ul>
-    <li><a href="#" onclick="loadModule('tiagemusic-geraetesetup.xsd')">tiagemusic-geraetesetup.xsd</a></li>
-    <li><a href="#" onclick="loadModule('geraetesetup.xml')">geraetesetup.xml</a></li>
-    <li><a href="#" onclick="loadModule('presets.xml')">presets.xml</a></li>
-    <li><a href="#" onclick="loadModule('scenes.xml')">scenes.xml</a></li>
-    <li><a href="#" onclick="loadModule('workflows.xml')">workflows.xml</a></li>
-  </ul>
-</div>
+  <script>
+    let currentFile = null;
+    let currentText = "";
 
-<div id="content">
-  <p>Bitte Kapitel oder Modul wählen…</p>
-</div>
-
-<script>
-  let currentText = "";
-  let currentFile = "";
-
-  function loadChapter(file) {
-    currentFile = file;
-    fetch("chapters/" + file)
-      .then(r => r.text())
-      .then(t => {
-        currentText = t;
-        document.getElementById("content").innerHTML = "<pre>" + t + "</pre>";
-      })
-      .catch(e => { document.getElementById("content").innerHTML = "Fehler: " + e; });
-  }
-
-  function loadModule(file) {
-    currentFile = file;
-    fetch("modules/" + file)
-      .then(r => r.text())
-      .then(t => {
-        let parser = new DOMParser();
-        let xml = parser.parseFromString(t, "application/xml");
-        let html = "<h3>XML Modul: " + file + "</h3>";
-        html += "<table><tr><th>Element</th><th>Wert</th></tr>";
-        xml.querySelectorAll("*").forEach(el => {
-          if (el.children.length === 0) {
-            html += "<tr><td>" + el.tagName + "</td><td>" + (el.textContent || "") + "</td></tr>";
-          }
-        });
-        html += "</table>";
-        document.getElementById("content").innerHTML = html;
-      })
-      .catch(e => { document.getElementById("content").innerHTML = "Fehler: " + e; });
-  }
-
-  function exportJSON1() {
-    let data = { file: currentFile, text: currentText };
-    downloadJSON(data, "export-json1.json");
-  }
-
-  function exportJSON2() {
-    let data = {
-      actions: [
-        { file: "02_geraeteuebersicht.md", type: "replace", target: "Zoom L-6", value: "Zoom L-6 (LiveTrak)" }
-      ]
-    };
-    downloadJSON(data, "export-json2.json");
-  }
-
-  function importJSON2() {
-    let input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-    input.onchange = e => {
-      let file = e.target.files[0];
-      let reader = new FileReader();
-      reader.onload = ev => {
-        try {
-          let json2 = JSON.parse(ev.target.result);
-          applyJson2Global(json2);
-        } catch(err) {
-          alert("Fehler beim Parsen: " + err);
-        }
-      };
-      reader.readAsText(file);
-    };
-    input.click();
-  }
-
-  function applyJson2Global(json2) {
-    if (!json2.actions || !Array.isArray(json2.actions)) {
-      alert("Ungültiges JSON2-Format");
-      return;
+    // Dummy Loader (Simulation)
+    function loadChapter(file) {
+      currentFile = file;
+      currentText = "# Inhalt von " + file + "\n\nBeispieltext mit Zoom L-6 und Roland J-6.\n";
+      document.getElementById("content").innerHTML = "<pre>" + currentText + "</pre>";
     }
 
-    json2.actions.forEach(action => {
-      if (action.file === currentFile) {
-        if (action.type === "replace") {
-          let regex = new RegExp(action.target, "g");
-          currentText = currentText.replace(regex, action.value);
-        } else if (action.type === "insert_after") {
-          let regex = new RegExp(action.target, "g");
-          currentText = currentText.replace(regex, action.target + "\n" + action.value);
-        }
+    function loadModule(file) {
+      currentFile = file;
+      currentText = "XML Modul: " + file + "\n\n<port id='1'/>\n<port id='2'/>";
+      document.getElementById("content").innerHTML = "<pre>" + currentText + "</pre>";
+    }
+
+    // JSON1 Export
+    function exportJson1() {
+      if (!currentFile || !currentText) {
+        alert("Kein Kapitel oder Modul geladen.");
+        return;
       }
-    });
+      let json1 = {
+        file: currentFile,
+        content: currentText
+      };
+      downloadFile("json1_export.json", JSON.stringify(json1, null, 2));
+    }
 
-    document.getElementById("content").innerHTML = "<pre>" + currentText + "</pre>";
-  }
+    // JSON2 Export (Template mit Aktionen)
+    function exportJson2() {
+      if (!currentFile || !currentText) {
+        alert("Kein Kapitel oder Modul geladen.");
+        return;
+      }
+      let json2 = {
+        actions: [
+          {
+            file: currentFile,
+            type: "replace",
+            target: "Zoom L-6",
+            value: "Zoom L-6 (LiveTrak)"
+          },
+          {
+            file: currentFile,
+            type: "delete",
+            target: "Roland J-6"
+          },
+          {
+            file: currentFile,
+            type: "insert_after",
+            target: "Beispieltext",
+            value: "→ Hinweis: beim L-6 immer MultiTrack wählen!"
+          }
+        ]
+      };
+      downloadFile("json2_export.json", JSON.stringify(json2, null, 2));
+    }
 
-  function downloadJSON(obj, filename) {
-    let blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
-    let url = URL.createObjectURL(blob);
-    let a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-</script>
+    // JSON2 Import und globale Anwendung
+    function importJson2() {
+      let input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json";
+      input.onchange = e => {
+        let file = e.target.files[0];
+        let reader = new FileReader();
+        reader.onload = evt => {
+          try {
+            let json2 = JSON.parse(evt.target.result);
+            applyJson2Global(json2);
+          } catch (err) {
+            alert("Fehler beim Importieren: " + err.message);
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
 
+    // Änderungen anwenden
+    function applyJson2Global(json2) {
+      if (!json2.actions || !Array.isArray(json2.actions)) {
+        alert("Ungültiges JSON2-Format");
+        return;
+      }
+
+      json2.actions.forEach(action => {
+        if (action.file === currentFile) {
+          if (action.type === "replace") {
+            let regex = new RegExp(action.target, "g");
+            currentText = currentText.replace(regex, action.value);
+
+          } else if (action.type === "insert_after") {
+            let regex = new RegExp(action.target, "g");
+            currentText = currentText.replace(regex, action.target + "\n" + action.value);
+
+          } else if (action.type === "delete") {
+            let regex = new RegExp(action.target, "g");
+            currentText = currentText.replace(regex, "");
+          }
+        }
+      });
+
+      document.getElementById("content").innerHTML = "<pre>" + currentText + "</pre>";
+    }
+
+    // Helper zum Download
+    function downloadFile(filename, content) {
+      let blob = new Blob([content], { type: "application/json" });
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
 </body>
 </html>
