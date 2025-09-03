@@ -4,77 +4,20 @@
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
   <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      margin: 0;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      background: #111;
-      color: #fff;
-    }
-    #menuBtn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    #topButtons {
-      display: flex;
-      gap: 0.5rem;
-    }
-    #topButtons button {
-      background: #444;
-      color: #fff;
-      border: none;
-      padding: 0.3rem 0.6rem;
-      cursor: pointer;
-    }
-    #sidebar {
-      width: 260px;
-      background: #f5f5f5;
-      border-right: 1px solid #ddd;
-      overflow-y: auto;
-      transition: transform 0.3s ease;
-    }
-    #sidebar.hidden {
-      transform: translateX(-100%);
-    }
-    #content {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-    }
-    main {
-      display: flex;
-      flex: 1;
-      height: calc(100vh - 60px);
-    }
-    table { border-collapse: collapse; margin: 10px 0; width: 100%; }
-    th, td { border: 1px solid #aaa; padding: 4px 6px; text-align: left; }
-    th { background: #eee; }
-    a.device-link { color: darkblue; cursor: pointer; text-decoration: underline; }
-    #commentSection {
-      margin-top: 20px;
-      padding: 1rem;
-      background-color: #f0f0f0;
-      border: 1px solid #ddd;
-      display: none;
-    }
-    #commentSection textarea {
-      width: 100%;
-      height: 100px;
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 14px;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: #111; color: #fff; }
+    #sidebar { width: 260px; background: #f5f5f5; border-right: 1px solid #ddd; overflow-y: auto; transition: transform 0.3s ease; }
+    #sidebar.hidden { transform: translateX(-100%); }
+    #content { flex: 1; padding: 1rem; overflow-y: auto; }
+    main { display: flex; flex: 1; height: calc(100vh - 60px); }
+    pre { background: #eee; padding: 0.5rem; overflow-x: auto; }
+    table { border-collapse: collapse; margin-top: 1rem; }
+    table, th, td { border: 1px solid #aaa; padding: 4px 8px; }
+    #comments { margin-top: 2rem; padding: 1rem; border-top: 2px solid #ccc; }
+    #comments textarea { width: 100%; height: 80px; }
+    #comments button { margin-top: 0.5rem; padding: 0.3rem 0.6rem; }
+    #topButtons button { background: #444; color: #fff; border: none; padding: 0.3rem 0.6rem; margin-left: 5px; cursor: pointer; }
+    #menuBtn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -95,27 +38,15 @@
     </section>
   </main>
 
-  <!-- Kommentarbereich -->
-  <div id="commentSection">
-    <h3>Kommentare</h3>
-    <textarea id="commentInput" placeholder="Kommentar für dieses Kapitel/Modul..."></textarea>
-    <br>
-    <button onclick="saveComment()">Kommentar speichern</button>
-  </div>
-
   <script>
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
-    const commentInput = document.getElementById("commentInput");
-    let allComments = {};
-    let currentPath = null;
 
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
     });
 
-    // Manifest laden
     async function loadManifest() {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
@@ -155,170 +86,78 @@
       }
     }
 
-    // Kapitel laden
     async function loadChapter(path) {
       try {
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-        content.innerHTML = `<article><pre>${text}</pre></article>`;
-        showComments(path);
+        content.innerHTML = `<article>${parseMarkdown(text)}</article>` + commentBox(path);
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
     }
 
-    // Modul laden + XML parsen
     async function loadModule(path) {
       try {
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-
         const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(text, "application/xml");
+        const xml = parser.parseFromString(text, "application/xml");
 
-        let html = `<h2>${path}</h2>`;
-
-        // Devices
-        const devices = xmlDoc.getElementsByTagName("device");
-        if (devices.length > 0) {
-          html += "<h3>Devices</h3><table><tr><th>Name</th><th>Hersteller</th><th>Typ</th></tr>";
-          Array.from(devices).forEach(dev => {
-            const id = dev.getAttribute("id");
-            html += `<tr>
-              <td><a href="#" class="device-link" data-id="${id}">${dev.getAttribute("name")}</a></td>
-              <td>${dev.getAttribute("manufacturer")||""}</td>
-              <td>${dev.getAttribute("type")||""}</td>
-            </tr>`;
-          });
-          html += "</table><div id='deviceConnections'></div>";
-        }
-
-        // Connections
-        const conns = Array.from(xmlDoc.getElementsByTagName("connection"));
-        if (conns.length > 0) {
-          html += "<h3>Connections</h3><table id='allConnections'><tr><th>Von</th><th>Nach</th><th>Signal</th></tr>";
-          conns.forEach(conn => {
-            html += `<tr data-from="${conn.getAttribute("fromDevice")}" data-to="${conn.getAttribute("toDevice")}">
-              <td>${conn.getAttribute("fromDevice")} → ${conn.getAttribute("fromPort")}</td>
-              <td>${conn.getAttribute("toDevice")} → ${conn.getAttribute("toPort")}</td>
-              <td>${conn.getAttribute("signal")||""}</td>
-            </tr>`;
-          });
-          html += "</table>";
-        }
-
-        // Presets
-        const presets = xmlDoc.getElementsByTagName("preset");
-        if (presets.length > 0) {
-          html += "<h3>Presets</h3><table><tr><th>ID</th><th>Name</th><th>Beschreibung</th></tr>";
-          Array.from(presets).forEach(p => {
-            html += `<tr><td>${p.getAttribute("id")}</td><td>${p.getElementsByTagName("name")[0]?.textContent||""}</td><td>${p.getElementsByTagName("description")[0]?.textContent||""}</td></tr>`;
-          });
-          html += "</table>";
-        }
-
-        // Scenes
-        const scenes = xmlDoc.getElementsByTagName("scene");
-        if (scenes.length > 0) {
-          html += "<h3>Scenes</h3><table><tr><th>ID</th><th>Name</th><th>Beschreibung</th></tr>";
-          Array.from(scenes).forEach(s => {
-            html += `<tr><td>${s.getAttribute("id")}</td><td>${s.getAttribute("name")}</td><td>${s.getElementsByTagName("description")[0]?.textContent||""}</td></tr>`;
-          });
-          html += "</table>";
-        }
-
-        content.innerHTML = html;
-
-        // Device-Link-Events
-        document.querySelectorAll(".device-link").forEach(link => {
-          link.addEventListener("click", e => {
-            e.preventDefault();
-            const deviceId = e.target.dataset.id;
-            showDeviceConnections(deviceId);
-          });
-        });
-
-        showComments(path);
+        let html = `<h2>XML Modul: ${path}</h2>`;
+        html += renderXML(xml.documentElement);
+        content.innerHTML = html + commentBox(path);
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
     }
 
-    function showDeviceConnections(deviceId) {
-      const rows = document.querySelectorAll("#allConnections tr[data-from], #allConnections tr[data-to]");
-      let result = `<h4>Verbindungen für ${deviceId}</h4><ul>`;
-      rows.forEach(row => {
-        if (row.dataset.from === deviceId || row.dataset.to === deviceId) {
-          result += `<li>${row.cells[0].innerText} → ${row.cells[1].innerText} (${row.cells[2].innerText})</li>`;
-        }
-      });
-      result += "</ul>";
-      document.getElementById("deviceConnections").innerHTML = result;
+    function renderXML(node) {
+      if (!node.children || node.children.length === 0) {
+        return `<p>${node.tagName}: ${node.textContent}</p>`;
+      }
+      let html = `<h3>${node.tagName}</h3><ul>`;
+      for (let child of node.children) {
+        html += `<li><strong>${child.tagName}:</strong> ${child.textContent} ${renderXML(child)}</li>`;
+      }
+      html += "</ul>";
+      return html;
     }
 
-    // Kommentare
-    function showComments(path) {
-      currentPath = path;
-      document.getElementById("commentSection").style.display = "block";
-      commentInput.value = allComments[path] || "";
+    function parseMarkdown(md) {
+      return md
+        .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+        .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+        .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+        .replace(/\*\*(.*)\*\*/gim, "<b>$1</b>")
+        .replace(/\*(.*)\*/gim, "<i>$1</i>")
+        .replace(/\n$/gim, "<br/>");
     }
 
-    function saveComment() {
-      if (currentPath) {
-        allComments[currentPath] = commentInput.value;
-        localStorage.setItem("comments", JSON.stringify(allComments));
-        alert("Kommentar gespeichert für " + currentPath);
+    function commentBox(id) {
+      return `
+        <div id="comments">
+          <h3>Kommentare zu: ${id}</h3>
+          <textarea id="commentInput_${id}"></textarea><br>
+          <button onclick="saveComment('${id}')">Kommentar speichern</button>
+          <div id="commentList_${id}"></div>
+        </div>
+      `;
+    }
+
+    function saveComment(id) {
+      const input = document.getElementById("commentInput_" + id);
+      const list = document.getElementById("commentList_" + id);
+      if (input.value.trim()) {
+        const p = document.createElement("p");
+        p.textContent = input.value;
+        list.appendChild(p);
+        input.value = "";
       }
     }
 
-    // Export JSON1
-    document.getElementById("exportJ1").addEventListener("click", () => {
-      const commentsArray = Object.keys(allComments).map(path => ({
-        path,
-        comment: allComments[path],
-        status: "Offen",
-        timestamp: new Date().toISOString()
-      }));
-
-      const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'comments.json';
-      a.click();
-    });
-
-    // Import JSON2
-    document.getElementById("importJ2").addEventListener("click", () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            const json2 = JSON.parse(e.target.result);
-            alert(`JSON2 importiert! Enthält ${json2.length || 0} Änderungen`);
-          } catch (error) {
-            alert('Fehler beim Importieren der Datei: ' + error);
-          }
-        };
-        reader.readAsText(file);
-      });
-      input.click();
-    });
-
-    // Beim Start Kommentare laden
-    window.onload = () => {
-      const saved = localStorage.getItem("comments");
-      if (saved) allComments = JSON.parse(saved);
-      loadManifest();
-    };
+    loadManifest();
   </script>
 </body>
 </html>
