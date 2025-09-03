@@ -5,7 +5,7 @@
   <title>Tiage Music Masterplan 25</title>
   <style>
     body {
-      font-family: monospace, sans-serif;
+      font-family: sans-serif;
       background: #fff;
       color: #000;
       margin: 0;
@@ -37,9 +37,6 @@
     #content {
       padding: 1rem;
     }
-    .chapter, .module {
-      margin-bottom: 2rem;
-    }
     h2 {
       border-bottom: 1px solid #ccc;
       padding-bottom: 4px;
@@ -50,6 +47,8 @@
       overflow-x: auto;
     }
   </style>
+  <!-- Markdown Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -74,22 +73,22 @@
     "03_first_steps_audio_routing.md": "# First Steps – Audio & Routing\n\n- Audio-Interface Modi: Automatic, MultiTrack\n- Scenes & Sound Pads"
   };
 
-  // --- JSON1 Export (aktueller Stand) ---
+  // --- JSON1 Export ---
   function exportJson1() {
     const blob = new Blob([JSON.stringify(chapters, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     downloadFile(url, "json1-export.json");
   }
 
-  // --- JSON2 Export (nur Platzhalter) ---
+  // --- JSON2 Export (Platzhalter) ---
   function exportJson2() {
-    const json2 = {}; // hier später Kommentare -> Aktionen
+    const json2 = {};
     const blob = new Blob([JSON.stringify(json2, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     downloadFile(url, "json2-export.json");
   }
 
-  // --- JSON2 Import (global anwenden) ---
+  // --- JSON2 Import ---
   function importJson2(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -105,7 +104,7 @@
     reader.readAsText(file);
   }
 
-  // --- Änderungen global einspielen ---
+  // --- Änderungen global anwenden ---
   function applyJson2Global(json2) {
     let changed = false;
 
@@ -128,13 +127,22 @@
     });
 
     if (changed) {
-      document.getElementById("content").innerHTML = "<p><b>Änderungen aus JSON2 wurden angewendet.</b></p><pre>" + JSON.stringify(chapters, null, 2) + "</pre>";
+      renderMarkdownAll();
     } else {
       document.getElementById("content").innerHTML = "<p><b>Keine Änderungen aus JSON2 angewendet.</b></p>";
     }
   }
 
-  // --- Helper zum Download ---
+  // --- Markdown Renderer für alle Kapitel ---
+  function renderMarkdownAll() {
+    let html = "";
+    Object.keys(chapters).forEach(file => {
+      html += `<div class="chapter"><h2>${file}</h2>${marked.parse(chapters[file])}</div>`;
+    });
+    document.getElementById("content").innerHTML = html;
+  }
+
+  // --- Helper ---
   function downloadFile(url, filename) {
     const a = document.createElement("a");
     a.href = url;
