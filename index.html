@@ -39,9 +39,6 @@
       padding: 0.3rem 0.6rem;
       cursor: pointer;
     }
-    #topButtons button:hover {
-      background: #666;
-    }
     #sidebar {
       width: 260px;
       background: #f5f5f5;
@@ -62,35 +59,26 @@
       flex: 1;
       height: calc(100vh - 60px);
     }
-    @media (max-width: 768px) {
-      #sidebar {
-        position: absolute;
-        top: 60px;
-        left: 0;
-        height: calc(100vh - 60px);
-        z-index: 10;
-      }
-      #sidebar.hidden {
-        transform: translateX(-100%);
-      }
-    }
     pre {
-      white-space: pre-wrap;
-      word-wrap: break-word;
       background: #fff;
-      border: 1px solid #ccc;
+      color: #000;
       padding: 10px;
+      border: 1px solid #ddd;
+      overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin: 1rem 0;
+      font-size: 14px;
     }
     th, td {
-      border: 1px solid #333;
-      padding: 4px;
+      border: 1px solid #000;
+      padding: 6px;
       text-align: left;
-      font-size: 14px;
+    }
+    th {
+      background: #eee;
     }
     #commentSection {
       margin-top: 20px;
@@ -116,6 +104,18 @@
     }
     #commentSection button:hover {
       background: #555;
+    }
+    @media (max-width: 768px) {
+      #sidebar {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+      #sidebar.hidden {
+        transform: translateX(-100%);
+      }
     }
   </style>
 </head>
@@ -159,8 +159,8 @@
         ).join("");
 
         html += "<h3>Module</h3>";
-        html += Object.entries(manifest.files).map(([key, file]) =>
-          `<p><a href="#" data-type="module" data-path="${file}">${key} – ${file}</a></p>`
+        html += manifest.modules.map(mod =>
+          `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
         ).join("");
 
         sidebar.innerHTML = html;
@@ -185,11 +185,12 @@
 
     async function loadChapter(path) {
       try {
-        currentChapter = path;
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
-        currentText = await res.text();
-        content.innerHTML = `<article><pre>${currentText}</pre></article>` + renderCommentSection(path);
+        const text = await res.text();
+        currentChapter = path;
+        currentText = text;
+        content.innerHTML = `<article><pre>${text}</pre></article>` + renderCommentSection(path);
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
@@ -201,55 +202,55 @@
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
 
-        let parsed = "";
         if (path.endsWith(".xml") || path.endsWith(".xsd")) {
-          parsed = parseXmlToTable(text);
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(text, "application/xml");
+          const tableHtml = parseXmlToTable(xmlDoc);
+          content.innerHTML = `<h3>XML Modul: ${path}</h3>` + tableHtml;
         } else {
-          parsed = `<pre>${text.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</pre>`;
+          const escaped = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          content.innerHTML = `<article><pre>${escaped}</pre></article>`;
         }
-        content.innerHTML = `<h3>XML Modul: ${path}</h3>${parsed}`;
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
     }
 
-    function parseXmlToTable(xmlString) {
-      try {
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(xmlString, "text/xml");
-        let rows = [];
-        xml.querySelectorAll("*").forEach(el => {
-          if (el.children.length === 0) {
-            rows.push(`<tr><td>${el.tagName}</td><td>${el.textContent}</td></tr>`);
-          }
-        });
-        return `<table><tr><th>Tag</th><th>Wert</th></tr>${rows.join("")}</table>`;
-      } catch (err) {
-        return `<pre>${xmlString}</pre>`;
-      }
+    function parseXmlToTable(xmlDoc) {
+      let rows = [];
+      xmlDoc.querySelectorAll("*").forEach(node => {
+        if (node.children.length === 0 && node.textContent.trim() !== "") {
+          rows.push(`<tr><td>${node.nodeName}</td><td>${node.textContent}</td></tr>`);
+        }
+      });
+      if (!rows.length) return "<p>(Keine Inhalte im XML geparst)</p>";
+      return `<table><thead><tr><th>Element</th><th>Wert</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
     }
 
     function renderCommentSection(path) {
       return `
-      <div id="commentSection">
-        <h3>Kommentare zu: ${path}</h3>
-        <textarea placeholder="Kommentar eingeben..."></textarea>
-        <br>
-        <button onclick="saveComment()">Speichern</button>
-      </div>`;
+        <div id="commentSection">
+          <h3>Kommentare zu: ${path}</h3>
+          <textarea placeholder="Kommentar eingeben..."></textarea><br>
+          <button onclick="saveComment()">Speichern</button>
+        </div>
+      `;
     }
 
     function saveComment() {
-      alert("Kommentar gespeichert (Demo)!");
+      const textarea = document.querySelector("#commentSection textarea");
+      if (!textarea) return;
+      const comment = textarea.value.trim();
+      if (!comment) return;
+      alert("Kommentar gespeichert: " + comment);
+      textarea.value = "";
     }
 
     // JSON1 Export
     document.getElementById("exportJ1").addEventListener("click", () => {
-      if (!currentChapter) {
-        alert("Kein Kapitel geladen!");
-        return;
-      }
       const data = {
+        timestamp: new Date().toISOString(),
+        note: "Demo-Export",
         chapter: currentChapter,
         text: currentText,
         comments: []
@@ -263,7 +264,7 @@
       URL.revokeObjectURL(url);
     });
 
-    // JSON2 Import
+    // JSON2 Import → Global
     document.getElementById("importJ2").addEventListener("click", async () => {
       const input = document.createElement("input");
       input.type = "file";
@@ -278,7 +279,6 @@
       input.click();
     });
 
-    // Globaler Import JSON2
     async function applyJson2(json2) {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
