@@ -3,198 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: monospace; margin: 0; padding: 0; background: #fff; color: #000; }
-    header { background: #111; color: #fff; padding: 10px; }
-    button { margin: 5px; padding: 5px 10px; }
-    #sidebar { background: #f4f4f4; padding: 10px; width: 250px; float: left; height: 100vh; overflow-y: auto; }
-    #content { margin-left: 260px; padding: 20px; }
-    pre { background: #fafafa; border: 1px solid #ddd; padding: 10px; white-space: pre-wrap; }
-    table { border-collapse: collapse; width: 100%; }
-    table, th, td { border: 1px solid #333; }
-    th, td { padding: 5px; text-align: left; }
+    body {
+      font-family: monospace;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+    }
+    header {
+      background: #111;
+      color: #fff;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    header .buttons button {
+      margin-left: 5px;
+      padding: 5px 10px;
+    }
+    #container {
+      display: flex;
+    }
+    #sidebar {
+      width: 250px;
+      padding: 15px;
+      border-right: 1px solid #ccc;
+      background: #f9f9f9;
+    }
+    #content {
+      flex: 1;
+      padding: 15px;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    ul li {
+      margin: 5px 0;
+    }
+    a {
+      text-decoration: none;
+      color: #0000cc;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>Tiage Music Masterplan 25</h1>
-    <button onclick="exportJson1()">ExpJ1</button>
-    <button onclick="exportJson2()">ExpJ2</button>
-    <button onclick="importJson2()">ImpJ2</button>
+    <div class="buttons">
+      <button onclick="exportJson1()">ExpJ1</button>
+      <button onclick="exportJson2()">ExpJ2</button>
+      <button onclick="importJson2()">ImpJ2</button>
+    </div>
   </header>
 
-  <div id="sidebar">
-    <h3>Kapitel</h3>
-    <ul id="chapterList"></ul>
-    <h3>Module</h3>
-    <ul id="moduleList"></ul>
+  <div id="container">
+    <div id="sidebar">
+      <h3>Kapitel</h3>
+      <ul id="chaptersList"></ul>
+
+      <h3>Module</h3>
+      <ul id="modulesList"></ul>
+    </div>
+    <div id="content">
+      Bitte Kapitel oder Modul wählen…
+    </div>
   </div>
 
-  <div id="content">
-    <h2>Bitte Kapitel oder Modul wählen…</h2>
-    <div id="chapterContent"></div>
-  </div>
-
-<script>
-// ======================
-// Globale Variablen
-// ======================
-let chapters = {
-  "01_cover.md": "# Cover",
-  "02_geraeteuebersicht.md": "# Geräteübersicht\n\nZoom L-6, Roland J-6, T-8, E-4, S-1",
-  "03_first_steps_audio_routing.md": "# First Steps – Audio & Routing\n\n## Geräte im Setup\n- Roland J-6\n- Roland T-8\n\n### Fixe Audio-Verkabelung\n| Gerät | Kanal | Quelle | Bemerkung |\n|-------|-------|--------|-----------|\n"
-};
-let modules = {
-  "geraetesetup.xml": "<devices><device id='U61' name='CME U6MIDI Pro'></device></devices>",
-  "tiagemusic-geraetesetup.xsd": "<xs:schema>...</xs:schema>"
-};
-let comments = {}; // { kapitel: [ {text, state} ] }
-
-// ======================
-// Init
-// ======================
-window.onload = function() {
-  renderSidebar();
-};
-
-// ======================
-// Sidebar
-// ======================
-function renderSidebar() {
-  let chList = document.getElementById("chapterList");
-  chList.innerHTML = "";
-  Object.keys(chapters).forEach(k => {
-    let li = document.createElement("li");
-    li.innerHTML = `<a href='#' onclick='loadChapter("${k}")'>${k}</a>`;
-    chList.appendChild(li);
-  });
-
-  let modList = document.getElementById("moduleList");
-  modList.innerHTML = "";
-  Object.keys(modules).forEach(m => {
-    let li = document.createElement("li");
-    li.innerHTML = `<a href='#' onclick='loadModule("${m}")'>${m}</a>`;
-    modList.appendChild(li);
-  });
-}
-
-// ======================
-// Kapitel laden
-// ======================
-function loadChapter(key) {
-  let cont = document.getElementById("chapterContent");
-  cont.innerHTML = `<pre>${chapters[key]}</pre>` + renderCommentSection(key);
-}
-function loadModule(name) {
-  let cont = document.getElementById("chapterContent");
-  cont.innerHTML = `<h3>XML Modul: ${name}</h3><pre>${modules[name]}</pre>`;
-}
-
-// ======================
-// Kommentare rendern
-// ======================
-function renderCommentSection(chapterKey) {
-  let list = comments[chapterKey] || [];
-  let html = `<div id="commentSection">
-      <h3>Kommentare zu: ${chapterKey}</h3>
-      <textarea id="commentInput"></textarea>
-      <button onclick="saveComment('${chapterKey}')">Speichern</button>
-      <ul>` +
-      list.map(c => `<li>[${c.state}] ${c.text}</li>`).join("") +
-      `</ul></div>`;
-  return html;
-}
-function saveComment(chapterKey) {
-  let txt = document.getElementById("commentInput").value;
-  if (!txt) return;
-  if (!comments[chapterKey]) comments[chapterKey] = [];
-  comments[chapterKey].push({ text: txt, state: "open" });
-  loadChapter(chapterKey);
-}
-
-// ======================
-// Export JSON1
-// ======================
-function exportJson1() {
-  let json1 = { chapters, modules, comments };
-  downloadFile("json1-export.json", JSON.stringify(json1, null, 2));
-}
-
-// ======================
-// Export JSON2 (neu: Aktionen)
-// ======================
-function exportJson2() {
-  let json2 = {};
-  Object.keys(comments).forEach(chKey => {
-    json2[chKey] = { actions: [] };
-    comments[chKey].forEach(c => {
-      if (c.state === "open") {
-        json2[chKey].actions.push({
-          type: "insert_after",
-          after: "Geräte im Setup",
-          content_md: "- [open] " + c.text
-        });
+  <script>
+    // Manifest mit allen 10 Kapiteln und 5 Modulen
+    const manifest = {
+      "chapters": [
+        { "id": "01", "title": "Cover", "path": "chapters/01_cover.md" },
+        { "id": "02", "title": "Geräteübersicht", "path": "chapters/02_geraeteuebersicht.md" },
+        { "id": "03", "title": "First Steps – Audio & Routing", "path": "chapters/03_first_steps_audio_routing.md" },
+        { "id": "04", "title": "First Steps – MIDI & Setup", "path": "chapters/04_first_steps_midi_setup.md" },
+        { "id": "05", "title": "Workflows Audio (inkl. Performance)", "path": "chapters/05_workflows_audio.md" },
+        { "id": "06", "title": "Workflows MIDI (inkl. Performance)", "path": "chapters/06_workflows_midi.md" },
+        { "id": "07", "title": "Texture Lab Einsatz", "path": "chapters/07_texture_lab.md" },
+        { "id": "08", "title": "Zusammenfassung", "path": "chapters/08_zusammenfassung.md" },
+        { "id": "09", "title": "Anhang", "path": "chapters/09_anhang.md" },
+        { "id": "10", "title": "Glossar", "path": "chapters/10_glossar.md" }
+      ],
+      "files": {
+        "schema": "tiagemusic-geraetesetup.xsd",
+        "setup": "geraetesetup.xml",
+        "presets": "presets.xml",
+        "scenes": "scenes.xml",
+        "workflows": "workflows.xml"
       }
-    });
-  });
-  downloadFile("json2-export.json", JSON.stringify(json2, null, 2));
-}
-
-// ======================
-// Import JSON2 (global)
-// ======================
-function importJson2() {
-  let inp = document.createElement("input");
-  inp.type = "file";
-  inp.accept = "application/json";
-  inp.onchange = e => {
-    let file = e.target.files[0];
-    let reader = new FileReader();
-    reader.onload = ev => {
-      let json2 = JSON.parse(ev.target.result);
-      applyJson2(json2);
     };
-    reader.readAsText(file);
-  };
-  inp.click();
-}
 
-// ======================
-// Anwenden von JSON2
-// ======================
-function applyJson2(json2) {
-  let applied = 0;
-  Object.keys(json2).forEach(chKey => {
-    if (!chapters[chKey]) return;
-    let content = chapters[chKey];
-    json2[chKey].actions.forEach(action => {
-      if (action.type === "insert_after") {
-        const regex = new RegExp(`(## ${action.after})`, "i");
-        content = content.replace(regex, `$1\n${action.content_md}`);
-        applied++;
-      }
-      if (action.type === "append_table") {
-        const regex = /\|[-]+.*\|\n([\s\S]*)$/m;
-        content = content.replace(regex, match => match + action.content_md + "\n");
-        applied++;
-      }
-    });
-    chapters[chKey] = content;
-  });
-  alert(applied > 0 ? `${applied} Änderungen angewendet.` : "Keine Änderungen aus JSON2 angewendet.");
-  renderSidebar();
-}
+    // Sidebar aufbauen
+    function buildSidebar() {
+      const chaptersList = document.getElementById('chaptersList');
+      const modulesList = document.getElementById('modulesList');
+      chaptersList.innerHTML = '';
+      modulesList.innerHTML = '';
 
-// ======================
-// Hilfsfunktion: Download
-// ======================
-function downloadFile(name, content) {
-  let a = document.createElement("a");
-  let file = new Blob([content], { type: "application/json" });
-  a.href = URL.createObjectURL(file);
-  a.download = name;
-  a.click();
-}
-</script>
+      manifest.chapters.forEach(ch => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.textContent = ch.id + ' – ' + ch.title;
+        a.href = '#';
+        a.onclick = () => loadChapter(ch.path);
+        li.appendChild(a);
+        chaptersList.appendChild(li);
+      });
+
+      Object.values(manifest.files).forEach(f => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.textContent = f;
+        a.href = '#';
+        a.onclick = () => loadModule(f);
+        li.appendChild(a);
+        modulesList.appendChild(li);
+      });
+    }
+
+    // Dummy Ladefunktionen
+    function loadChapter(path) {
+      document.getElementById('content').innerHTML =
+        '<h2>Kapitel: ' + path + '</h2><p>(Inhalt hier laden…)</p>';
+    }
+
+    function loadModule(file) {
+      document.getElementById('content').innerHTML =
+        '<h2>XML Modul: ' + file + '</h2><p>(XML-Inhalt hier parsen…)</p>';
+    }
+
+    // JSON Export-Funktionen (Platzhalter)
+    function exportJson1() {
+      alert("Export JSON1 – Rohdaten");
+    }
+
+    function exportJson2() {
+      alert("Export JSON2 – Update-Anleitung");
+    }
+
+    function importJson2() {
+      alert("Import JSON2 – Änderungen anwenden");
+    }
+
+    // Init
+    buildSidebar();
+  </script>
 </body>
 </html>
