@@ -1,77 +1,158 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tiagemusic-setup version="1.1">
+<tiagemusic-setup version="1.3">
 
-  <!-- Geräte -->
   <devices>
+
+    <!-- CME U6 #1 -->
     <device id="cme_u6_1" manufacturer="CME" type="MIDI Interface">
       <name>CME U6 #1</name>
       <ports>
-        <port id="in1"  type="MIDI In"  connector="DIN" status="active"/>
+        <port id="in1" type="MIDI In" connector="DIN" status="active"/>
+        <port id="in2" type="MIDI In" connector="DIN" status="not-in-use"/>
+        <port id="in3" type="MIDI In" connector="DIN" status="not-in-use"/>
         <port id="out1" type="MIDI Out" connector="DIN" status="active"/>
         <port id="out2" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="out3" type="MIDI Out" connector="DIN" status="active"/>
       </ports>
     </device>
 
-    <device id="merge5" manufacturer="Doremidi" type="MIDI Merge Box">
-      <name>Doremidi Merge 5</name>
+    <!-- CME U6 #2 -->
+    <device id="cme_u6_2" manufacturer="CME" type="MIDI Interface">
+      <name>CME U6 #2</name>
       <ports>
         <port id="in1" type="MIDI In" connector="DIN" status="active"/>
-        <port id="outA" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="in2" type="MIDI In" connector="DIN" status="not-in-use"/>
+        <port id="in3" type="MIDI In" connector="DIN" status="not-in-use"/>
+        <port id="out1" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="out2" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="out3" type="MIDI Out" connector="DIN" status="active"/>
       </ports>
     </device>
 
+    <!-- Doremidi Merge 5 -->
+    <device id="merge5" manufacturer="Doremidi" type="MIDI Merge Box">
+      <name>Merge 5</name>
+      <ports>
+        <port id="in1" type="MIDI In" connector="DIN" status="active"/>
+        <port id="in2" type="MIDI In" connector="DIN" status="active"/>
+        <port id="in3" type="MIDI In" connector="DIN" status="active"/>
+        <port id="in4" type="MIDI In" connector="DIN" status="active"/>
+        <port id="in5" type="MIDI In" connector="DIN" status="active"/>
+        <port id="outA" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="outB" type="MIDI Out" connector="DIN" status="active"/>
+      </ports>
+    </device>
+
+    <!-- Zoom L-6 -->
     <device id="zoom_l6" manufacturer="Zoom" type="Mixer/Recorder">
       <name>Zoom L-6</name>
       <ports>
         <port id="midi_in" type="MIDI In" connector="TRS-A" status="active"/>
-        <port id="midi_out" type="MIDI Out" connector="TRS-A" status="inactive"/>
+        <port id="midi_out" type="MIDI Out" connector="TRS-A" status="not-in-use"/>
       </ports>
-      <notes>Empfängt Program Change für Szenen und MMC für Transport.</notes>
+      <notes>
+        Empfängt Program Change (PC 1–9) → Szenenwechsel.
+        Empfängt MMC → Start/Stop/Rec.
+        Pads senden Note-On/Off (nur Out).
+      </notes>
     </device>
+
+    <!-- Quellen / Ziele -->
+    <device id="t8" manufacturer="Roland" type="Rhythm Machine">
+      <name>Roland T-8</name>
+      <ports>
+        <port id="out" type="MIDI Out" connector="TRS-A" status="active"/>
+      </ports>
+    </device>
+
+    <device id="j6" manufacturer="Roland" type="Synth/Sequencer">
+      <name>Roland J-6</name>
+      <ports>
+        <port id="out" type="MIDI Out" connector="TRS-A" status="active"/>
+        <port id="in" type="MIDI In" connector="TRS-A" status="active"/>
+      </ports>
+    </device>
+
+    <device id="s1" manufacturer="Roland" type="Synth">
+      <name>Roland S-1</name>
+      <ports>
+        <port id="out" type="MIDI Out" connector="TRS-A" status="active"/>
+        <port id="in" type="MIDI In" connector="TRS-A" status="active"/>
+      </ports>
+    </device>
+
+    <device id="texture_lab" manufacturer="Sonicware" type="Granular Synth">
+      <name>Sonicware LIVEN Texture Lab</name>
+      <ports>
+        <port id="in" type="MIDI In" connector="DIN" status="active"/>
+        <port id="out" type="MIDI Out" connector="DIN" status="not-in-use"/>
+      </ports>
+      <notes>Wird hier ausschließlich als MIDI-Empfänger genutzt.</notes>
+    </device>
+
   </devices>
+
+  <!-- Grundverkabelung -->
+  <connections>
+    <connection id="conn_t8_merge" fromDevice="t8" fromPort="out" toDevice="merge5" toPort="in1" signal="Clock+Notes"/>
+    <connection id="conn_j6_merge" fromDevice="j6" fromPort="out" toDevice="merge5" toPort="in2" signal="Notes"/>
+    <connection id="conn_s1_merge" fromDevice="s1" fromPort="out" toDevice="merge5" toPort="in3" signal="Notes"/>
+    <connection id="conn_merge_u6_1" fromDevice="merge5" fromPort="outA" toDevice="cme_u6_1" toPort="in1" signal="All merged"/>
+    <connection id="conn_merge_u6_2" fromDevice="merge5" fromPort="outB" toDevice="cme_u6_2" toPort="in1" signal="All merged"/>
+    <connection id="conn_u6_1_out1_j6" fromDevice="cme_u6_1" fromPort="out1" toDevice="j6" toPort="in" signal="Clock"/>
+    <connection id="conn_u6_1_out2_s1" fromDevice="cme_u6_1" fromPort="out2" toDevice="s1" toPort="in" signal="Clock"/>
+    <connection id="conn_u6_2_out1_tl" fromDevice="cme_u6_2" fromPort="out1" toDevice="texture_lab" toPort="in" signal="Clock+Notes"/>
+    <connection id="conn_u6_2_out2_zoom" fromDevice="cme_u6_2" fromPort="out2" toDevice="zoom_l6" toPort="midi_in" signal="PC+MMC"/>
+  </connections>
 
   <!-- Presets -->
   <presets>
-    <preset id="P01">
-      <name>S-1 Fokus</name>
-      <description>T-8 Clock an alle, J-6 spielt S-1, TL nur Clock.</description>
+    <preset id="P01" name="S-1 Fokus">
+      <description>T-8 Clock an alle; J-6 Notes → S-1; TL erhält nur Clock.</description>
     </preset>
-    <preset id="P02">
-      <name>Texture Fokus</name>
-      <description>J-6 spielt Texture Lab, S-1 bekommt nur Clock.</description>
+    <preset id="P02" name="Texture-Fokus">
+      <description>T-8 Clock an alle; J-6 Notes → Texture Lab; S-1 nur Clock.</description>
+    </preset>
+    <preset id="P03" name="Layer S-1 + Texture Lab">
+      <description>J-6 Notes gedoppelt → S-1 + TL; T-8 Clock an alle.</description>
     </preset>
   </presets>
 
-  <!-- Szenen -->
+  <!-- Scenes -->
   <scenes>
-    <scene id="S01">
-      <name>Jam Setup</name>
-      <description>Alle Instrumente offen, neutraler Mix.</description>
-    </scene>
-    <scene id="S02">
-      <name>Performance Fokus</name>
-      <description>Vocals im Vordergrund, Synths reduziert.</description>
-    </scene>
+    <scene id="S01" name="Jam / Full Setup" pc="1"/>
+    <scene id="S02" name="Instrumental Fokus" pc="2"/>
+    <scene id="S03" name="Performance Fokus (Vocals)" pc="3"/>
   </scenes>
 
   <!-- Workflows -->
   <workflows>
-    <workflow id="W01">
-      <name>Jam Setup</name>
-      <presets>
-        <preset device="cme_u6_1" ref="P01"/>
-      </presets>
-      <scene device="zoom_l6" ref="S01"/>
-      <description>Spielbar mit 2 Händen, ideal für freie Sessions.</description>
+    <workflow id="W01" scene="S01" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
+      <description>Jam Setup: J-6 spielt S-1, Clock an alle. Texture Lab nur Clock. → Gut spielbar mit 2 Händen.</description>
     </workflow>
-
-    <workflow id="W02">
-      <name>Performance Setup</name>
-      <presets>
-        <preset device="cme_u6_1" ref="P02"/>
-      </presets>
-      <scene device="zoom_l6" ref="S02"/>
-      <description>Performance-Modus mit Vocal-Fokus.</description>
+    <workflow id="W02" scene="S01" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
+      <description>Jam Setup: Texture-Fokus. J-6 Noten gehen ins TL, S-1 läuft nur im Sync. → Live gut machbar.</description>
+    </workflow>
+    <workflow id="W03" scene="S01" presetU6_1="P03" presetU6_2="P03" playable="false" hands="3">
+      <description>Jam Setup: Layer von J-6 → S-1 + TL gleichzeitig. → Zu viel parallel, kaum mit 2 Händen machbar.</description>
+    </workflow>
+    <workflow id="W04" scene="S02" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
+      <description>Instrumental Fokus: Vocals gemutet. J-6 → S-1, TL bleibt im Hintergrund. → Gut live spielbar.</description>
+    </workflow>
+    <workflow id="W05" scene="S02" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
+      <description>Instrumental Fokus: TL übernimmt Melodie, S-1 nur Clock. → Sehr spielbar.</description>
+    </workflow>
+    <workflow id="W06" scene="S02" presetU6_1="P03" presetU6_2="P03" playable="false" hands="3">
+      <description>Instrumental Fokus: Layer von J-6 → S-1 + TL, dazu Szeneumschaltung am L-6. → Live kaum bedienbar.</description>
+    </workflow>
+    <workflow id="W07" scene="S03" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
+      <description>Performance Fokus: Vocals im Vordergrund. J-6 → S-1, Clock hält Sync. → Einfach nutzbar.</description>
+    </workflow>
+    <workflow id="W08" scene="S03" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
+      <description>Performance Fokus: TL übernimmt Flächen, S-1 minimal. → Spielbar.</description>
+    </workflow>
+    <workflow id="W09" scene="S03" presetU6_1="P03" presetU6_2="P03" playable="false" hands="3">
+      <description>Performance Fokus: Layer + Vocals im Vordergrund. → Zu viele Layer gleichzeitig, nicht sinnvoll mit 2 Händen.</description>
     </workflow>
   </workflows>
 
