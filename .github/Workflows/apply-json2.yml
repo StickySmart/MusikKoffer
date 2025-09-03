@@ -1,26 +1,34 @@
-name: Apply JSON2 to Chapters
+# .github/workflows/apply-json2.yml
+name: Apply JSON2 Changes
 
 on:
-  workflow_dispatch:   # Manuell starten
   push:
     paths:
-      - 'json2-*.json'   # startet automatisch, wenn du eine neue JSON2 hochlädst
+      - 'imports/*.json'   # Workflow startet nur, wenn eine JSON2 ins imports/ gelegt wird
 
 jobs:
   apply-json2:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Repository auschecken
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Node.js einrichten
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Dependencies installieren
-        run: npm install js-yaml
+      - name: Install dependencies
+        run: npm install jsdom
 
-      - name: JSON2 Script ausführen
+      - name: Run JSON2 processor
         run: node scripts/apply-json2.js
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "json2-bot"
+          git config --global user.email "bot@example.com"
+          git add chapters/*.md
+          git commit -m "Apply JSON2 changes"
+          git push
