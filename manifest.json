@@ -27,3 +27,25 @@
     },
     {
       "id": "scenes",
+      "source": "scenes.xml",
+      "purpose": "Speichert Audio-Mixer-Szenen des Zoom L-6 (z. B. Neutral, Texture Fokus, S-1 Fokus)."
+    },
+    {
+      "id": "workflows",
+      "source": "workflows.xml",
+      "purpose": "Kombinationen aus Presets und Szenen mit Spielbarkeitsangaben (hands, playable)."
+    }
+  ],
+  "chapters": [
+    { "id": "01", "title": "Cover", "path": "chapters/01_cover.md" },
+    { "id": "02", "title": "First Steps – Audio", "path": "chapters/02_first_steps_audio.md" },
+    { "id": "03", "title": "First Steps – MIDI", "path": "chapters/03_first_steps_midi.md" },
+    { "id": "04", "title": "Workflows Zoom L-6", "path": "chapters/04_workflows_zoom_l6.md" },
+    { "id": "05", "title": "Geräteübersicht", "path": "chapters/05_geraeteuebersicht.md" },
+    { "id": "06", "title": "MIDI-Setup mit Merge 5 + U6", "path": "chapters/06_midi_setup.md" },
+    { "id": "07", "title": "Audio-Routing mit Zoom L-6", "path": "chapters/07_audio_routing.md" },
+    { "id": "08", "title": "Texture Lab Einsatz", "path": "chapters/08_texture_lab.md" },
+    { "id": "09", "title": "Performance Workflows", "path": "chapters/09_performance_workflows.md" },
+    { "id": "10", "title": "Zusammenfassung", "path": "chapters/10_zusammenfassung.md" }
+  ]
+}
