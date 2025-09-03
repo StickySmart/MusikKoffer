@@ -10,8 +10,6 @@
       margin: 0;
       height: 100vh;
       font-family: Arial, sans-serif;
-      background: #fff;
-      color: #000;
     }
     header {
       display: flex;
@@ -59,23 +57,27 @@
       flex: 1;
       height: calc(100vh - 60px);
     }
-    @media (max-width: 768px) {
-      #sidebar {
-        position: absolute;
-        top: 60px;
-        left: 0;
-        height: calc(100vh - 60px);
-        z-index: 10;
-      }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
-
-    /* Kommentarbereich */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1rem 0;
+    }
+    table, th, td {
+      border: 1px solid #333;
+    }
+    th, td {
+      padding: 6px;
+      text-align: left;
+    }
     #commentSection {
       margin-top: 20px;
       padding: 15px;
       background: #f9f9f9;
       border: 1px solid #ddd;
-      display: none;
     }
     #commentSection textarea {
       width: 100%;
@@ -95,6 +97,18 @@
     }
     #commentSection button:hover {
       background: #555;
+    }
+    @media (max-width: 768px) {
+      #sidebar {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+      #sidebar.hidden {
+        transform: translateX(-100%);
+      }
     }
   </style>
 </head>
@@ -116,22 +130,13 @@
     </section>
   </main>
 
-  <!-- Kommentarbereich -->
-  <div id="commentSection">
-    <h3 id="commentTitle"></h3>
-    <textarea id="commentInput" placeholder="Kommentar eingeben..."></textarea><br>
-    <button id="saveComment">Speichern</button>
-    <div id="existingComments"></div>
-  </div>
-
   <script>
+    let currentChapter = null;
+    let currentText = "";
+
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
-
-    let currentChapter = null;
-    let currentText = "";
-    let comments = {}; // JSON1 Rohdaten
 
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
@@ -148,8 +153,8 @@
         ).join("");
 
         html += "<h3>Module</h3>";
-        html += Object.entries(manifest.files).map(([id, path]) =>
-          `<p><a href="#" data-type="module" data-path="${path}">${id} – ${path}</a></p>`
+        html += manifest.modules.map(mod =>
+          `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
         ).join("");
 
         sidebar.innerHTML = html;
@@ -179,10 +184,7 @@
         const text = await res.text();
         currentChapter = path;
         currentText = text;
-        content.innerHTML = `<article><pre>${text}</pre></article>`;
-        document.getElementById("commentSection").style.display = "block";
-        document.getElementById("commentTitle").innerText = "Kommentare zu: " + path;
-       
+        content.innerHTML = `<article><pre>${text}</pre></article>` + renderComments(path);
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
@@ -192,61 +194,84 @@
       try {
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
-        const text = await res.text();
+        const xmlText = await res.text();
+        currentChapter = null;
         const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(text, "application/xml");
+        const xml = parser.parseFromString(xmlText, "application/xml");
 
         let html = `<h3>XML Modul: ${path}</h3>`;
-        html += `<table border="1" style="border-collapse:collapse;width:100%;">`;
-
-        xmlDoc.querySelectorAll("*").forEach(node => {
-          if (node.children.length === 0) {
-            html += `<tr><td>${node.nodeName}</td><td>${node.textContent}</td></tr>`;
-          }
-        });
-
-        html += "</table>";
+        html += parseXmlToHtml(xml.documentElement);
         content.innerHTML = html;
-        document.getElementById("commentSection").style.display = "none"; // keine Kommentare bei Modulen
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
     }
 
-    function renderComments(path) {
-      const list = comments[path] || [];
-      document.getElementById("existingComments").innerHTML = list
-        .map(c => `<p>[${c.status}] ${c.text}</p>`)
-        .join("");
+    function parseXmlToHtml(node) {
+      let html = "";
+      if (node.children.length === 0) {
+        return `<p><b>${node.nodeName}:</b> ${node.textContent}</p>`;
+      }
+      html += `<h4>${node.nodeName}</h4><ul>`;
+      Array.from(node.children).forEach(child => {
+        html += `<li>${parseXmlToHtml(child)}</li>`;
+      });
+      html += `</ul>`;
+      return html;
     }
 
-    document.getElementById("saveComment").addEventListener("click", () => {
-      const input = document.getElementById("commentInput").value.trim();
-      if (!input || !currentChapter) return;
-      if (!comments[currentChapter]) comments[currentChapter] = [];
-      comments[currentChapter].push({ status: "open", text: input });
-      document.getElementById("commentInput").value = "";
-      
-    });
+    function renderComments(path) {
+      return `
+        <div id="commentSection">
+          <h3>Kommentare zu: ${path}</h3>
+          <textarea id="commentInput" placeholder="Kommentar eingeben..."></textarea>
+          <br>
+          <button onclick="saveComment()">Speichern</button>
+          <div id="commentList"></div>
+        </div>
+      `;
+    }
 
+    function saveComment() {
+      const input = document.getElementById("commentInput");
+      const comment = input.value.trim();
+      if (!comment) return;
+      const list = document.getElementById("commentList");
+      list.innerHTML += `<p>${comment}</p>`;
+      input.value = "";
+    }
+
+    // Import/Export JSON
     document.getElementById("exportJ1").addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(comments, null, 2)], { type: "application/json" });
+      if (!currentChapter) {
+        alert("Kein Kapitel geladen.");
+        return;
+      }
+      const comments = Array.from(document.querySelectorAll("#commentList p"))
+        .map(p => p.innerText);
+      const json1 = { chapter: currentChapter, text: currentText, comments };
+      const blob = new Blob([JSON.stringify(json1, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
+      a.href = url;
       a.download = "json1-export.json";
       a.click();
+      URL.revokeObjectURL(url);
     });
 
-    document.getElementById("importJ2").addEventListener("click", async () => {
+    document.getElementById("importJ2").addEventListener("click", () => {
       const input = document.createElement("input");
       input.type = "file";
       input.accept = "application/json";
       input.onchange = async e => {
         const file = e.target.files[0];
-        if (!file) return;
         const text = await file.text();
-        const json2 = JSON.parse(text);
-        applyJson2(json2);
+        try {
+          const json2 = JSON.parse(text);
+          applyJson2(json2);
+        } catch (err) {
+          alert("Fehler beim Importieren der Datei: " + err);
+        }
       };
       input.click();
     });
@@ -256,22 +281,20 @@
         alert("Kein Kapitel geladen.");
         return;
       }
-      let chapterKey = currentChapter.split("/").pop();
+      let chapterKey = currentChapter.split('/').pop();
       if (!json2[chapterKey]) {
-        alert("Kein passender Eintrag in JSON2 für " + chapterKey);
+        alert("Kein Eintrag in JSON2 für " + chapterKey);
         return;
       }
-      let actions = json2[chapterKey].actions;
+      let actions = json2[chapterKey].actions || [];
       let text = currentText;
-
       actions.forEach(action => {
         if (action.type === "insert_after") {
           let regex = new RegExp(action.target, "i");
-          text = text.replace(regex, match => match + "\n" + action.text);
+          text = text.replace(regex, `$&\n${action.text}`);
         }
       });
-
-      content.innerHTML = `<article><pre>${text}</pre></article>`;
+      content.innerHTML = `<article><pre>${text}</pre></article>` + renderComments(currentChapter);
     }
 
     loadManifest();
