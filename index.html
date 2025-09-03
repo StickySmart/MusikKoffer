@@ -3,44 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Basis-Styles -->
+  <link rel="stylesheet" href="comments.css">
   <style>
     body {
+      display: flex;
+      flex-direction: column;
       margin: 0;
+      height: 100vh;
       font-family: Arial, sans-serif;
-      background: #fff;
-      color: #000;
     }
     header {
-      background: #111;
-      color: #fff;
-      padding: 0.5rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 0.5rem 1rem;
+      background: #111;
+      color: #fff;
+    }
+    #menuBtn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    #topButtons {
+      display: flex;
+      gap: 0.5rem;
     }
     #topButtons button {
       background: #444;
       color: #fff;
       border: none;
       padding: 0.3rem 0.6rem;
-      margin-right: 0.3rem;
       cursor: pointer;
-    }
-    #topButtons button:hover {
-      background: #666;
-    }
-    main {
-      display: flex;
-      height: calc(100vh - 60px);
     }
     #sidebar {
       width: 260px;
       background: #f5f5f5;
       border-right: 1px solid #ddd;
-      padding: 1rem;
       overflow-y: auto;
       transition: transform 0.3s ease;
     }
@@ -51,28 +52,13 @@
       flex: 1;
       padding: 1rem;
       overflow-y: auto;
+      white-space: pre-wrap; /* MD besser anzeigen */
     }
-    a {
-      color: #000;
-      text-decoration: none;
+    main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
     }
-    a:hover {
-      text-decoration: underline;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0;
-    }
-    th, td {
-      border: 1px solid #000;
-      padding: 6px;
-      text-align: left;
-    }
-    th {
-      background: #eee;
-    }
-    /* Mobile Optimierung */
     @media (max-width: 768px) {
       #sidebar {
         position: absolute;
@@ -86,10 +72,6 @@
       }
     }
   </style>
-
-  <!-- Kommentare laden -->
-  <link rel="stylesheet" href="comments.css">
-  <script src="comments.js" defer></script>
 </head>
 <body>
   <header>
@@ -109,17 +91,27 @@
     </section>
   </main>
 
+  <!-- Kommentarbereich -->
+  <div id="commentSection">
+    <h3>Kommentar zu diesem Kapitel</h3>
+    <textarea id="commentInput" placeholder="Deine Notiz nur für dieses Kapitel..."></textarea>
+    <div>
+      <button id="saveCommentBtn">Kommentar speichern</button>
+    </div>
+  </div>
+
+  <script src="comments.js"></script>
   <script>
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
-    let currentPath = "";
+    let currentChapter = null;
+    let currentText = "";
 
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
     });
 
-    // Manifest laden
     async function loadManifest() {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
@@ -146,7 +138,6 @@
             e.preventDefault();
             const type = e.target.dataset.type;
             const path = e.target.dataset.path;
-            currentPath = path;
             if (type === "chapter") {
               await loadChapter(path);
             } else if (type === "module") {
@@ -160,86 +151,83 @@
       }
     }
 
-    // Markdown laden
     async function loadChapter(path) {
       try {
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-
-        content.innerHTML = `<article><pre>${text}</pre></article>
-          <section id="commentSection">
-            <h3>Kommentare zu: <span id="commentPath">${path}</span></h3>
-            <textarea id="commentInput" placeholder="Kommentar eingeben..."></textarea>
-            <br>
-            <button onclick="saveComment(currentPath, document.getElementById('commentInput').value)">Speichern</button>
-            <div id="commentList" class="commentList"></div>
-          </section>`;
-
-        renderComments(path);
+        currentChapter = path;
+        currentText = text;
+        content.innerHTML = `<article>${text}</article>`;
+        document.getElementById("commentSection").style.display = "block";
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
     }
 
-    // XML laden und parsen
     async function loadModule(path) {
       try {
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, "application/xml");
-
-        let html = `<h2>XML Modul: ${path}</h2>`;
-
-        // Geräte darstellen
-        const devices = xml.getElementsByTagName("device");
-        if (devices.length > 0) {
-          html += "<h3>Geräte</h3><table><tr><th>ID</th><th>Name</th><th>Typ</th></tr>";
-          Array.from(devices).forEach(dev => {
-            html += `<tr>
-              <td>${dev.getAttribute("id") || ""}</td>
-              <td>${dev.getAttribute("name") || ""}</td>
-              <td>${dev.getAttribute("type") || ""}</td>
-            </tr>`;
-          });
-          html += "</table>";
-        }
-
-        // Presets darstellen
-        const presets = xml.getElementsByTagName("preset");
-        if (presets.length > 0) {
-          html += "<h3>Presets</h3><table><tr><th>ID</th><th>Name</th><th>Beschreibung</th></tr>";
-          Array.from(presets).forEach(pre => {
-            html += `<tr>
-              <td>${pre.getAttribute("id") || ""}</td>
-              <td>${pre.getElementsByTagName("name")[0]?.textContent || ""}</td>
-              <td>${pre.getElementsByTagName("description")[0]?.textContent || ""}</td>
-            </tr>`;
-          });
-          html += "</table>";
-        }
-
-        // Szenen darstellen
-        const scenes = xml.getElementsByTagName("scene");
-        if (scenes.length > 0) {
-          html += "<h3>Szenen</h3><table><tr><th>ID</th><th>Name</th><th>Beschreibung</th></tr>";
-          Array.from(scenes).forEach(sc => {
-            html += `<tr>
-              <td>${sc.getAttribute("id") || ""}</td>
-              <td>${sc.getAttribute("name") || ""}</td>
-              <td>${sc.getElementsByTagName("description")[0]?.textContent || ""}</td>
-            </tr>`;
-          });
-          html += "</table>";
-        }
-
-        content.innerHTML = html;
+        const escaped = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        currentChapter = path;
+        currentText = text;
+        content.innerHTML = `<article><pre>${escaped}</pre></article>`;
+        document.getElementById("commentSection").style.display = "none";
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
+    }
+
+    // --- JSON2 Import mit Aktionen ---
+    document.getElementById("importJ2").addEventListener("click", () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const json2 = JSON.parse(e.target.result);
+            applyJson2(json2);
+          } catch (error) {
+            alert('Fehler beim Importieren: ' + error);
+          }
+        };
+        reader.readAsText(file);
+      });
+      input.click();
+    });
+
+    function applyJson2(json2) {
+      if (!currentChapter || !json2[currentChapter]) {
+        alert("Kein passender Eintrag in JSON2 für " + currentChapter);
+        return;
+      }
+      let actions = json2[currentChapter].actions;
+      let text = currentText;
+
+      actions.forEach(action => {
+        if (action.type === "insert_after") {
+          let regex = new RegExp(action.target, "i");
+          text = text.replace(regex, match => match + "\n" + action.text);
+        } else if (action.type === "append") {
+          text += "\n" + action.text;
+        } else if (action.type === "remove_section") {
+          let regex = new RegExp(`# ${action.section}[\\s\\S]*?(?=\\n#|$)`, "gi");
+          text = text.replace(regex, "");
+        } else if (action.type === "search_replace") {
+          let regex = new RegExp(action.search, "gi");
+          text = text.replace(regex, action.replace);
+        }
+      });
+
+      currentText = text;
+      content.innerHTML = `<article>${text}</article>`;
     }
 
     loadManifest();
