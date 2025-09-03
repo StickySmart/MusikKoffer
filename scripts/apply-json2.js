@@ -1,40 +1,56 @@
-async function applyJson2(json2) {
-  try {
-    const res = await fetch("manifest.json?v=" + Date.now());
-    const manifest = await res.json();
+function applyJson2(json2) {
+  if (!json2) {
+    alert("Keine JSON2-Daten geladen.");
+    return;
+  }
 
-    let results = "";
+  let applied = 0;
 
-    // alle Kapitel aus dem Manifest laden
-    for (let ch of manifest.chapters) {
-      const chapterKey = ch.path.split("/").pop(); // z.B. 03_first_steps_audio_routing.md
-      const resCh = await fetch(ch.path);
-      if (!resCh.ok) continue;
+  // Alle Kapitel in JSON2 durchgehen
+  Object.keys(json2).forEach(chapterKey => {
+    const entry = json2[chapterKey];
+    if (!entry.actions) return;
 
-      let text = await resCh.text();
+    entry.actions.forEach(action => {
+      // Stelle sicher, dass wir den richtigen Container für das Kapitel haben
+      const container = document.querySelector(`[data-chapter="${chapterKey}"]`);
+      if (!container) return;
 
-      // nur dann anwenden, wenn JSON2 was für dieses Kapitel hat
-      if (json2[chapterKey] && Array.isArray(json2[chapterKey].actions)) {
-        json2[chapterKey].actions.forEach(action => {
-          if (action.type === "insert_after") {
-            let regex = new RegExp(action.target, "i");
-            text = text.replace(regex, match => match + "\n" + action.text);
-          } else if (action.type === "replace") {
-            let regex = new RegExp(action.target, "i");
-            text = text.replace(regex, action.text);
-          } else if (action.type === "append") {
-            text += "\n" + action.text;
+      let text = container.innerHTML;
+
+      if (action.type === "insert_after") {
+        let targetEl = container.querySelector(action.selector);
+        if (targetEl) {
+          targetEl.insertAdjacentHTML("afterend", action.content_md);
+          applied++;
+        }
+      }
+
+      if (action.type === "append") {
+        container.insertAdjacentHTML("beforeend", action.content_md);
+        applied++;
+      }
+
+      if (action.type === "remove_section") {
+        let targets = container.querySelectorAll(action.selector);
+        targets.forEach(t => t.remove());
+        applied++;
+      }
+
+      if (action.type === "augment_blocks") {
+        // Spezialfall – Mapping anwenden
+        let lis = container.querySelectorAll(action.selector);
+        lis.forEach(li => {
+          let name = li.textContent.trim();
+          let extra = action.fields[0].mapping[name];
+          if (extra) {
+            li.innerHTML += ` – <em>${extra}</em>`;
+            applied++;
           }
         });
       }
+    });
+  });
 
-      results += `<h3>${ch.title}</h3><pre>${text}</pre>`;
-    }
-
-    if (!results) results = "<p>Keine Änderungen aus JSON2 angewendet.</p>";
-    content.innerHTML = results;
-
-  } catch (err) {
-    content.innerHTML = `<p style="color:red">Fehler beim globalen Import: ${err}</p>`;
-  }
+  alert(applied > 0 ? `${applied} Änderungen aus JSON2 angewendet.` : "Keine Änderungen aus JSON2 angewendet.");
 }
