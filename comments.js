@@ -1,70 +1,96 @@
-let comments = {};
+// comments.js
 
-// Kommentare laden
-function loadComments() {
-  comments = JSON.parse(localStorage.getItem("comments") || "{}");
-}
+const allComments = {};
+let currentChapter = null;
 
-// Kommentare speichern
-function saveComment(path, text) {
-  if (!comments[path]) comments[path] = [];
-  comments[path].push({ text, status: "open", date: new Date().toISOString() });
-  localStorage.setItem("comments", JSON.stringify(comments));
-  renderComments(path);
-}
+// Kapitel laden und Kommentare zuordnen
+async function loadChapter(path) {
+  try {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`${path} → ${res.status}`);
+    const text = await res.text();
 
-// Kommentare rendern
-function renderComments(path) {
-  const list = document.getElementById("commentList");
-  if (!list) return;
-  list.innerHTML = "";
+    document.getElementById("content").innerHTML = `<article><pre>${text}</pre></article>`;
+    document.getElementById("commentSection").style.display = "block";
 
-  if (comments[path]) {
-    comments[path].forEach((c, i) => {
-      const div = document.createElement("div");
-      div.className = "commentItem";
-      div.textContent = `[${c.status}] ${c.text}`;
-      list.appendChild(div);
-    });
+    currentChapter = path;
+    document.getElementById("commentInput").value = allComments[path]?.comment || "";
+  } catch (err) {
+    document.getElementById("content").innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
   }
 }
 
-// Export JSON1
-function exportComments() {
-  loadComments();
-  const blob = new Blob([JSON.stringify(comments, null, 2)], { type: "application/json" });
+// Kommentar speichern
+document.getElementById("saveCommentBtn").addEventListener("click", () => {
+  if (!currentChapter) {
+    alert("Kein Kapitel ausgewählt.");
+    return;
+  }
+  allComments[currentChapter] = {
+    chapter: currentChapter,
+    comment: document.getElementById("commentInput").value,
+    status: "Offen",
+    timestamp: new Date().toISOString()
+  };
+  alert("Kommentar gespeichert.");
+});
+
+// --- Export JSON1 ---
+document.getElementById("exportJ1").addEventListener("click", () => {
+  const commentsArray = Object.values(allComments);
+  if (commentsArray.length === 0) {
+    alert("Noch keine Kommentare vorhanden.");
+    return;
+  }
+  const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+  const a = document.createElement('a');
   a.href = url;
-  a.download = "comments_export.json";
+  a.download = 'comments.json';
   a.click();
-}
+});
 
-// Import JSON2 (Anleitung)
-async function importComments(file) {
-  const text = await file.text();
-  const json = JSON.parse(text);
+// --- Import JSON2 ---
+document.getElementById("importJ2").addEventListener("click", () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-  Object.entries(json).forEach(([path, { actions }]) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const json2 = JSON.parse(e.target.result);
+        applyJson2(json2);
+      } catch (error) {
+        alert('Fehler beim Importieren von JSON2: ' + error);
+      }
+    };
+    reader.readAsText(file);
+  });
+  input.click();
+});
+
+// Änderungen aus JSON2 anwenden
+function applyJson2(json2) {
+  Object.entries(json2).forEach(([file, { actions }]) => {
     actions.forEach(action => {
-      if (action.type === "insert") {
-        saveComment(path, action.text);
-      }
-      if (action.type === "replace") {
-        saveComment(path, `(REPLACE) ${action.target} -> ${action.text}`);
-      }
+      console.log(`⚡ ${action.type} in ${file}`, action);
+
+      // 👉 Hier würdest du den Text in den .md Files überschreiben
+      // In Browser-Demo nur Anzeige:
+      document.getElementById("content").innerHTML += `
+        <div style="border:1px solid #ccc; margin:10px; padding:10px;">
+          Änderung in <b>${file}</b>:<br>
+          <code>${action.type}</code> auf <code>${action.target}</code><br>
+          <pre>${action.content_md}</pre>
+        </div>`;
     });
   });
 }
 
-// Buttons verbinden
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("exportJ1")?.addEventListener("click", exportComments);
-  document.getElementById("importJ2")?.addEventListener("click", () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-    input.onchange = e => importComments(e.target.files[0]);
     input.click();
   });
   loadComments();
