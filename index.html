@@ -4,101 +4,33 @@
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
   <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      margin: 0;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; }
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      background: #111;
-      color: #fff;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.5rem 1rem; background: #111; color: #fff;
     }
-    #menuBtn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    #topButtons {
-      display: flex;
-      gap: 0.5rem;
-    }
+    #menuBtn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+    #topButtons { display: flex; gap: 0.5rem; }
     #topButtons button {
-      background: #444;
-      color: #fff;
-      border: none;
-      padding: 0.3rem 0.6rem;
-      cursor: pointer;
+      background: #444; color: #fff; border: none; padding: 0.3rem 0.6rem; cursor: pointer;
     }
     #sidebar {
-      width: 260px;
-      background: #f5f5f5;
-      border-right: 1px solid #ddd;
-      overflow-y: auto;
-      transition: transform 0.3s ease;
+      width: 260px; background: #f5f5f5; border-right: 1px solid #ddd;
+      overflow-y: auto; transition: transform 0.3s ease; padding: 0.5rem;
     }
-    #sidebar.hidden {
-      transform: translateX(-100%);
-    }
-    #content {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-    }
-    main {
-      display: flex;
-      flex: 1;
-      height: calc(100vh - 60px);
-    }
-    @media (min-width: 769px) {
-      #content {
-        margin-left: 260px;
-      }
-    }
+    #sidebar.hidden { transform: translateX(-100%); }
+    #content { flex: 1; padding: 1rem; overflow-y: auto; }
+    main { display: flex; flex: 1; height: calc(100vh - 60px); }
     @media (max-width: 768px) {
-      #sidebar {
-        position: absolute;
-        top: 60px;
-        left: 0;
-        height: calc(100vh - 60px);
-        z-index: 10;
-      }
-      #sidebar.hidden {
-        transform: translateX(-100%);
-      }
-      #content {
-        margin-left: 0 !important;
-      }
+      #sidebar { position: absolute; top: 60px; left: 0; height: calc(100vh - 60px); z-index: 10; }
     }
-
-    pre.xml {
-      background: #222;
-      color: #eee;
-      padding: 1rem;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      border-radius: 5px;
-      font-family: monospace;
-      font-size: 0.9rem;
-    }
-    #commentSection {
-      margin-top: 2rem;
-      border-top: 1px solid #ccc;
-      padding-top: 1rem;
-    }
-    #commentInput {
-      width: 100%;
-      height: 80px;
-    }
+    table { border-collapse: collapse; margin-top: 1rem; width: 100%; }
+    th, td { border: 1px solid #aaa; padding: 4px 6px; }
+    th { background: #eee; }
+    #comments { margin-top: 2rem; border-top: 1px solid #ccc; padding-top: 1rem; }
+    #comments h3 { margin-top: 0; }
+    #comments textarea { width: 100%; height: 80px; }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <header>
@@ -123,9 +55,7 @@
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
 
-    menuBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("hidden");
-    });
+    menuBtn.addEventListener("click", () => sidebar.classList.toggle("hidden"));
 
     async function loadManifest() {
       try {
@@ -138,8 +68,8 @@
         ).join("");
 
         html += "<h3>Module</h3>";
-        html += manifest.modules.map(mod =>
-          `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
+        html += Object.entries(manifest.files).map(([id, src]) =>
+          `<p><a href="#" data-type="module" data-path="${src}">${id} – ${src}</a></p>`
         ).join("");
 
         sidebar.innerHTML = html;
@@ -167,9 +97,12 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-        const html = marked.parse(text);
-        content.innerHTML = `<article>${html}</article>` + commentBox(path);
-        attachCommentEvents(path);
+        content.innerHTML = `<article><pre>${text}</pre></article>
+          <div id="comments">
+            <h3>Kommentare zu: ${path}</h3>
+            <textarea placeholder="Kommentar schreiben…"></textarea><br>
+            <button onclick="alert('Kommentar gespeichert!')">Speichern</button>
+          </div>`;
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
@@ -181,52 +114,61 @@
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
 
-        // XML parsen
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(text, "application/xml");
 
-        if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
-          throw new Error("Ungültiges XML in " + path);
+        let html = `<h2>XML Modul: ${path}</h2>`;
+
+        // Geräte Setup
+        if (xmlDoc.getElementsByTagName("devices").length > 0) {
+          html += "<h3>Geräte</h3><table><tr><th>Name</th><th>Hersteller</th><th>Typ</th><th>Ports</th></tr>";
+          xmlDoc.querySelectorAll("device").forEach(dev => {
+            let ports = [...dev.querySelectorAll("port")].map(p =>
+              `${p.getAttribute("id")} (${p.getAttribute("type")} / ${p.getAttribute("connector")} / ${p.getAttribute("active")})`
+            ).join("<br>");
+            html += `<tr><td>${dev.querySelector("name")?.textContent || dev.getAttribute("name")}</td>
+                        <td>${dev.querySelector("manufacturer")?.textContent || ""}</td>
+                        <td>${dev.querySelector("type")?.textContent || ""}</td>
+                        <td>${ports}</td></tr>`;
+          });
+          html += "</table>";
         }
 
-        const serializer = new XMLSerializer();
-        let xmlStr = serializer.serializeToString(xmlDoc);
-        xmlStr = xmlStr.replace(/></g, ">\n<");
+        // Presets
+        if (xmlDoc.getElementsByTagName("presets").length > 0) {
+          html += "<h3>Presets</h3><ul>";
+          xmlDoc.querySelectorAll("preset").forEach(pr => {
+            html += `<li><b>${pr.getAttribute("id")}</b>: ${pr.querySelector("name")?.textContent} – ${pr.querySelector("description")?.textContent}</li>`;
+          });
+          html += "</ul>";
+        }
 
-        content.innerHTML = `
-          <article>
-            <h3>XML Modul: ${path}</h3>
-            <pre class="xml">${xmlStr}</pre>
-          </article>
-        `;
+        // Szenen
+        if (xmlDoc.getElementsByTagName("scenes").length > 0) {
+          html += "<h3>Szenen</h3><ul>";
+          xmlDoc.querySelectorAll("scene").forEach(sc => {
+            html += `<li><b>${sc.getAttribute("id")}</b>: ${sc.getAttribute("name")} – ${sc.querySelector("description")?.textContent}</li>`;
+          });
+          html += "</ul>";
+        }
+
+        // Workflows
+        if (xmlDoc.getElementsByTagName("workflows").length > 0) {
+          html += "<h3>Workflows</h3><table><tr><th>ID</th><th>Preset</th><th>Szene</th><th>Spielbarkeit</th></tr>";
+          xmlDoc.querySelectorAll("workflow").forEach(wf => {
+            html += `<tr>
+                      <td>${wf.getAttribute("id")}</td>
+                      <td>${wf.querySelector("preset")?.textContent}</td>
+                      <td>${wf.querySelector("scene")?.textContent}</td>
+                      <td>${wf.getAttribute("hands") || "?"}</td>
+                    </tr>`;
+          });
+          html += "</table>";
+        }
+
+        content.innerHTML = html;
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
-      }
-    }
-
-    // Kommentarbereich (nur Kapitel)
-    function commentBox(path) {
-      return `
-        <div id="commentSection">
-          <h3>Kommentar zu ${path}</h3>
-          <textarea id="commentInput" placeholder="Deine Notiz nur für dieses Kapitel..."></textarea>
-          <div>
-            <button id="saveCommentBtn">Kommentar speichern</button>
-          </div>
-        </div>
-      `;
-    }
-
-    function attachCommentEvents(path) {
-      const saveBtn = document.getElementById("saveCommentBtn");
-      const input = document.getElementById("commentInput");
-      if (saveBtn) {
-        saveBtn.addEventListener("click", () => {
-          const comment = input.value;
-          if (comment) {
-            alert("Kommentar gespeichert für " + path + ": " + comment);
-          }
-        });
       }
     }
 
