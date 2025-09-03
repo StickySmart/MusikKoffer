@@ -1,44 +1,25 @@
-function applyJson2(json2) {
-  let applied = 0;
+function applyJson2Global(json2) {
+  if (!json2.actions || !Array.isArray(json2.actions)) {
+    alert("Ungültiges JSON2-Format");
+    return;
+  }
 
-  Object.keys(json2).forEach(chapterKey => {
-    const entry = json2[chapterKey];
-    if (!entry.actions) return;
+  json2.actions.forEach(action => {
+    if (action.file === currentFile) {
+      if (action.type === "replace") {
+        let regex = new RegExp(action.target, "g");
+        currentText = currentText.replace(regex, action.value);
 
-    const container = document.querySelector(`[data-chapter="${chapterKey}"] pre`);
-    if (!container) return;
+      } else if (action.type === "insert_after") {
+        let regex = new RegExp(action.target, "g");
+        currentText = currentText.replace(regex, action.target + "\n" + action.value);
 
-    let newContent = container.textContent;
-
-    entry.actions.forEach(action => {
-      if (action.type === "insert_after") {
-        // gezielt nach einer Überschrift einfügen
-        const regex = new RegExp(`(## ${action.after})`, "i");
-        newContent = newContent.replace(regex, `$1\n\n${action.content_md}`);
-        applied++;
+      } else if (action.type === "delete") {
+        let regex = new RegExp(action.target, "g");
+        currentText = currentText.replace(regex, "");
       }
-
-      if (action.type === "replace_section") {
-        // Abschnitt zwischen zwei Überschriften ersetzen
-        const regex = new RegExp(`(## ${action.section}[\\s\\S]*?)(?=## |$)`, "i");
-        newContent = newContent.replace(regex, `## ${action.section}\n\n${action.content_md}`);
-        applied++;
-      }
-
-      if (action.type === "append_table") {
-        // neue Tabellenzeile am Ende anhängen
-        const regex = new RegExp(`(\\|[-]+.*\\|\\n)([\\s\\S]*?)$`, "m");
-        newContent = newContent.replace(regex, `$1$2${action.content_md}\n`);
-        applied++;
-      }
-    });
-
-    if (applied > 0) {
-      const revFile = `${chapterKey}_rev${Date.now()}.md`;
-      downloadRevision(revFile, newContent);
-      container.textContent = newContent;
     }
   });
 
-  alert(applied > 0 ? `${applied} Änderungen angewendet.` : "Keine Änderungen aus JSON2 angewendet.");
+  document.getElementById("content").innerHTML = "<pre>" + currentText + "</pre>";
 }
