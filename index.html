@@ -5,37 +5,37 @@
   <title>Tiage Music Masterplan 25</title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #fff;
-      color: #000;
       display: flex;
       flex-direction: column;
+      margin: 0;
       height: 100vh;
+      font-family: Arial, sans-serif;
     }
     header {
-      background: #111;
-      color: #fff;
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0.5rem 1rem;
+      background: #111;
+      color: #fff;
+    }
+    #menuBtn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    #topButtons {
+      display: flex;
+      gap: 0.5rem;
     }
     #topButtons button {
       background: #444;
       color: #fff;
       border: none;
-      padding: 0.4rem 0.8rem;
-      margin-left: 5px;
+      padding: 0.3rem 0.6rem;
       cursor: pointer;
-    }
-    #topButtons button:hover {
-      background: #666;
-    }
-    main {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
     }
     #sidebar {
       width: 260px;
@@ -52,29 +52,25 @@
       padding: 1rem;
       overflow-y: auto;
     }
-    pre {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 1rem 0;
-    }
-    table, th, td {
-      border: 1px solid #000;
-    }
-    th, td {
-      padding: 6px;
-      text-align: left;
+    main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
     }
     @media (max-width: 768px) {
       #sidebar {
         position: absolute;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
         z-index: 10;
-        height: 100%;
+      }
+      #sidebar.hidden {
+        transform: translateX(-100%);
       }
     }
+
+    /* Kommentarbereich */
     #commentSection {
       margin-top: 20px;
       padding: 15px;
@@ -120,13 +116,23 @@
     </section>
   </main>
 
-  <script src="scripts/comments.js"></script>
-  <script src="scripts/apply-json2.js"></script>
+  <!-- Kommentarbereich -->
+  <div id="commentSection" style="display:none;">
+    <h3>Kommentar</h3>
+    <textarea id="commentInput" placeholder="Deine Notiz zu diesem Kapitel..."></textarea>
+    <div>
+      <button id="saveCommentBtn">Kommentar speichern</button>
+    </div>
+  </div>
+
   <script>
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
+    const commentInput = document.getElementById("commentInput");
+    const saveCommentBtn = document.getElementById("saveCommentBtn");
 
+    let allComments = {};
     let currentChapter = null;
     let currentText = "";
 
@@ -140,14 +146,18 @@
         const manifest = await res.json();
 
         let html = "<h3>Kapitel</h3>";
-        html += manifest.chapters.map(ch =>
-          `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
-        ).join("");
+        if (manifest.chapters) {
+          html += manifest.chapters.map(ch =>
+            `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
+          ).join("");
+        }
 
         html += "<h3>Module</h3>";
-        html += manifest.modules.map(mod =>
-          `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
-        ).join("");
+        if (manifest.modules) {
+          html += manifest.modules.map(mod =>
+            `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
+          ).join("");
+        }
 
         sidebar.innerHTML = html;
 
@@ -174,10 +184,11 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-        currentChapter = path;
         currentText = text;
-        content.innerHTML = `<article><pre>${text}</pre></article>` + renderCommentSection(path);
-        loadComments(path);
+        currentChapter = path;
+        content.innerHTML = `<article><pre>${text}</pre></article>`;
+        document.getElementById("commentSection").style.display = "block";
+        commentInput.value = allComments[path]?.comment || "";
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
@@ -189,50 +200,121 @@
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
 
-        // XML Parser → Tabelle/Liste
-        if (path.endsWith(".xml") || path.endsWith(".xsd")) {
-          const parser = new DOMParser();
-          const xmlDoc = parser.parseFromString(text, "application/xml");
-          let html = `<h2>XML Modul: ${path}</h2>`;
-          xmlDoc.querySelectorAll("*").forEach(node => {
-            if (node.children.length === 0) {
-              html += `<p><b>${node.nodeName}</b>: ${node.textContent}</p>`;
-            }
-          });
-          content.innerHTML = `<article>${html}</article>`;
-        } else {
-          content.innerHTML = `<article><pre>${text}</pre></article>`;
-        }
+        // XML Parser
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(text, "application/xml");
+
+        let html = `<h2>${path}</h2><table border="1" cellpadding="5" cellspacing="0">`;
+
+        xmlDoc.querySelectorAll("*").forEach(node => {
+          if (node.children.length === 0) {
+            html += `<tr><td>${node.tagName}</td><td>${node.textContent}</td></tr>`;
+          }
+        });
+
+        html += "</table>";
+        content.innerHTML = html;
+
+        // Keine Kommentare bei Modulen
+        document.getElementById("commentSection").style.display = "none";
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
     }
 
+    saveCommentBtn.addEventListener("click", () => {
+      if (!currentChapter) {
+        alert("Kein Kapitel ausgewählt.");
+        return;
+      }
+      allComments[currentChapter] = {
+        chapter: currentChapter,
+        comment: commentInput.value,
+        status: "Offen",
+        timestamp: new Date().toISOString()
+      };
+      alert("Kommentar gespeichert für " + currentChapter);
+    });
+
     // Export JSON1
     document.getElementById("exportJ1").addEventListener("click", () => {
-      const data = collectComments();
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+      const commentsArray = Object.values(allComments);
+      if (commentsArray.length === 0) {
+        alert("Noch keine Kommentare vorhanden.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(commentsArray, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = "json1-export.json";
+      a.download = 'comments.json';
       a.click();
-      URL.revokeObjectURL(url);
     });
 
     // Import JSON2
     document.getElementById("importJ2").addEventListener("click", () => {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "application/json";
-      input.onchange = async e => {
-        const file = e.target.files[0];
-        const text = await file.text();
-        const json2 = JSON.parse(text);
-        applyJson2(json2);
-      };
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const json2 = JSON.parse(e.target.result);
+            applyJson2(json2);
+          } catch (error) {
+            alert('Fehler beim Importieren der Datei: ' + error);
+          }
+        };
+        reader.readAsText(file);
+      });
       input.click();
     });
+
+    function applyJson2(json2) {
+      if (!currentChapter) {
+        alert("Kein Kapitel geladen.");
+        return;
+      }
+
+      let chapterKey = currentChapter.split('/').pop();
+      let keyWithPath = "chapters/" + chapterKey;
+
+      if (!json2[keyWithPath] || !Array.isArray(json2[keyWithPath].actions)) {
+        alert("Keine passenden Aktionen für " + keyWithPath);
+        return;
+      }
+
+      let actions = json2[keyWithPath].actions;
+      let text = currentText;
+
+      actions.forEach(action => {
+        if (action.type === "insert_after") {
+          let regex = new RegExp(action.selector, "i");
+          text = text.replace(regex, match => match + "\n" + action.content_md);
+        } else if (action.type === "append") {
+          text += "\n" + action.content_md;
+        } else if (action.type === "remove_section") {
+          let regex = new RegExp(action.selector, "gi");
+          text = text.replace(regex, "");
+        } else if (action.type === "augment_blocks") {
+          if (action.fields && action.fields.length > 0) {
+            text += "\n\n### Erweiterte Infos\n";
+            action.fields.forEach(f => {
+              for (let [device, info] of Object.entries(f.mapping)) {
+                text += `- ${device}: ${info}\n`;
+              }
+            });
+          }
+        }
+      });
+
+      currentText = text;
+      content.innerHTML = `<article><pre>${text}</pre></article>`;
+    }
 
     loadManifest();
   </script>
