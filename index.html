@@ -2,213 +2,149 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tiage Music Masterplan 25</title>
   <style>
     body {
       font-family: monospace, sans-serif;
-      margin: 0;
-      padding: 0;
       background: #fff;
       color: #000;
+      margin: 0;
+      padding: 0;
     }
     header {
       background: #111;
-      color: #fff;
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      color: white;
+      padding: 1rem;
     }
     header h1 {
       margin: 0;
-      font-size: 20px;
+      font-size: 1.5rem;
     }
-    nav button {
-      margin-left: 5px;
-      padding: 6px 10px;
+    .button-bar {
+      margin-top: 0.5rem;
+    }
+    .button-bar button {
+      margin-right: 8px;
+      padding: 6px 12px;
       border: none;
-      background: #555;
-      color: white;
       cursor: pointer;
+      background: #333;
+      color: white;
     }
-    nav button:hover {
-      background: #777;
-    }
-    #sidebar {
-      float: left;
-      width: 30%;
-      padding: 15px;
-      background: #f4f4f4;
-      min-height: 100vh;
+    .button-bar button:hover {
+      background: #666;
     }
     #content {
-      margin-left: 30%;
-      padding: 15px;
+      padding: 1rem;
+    }
+    .chapter, .module {
+      margin-bottom: 2rem;
+    }
+    h2 {
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 4px;
     }
     pre {
-      white-space: pre-wrap;
-      word-wrap: break-word;
+      background: #f5f5f5;
+      padding: 10px;
+      overflow-x: auto;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Tiage Music Masterplan 25</h1>
-    <nav>
-      <button onclick="exportJson1()">ExpJ1</button>
-      <button onclick="exportJson2()">ExpJ2</button>
-      <button onclick="importJson2()">ImpJ2</button>
-    </nav>
-  </header>
 
-  <div id="sidebar">
-    <h2>Kapitel</h2>
-    <ul id="chapters">
-      <li><a href="#" onclick="loadChapter('01_cover.md')">01 – Cover</a></li>
-      <li><a href="#" onclick="loadChapter('02_geraeteuebersicht.md')">02 – Geräteübersicht</a></li>
-      <li><a href="#" onclick="loadChapter('03_first_steps_audio_routing.md')">03 – First Steps – Audio & Routing</a></li>
-      <li><a href="#" onclick="loadChapter('04_first_steps_midi_setup.md')">04 – First Steps – MIDI & Setup</a></li>
-      <li><a href="#" onclick="loadChapter('05_workflows_audio.md')">05 – Workflows Audio</a></li>
-      <li><a href="#" onclick="loadChapter('06_workflows_midi.md')">06 – Workflows MIDI</a></li>
-      <li><a href="#" onclick="loadChapter('07_texture_lab.md')">07 – Texture Lab Einsatz</a></li>
-      <li><a href="#" onclick="loadChapter('08_zusammenfassung.md')">08 – Zusammenfassung</a></li>
-      <li><a href="#" onclick="loadChapter('09_outro.md')">09 – Outro</a></li>
-      <li><a href="#" onclick="loadChapter('10_anhang.md')">10 – Anhang</a></li>
-    </ul>
-
-    <h2>Module</h2>
-    <ul id="modules">
-      <li><a href="#" onclick="loadModule('geraetesetup.xml')">geraetesetup.xml</a></li>
-      <li><a href="#" onclick="loadModule('tiagemusic-geraetesetup.xsd')">tiagemusic-geraetesetup.xsd</a></li>
-      <li><a href="#" onclick="loadModule('presets.xml')">presets.xml</a></li>
-      <li><a href="#" onclick="loadModule('scenes.xml')">scenes.xml</a></li>
-      <li><a href="#" onclick="loadModule('workflows.xml')">workflows.xml</a></li>
-    </ul>
+<header>
+  <h1>Tiage Music Masterplan 25</h1>
+  <div class="button-bar">
+    <button onclick="exportJson1()">ExpJ1</button>
+    <button onclick="exportJson2()">ExpJ2</button>
+    <input type="file" id="importFile" style="display:none" onchange="importJson2(event)">
+    <button onclick="document.getElementById('importFile').click()">ImpJ2</button>
   </div>
+</header>
 
-  <div id="content">
-    <p>Bitte Kapitel oder Modul wählen…</p>
-  </div>
+<div id="content">
+  <p>Bitte Kapitel oder Modul wählen…</p>
+</div>
 
-  <script>
-    let currentFile = null;
-    let currentText = "";
+<script>
+  let chapters = {
+    "01_cover.md": "# Cover\n\n## Geräte im Setup\nZoom L-6, Roland J-6, T-8, E-4, S-1, Sonicware Texture Lab, CME U61/U62.",
+    "02_geraeteuebersicht.md": "# Geräteübersicht\n\nZoom L-6, Roland J-6, T-8, E-4, S-1, Sonicware Texture Lab, CME U61/U62.",
+    "03_first_steps_audio_routing.md": "# First Steps – Audio & Routing\n\n- Audio-Interface Modi: Automatic, MultiTrack\n- Scenes & Sound Pads"
+  };
 
-    // Dummy Loader (Simulation)
-    function loadChapter(file) {
-      currentFile = file;
-      currentText = "# Inhalt von " + file + "\n\nBeispieltext mit Zoom L-6 und Roland J-6.\n";
-      document.getElementById("content").innerHTML = "<pre>" + currentText + "</pre>";
-    }
+  // --- JSON1 Export (aktueller Stand) ---
+  function exportJson1() {
+    const blob = new Blob([JSON.stringify(chapters, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    downloadFile(url, "json1-export.json");
+  }
 
-    function loadModule(file) {
-      currentFile = file;
-      currentText = "XML Modul: " + file + "\n\n<port id='1'/>\n<port id='2'/>";
-      document.getElementById("content").innerHTML = "<pre>" + currentText + "</pre>";
-    }
+  // --- JSON2 Export (nur Platzhalter) ---
+  function exportJson2() {
+    const json2 = {}; // hier später Kommentare -> Aktionen
+    const blob = new Blob([JSON.stringify(json2, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    downloadFile(url, "json2-export.json");
+  }
 
-    // JSON1 Export
-    function exportJson1() {
-      if (!currentFile || !currentText) {
-        alert("Kein Kapitel oder Modul geladen.");
-        return;
+  // --- JSON2 Import (global anwenden) ---
+  function importJson2(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const json2 = JSON.parse(e.target.result);
+        applyJson2Global(json2);
+      } catch (err) {
+        alert("Fehler beim Importieren: " + err.message);
       }
-      let json1 = {
-        file: currentFile,
-        content: currentText
-      };
-      downloadFile("json1_export.json", JSON.stringify(json1, null, 2));
-    }
+    };
+    reader.readAsText(file);
+  }
 
-    // JSON2 Export (Template mit Aktionen)
-    function exportJson2() {
-      if (!currentFile || !currentText) {
-        alert("Kein Kapitel oder Modul geladen.");
-        return;
-      }
-      let json2 = {
-        actions: [
-          {
-            file: currentFile,
-            type: "replace",
-            target: "Zoom L-6",
-            value: "Zoom L-6 (LiveTrak)"
-          },
-          {
-            file: currentFile,
-            type: "delete",
-            target: "Roland J-6"
-          },
-          {
-            file: currentFile,
-            type: "insert_after",
-            target: "Beispieltext",
-            value: "→ Hinweis: beim L-6 immer MultiTrack wählen!"
-          }
-        ]
-      };
-      downloadFile("json2_export.json", JSON.stringify(json2, null, 2));
-    }
+  // --- Änderungen global einspielen ---
+  function applyJson2Global(json2) {
+    let changed = false;
 
-    // JSON2 Import und globale Anwendung
-    function importJson2() {
-      let input = document.createElement("input");
-      input.type = "file";
-      input.accept = "application/json";
-      input.onchange = e => {
-        let file = e.target.files[0];
-        let reader = new FileReader();
-        reader.onload = evt => {
-          try {
-            let json2 = JSON.parse(evt.target.result);
-            applyJson2Global(json2);
-          } catch (err) {
-            alert("Fehler beim Importieren: " + err.message);
-          }
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    }
+    Object.keys(json2).forEach(fileName => {
+      const entry = json2[fileName];
+      if (!chapters[fileName]) return;
 
-    // Änderungen anwenden
-    function applyJson2Global(json2) {
-      if (!json2.actions || !Array.isArray(json2.actions)) {
-        alert("Ungültiges JSON2-Format");
-        return;
-      }
-
-      json2.actions.forEach(action => {
-        if (action.file === currentFile) {
-          if (action.type === "replace") {
-            let regex = new RegExp(action.target, "g");
-            currentText = currentText.replace(regex, action.value);
-
-          } else if (action.type === "insert_after") {
-            let regex = new RegExp(action.target, "g");
-            currentText = currentText.replace(regex, action.target + "\n" + action.value);
-
-          } else if (action.type === "delete") {
-            let regex = new RegExp(action.target, "g");
-            currentText = currentText.replace(regex, "");
-          }
+      entry.actions.forEach(action => {
+        if (action.type === "replace") {
+          let regex = new RegExp(action.target, "i");
+          chapters[fileName] = chapters[fileName].replace(regex, action.content_md);
+          changed = true;
+        }
+        if (action.type === "insert_after") {
+          let regex = new RegExp(action.target, "i");
+          chapters[fileName] = chapters[fileName].replace(regex, match => match + "\n" + action.content_md);
+          changed = true;
         }
       });
+    });
 
-      document.getElementById("content").innerHTML = "<pre>" + currentText + "</pre>";
+    if (changed) {
+      document.getElementById("content").innerHTML = "<p><b>Änderungen aus JSON2 wurden angewendet.</b></p><pre>" + JSON.stringify(chapters, null, 2) + "</pre>";
+    } else {
+      document.getElementById("content").innerHTML = "<p><b>Keine Änderungen aus JSON2 angewendet.</b></p>";
     }
+  }
 
-    // Helper zum Download
-    function downloadFile(filename, content) {
-      let blob = new Blob([content], { type: "application/json" });
-      let url = URL.createObjectURL(blob);
-      let a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  </script>
+  // --- Helper zum Download ---
+  function downloadFile(url, filename) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
+
 </body>
 </html>
