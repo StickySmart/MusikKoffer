@@ -26,3 +26,15 @@
 #commentSection button:hover {
   background: #555;
 }
+
+.commentList {
+  margin-top: 15px;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.commentItem {
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
