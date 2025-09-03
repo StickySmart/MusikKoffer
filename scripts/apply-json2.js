@@ -1,42 +1,40 @@
-function applyJson2(json2) {
-  if (!currentChapter) {
-    alert("Kein Kapitel geladen.");
-    return;
-  }
+async function applyJson2(json2) {
+  try {
+    const res = await fetch("manifest.json?v=" + Date.now());
+    const manifest = await res.json();
 
-  // Dateiname als Key für json2 bestimmen
-  let chapterKey = currentChapter.split('/').pop();
-  let keyWithPath = "chapters/" + chapterKey;
+    let results = "";
 
-  if (!json2[keyWithPath] || !Array.isArray(json2[keyWithPath].actions)) {
-    alert("Kein passender Eintrag oder keine Aktionen in JSON2 für " + keyWithPath);
-    return;
-  }
+    // alle Kapitel aus dem Manifest laden
+    for (let ch of manifest.chapters) {
+      const chapterKey = ch.path.split("/").pop(); // z.B. 03_first_steps_audio_routing.md
+      const resCh = await fetch(ch.path);
+      if (!resCh.ok) continue;
 
-  let actions = json2[keyWithPath].actions;
-  let text = currentText;
+      let text = await resCh.text();
 
-  actions.forEach(action => {
-    if (action.type === "insert_after") {
-      let regex = new RegExp(action.selector, "i");
-      text = text.replace(regex, match => match + "\n" + action.content_md);
-    } else if (action.type === "append") {
-      text += "\n" + action.content_md;
-    } else if (action.type === "remove_section") {
-      let regex = new RegExp(action.selector, "gi");
-      text = text.replace(regex, "");
-    } else if (action.type === "augment_blocks") {
-      // einfache Variante: hängt Mapping als Liste unten an
-      if (action.fields && action.fields.length > 0) {
-        text += "\n\n### Erweiterte Infos\n";
-        action.fields.forEach(f => {
-          for (let [device, info] of Object.entries(f.mapping)) {
-            text += `- ${device}: ${info}\n`;
+      // nur dann anwenden, wenn JSON2 was für dieses Kapitel hat
+      if (json2[chapterKey] && Array.isArray(json2[chapterKey].actions)) {
+        json2[chapterKey].actions.forEach(action => {
+          if (action.type === "insert_after") {
+            let regex = new RegExp(action.target, "i");
+            text = text.replace(regex, match => match + "\n" + action.text);
+          } else if (action.type === "replace") {
+            let regex = new RegExp(action.target, "i");
+            text = text.replace(regex, action.text);
+          } else if (action.type === "append") {
+            text += "\n" + action.text;
           }
         });
       }
-    }
-  });
 
-  content.innerHTML = `<article><pre>${text}</pre></article>`;
+      results += `<h3>${ch.title}</h3><pre>${text}</pre>`;
+    }
+
+    if (!results) results = "<p>Keine Änderungen aus JSON2 angewendet.</p>";
+    content.innerHTML = results;
+
+  } catch (err) {
+    content.innerHTML = `<p style="color:red">Fehler beim globalen Import: ${err}</p>`;
+  }
 }
