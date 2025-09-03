@@ -4,20 +4,84 @@
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    header { background: #111; color: #fff; padding: 0.5rem 1rem;
-             display: flex; justify-content: space-between; align-items: center; }
-    #menuBtn, #topButtons button {
-      background: #444; color: #fff; border: none; padding: 0.3rem 0.6rem; cursor: pointer;
+    body {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
     }
-    #sidebar { width: 260px; background: #f5f5f5; border-right: 1px solid #ddd;
-               overflow-y: auto; transition: transform 0.3s ease; }
-    #sidebar.hidden { transform: translateX(-100%); }
-    main { display: flex; height: calc(100vh - 50px); }
-    #content { flex: 1; padding: 1rem; overflow-y: auto; }
-    table { border-collapse: collapse; margin-top: 1rem; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-    th { background: #eee; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: #111;
+      color: #fff;
+    }
+    #menuBtn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    #topButtons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    #topButtons button {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+    }
+    #sidebar {
+      width: 260px;
+      background: #f5f5f5;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    #sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    #content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 1rem;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 4px 8px;
+      text-align: left;
+    }
+    th {
+      background: #ddd;
+    }
+    @media (max-width: 768px) {
+      #sidebar {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+      #sidebar.hidden {
+        transform: translateX(-100%);
+      }
+    }
   </style>
 </head>
 <body>
@@ -32,13 +96,16 @@
 
   <main>
     <nav id="sidebar">Lade Manifest …</nav>
-    <section id="content"><h2>Willkommen</h2><p>Bitte Kapitel oder Modul wählen…</p></section>
+    <section id="content">
+      <h2>Willkommen</h2>
+      <p>Bitte Kapitel oder Modul wählen…</p>
+    </section>
   </main>
 
   <script>
     const sidebar = document.getElementById("sidebar");
-    const content = document.getElementById("content");
     const menuBtn = document.getElementById("menuBtn");
+    const content = document.getElementById("content");
 
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
@@ -50,14 +117,18 @@
         const manifest = await res.json();
 
         let html = "<h3>Kapitel</h3>";
-        html += manifest.chapters.map(ch =>
-          `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
-        ).join("");
+        if (manifest.chapters) {
+          html += manifest.chapters.map(ch =>
+            `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
+          ).join("");
+        }
 
         html += "<h3>Module</h3>";
-        html += manifest.modules.map(mod =>
-          `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
-        ).join("");
+        if (manifest.modules) {
+          html += manifest.modules.map(mod =>
+            `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
+          ).join("");
+        }
 
         sidebar.innerHTML = html;
 
@@ -95,13 +166,7 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-
-        if (path.endsWith(".xml")) {
-          renderXML(text, path);
-        } else {
-          const escaped = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-          content.innerHTML = `<article><pre>${escaped}</pre></article>`;
-        }
+        renderXML(text, path);
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
@@ -112,21 +177,58 @@
         const parser = new DOMParser();
         const xml = parser.parseFromString(xmlText, "application/xml");
 
-        // Geräteübersicht aus geraetesetup.xml
         if (path.includes("geraetesetup")) {
           const devices = xml.getElementsByTagName("device");
           let html = "<h2>Geräte-Setup</h2><table><tr><th>ID</th><th>Name</th><th>Hersteller</th><th>Typ</th></tr>";
           [...devices].forEach(dev => {
             const id = dev.getAttribute("id");
-            const name = dev.getAttribute("name") || "";
-            const manufacturer = dev.getAttribute("manufacturer") || "";
-            const type = dev.getAttribute("type") || "";
+            const name = dev.getElementsByTagName("name")[0]?.textContent || "";
+            const manufacturer = dev.getElementsByTagName("manufacturer")[0]?.textContent || "";
+            const type = dev.getElementsByTagName("type")[0]?.textContent || "";
             html += `<tr><td>${id}</td><td>${name}</td><td>${manufacturer}</td><td>${type}</td></tr>`;
           });
           html += "</table>";
           content.innerHTML = html;
-        } else {
-          // Fallback: XML roh anzeigen
+        }
+        else if (path.includes("presets")) {
+          const presets = xml.getElementsByTagName("preset");
+          let html = "<h2>Presets</h2><table><tr><th>ID</th><th>Name</th><th>Beschreibung</th></tr>";
+          [...presets].forEach(pre => {
+            const id = pre.getAttribute("id");
+            const name = pre.getElementsByTagName("name")[0]?.textContent || "";
+            const desc = pre.getElementsByTagName("description")[0]?.textContent || "";
+            html += `<tr><td>${id}</td><td>${name}</td><td>${desc}</td></tr>`;
+          });
+          html += "</table>";
+          content.innerHTML = html;
+        }
+        else if (path.includes("scenes")) {
+          const scenes = xml.getElementsByTagName("scene");
+          let html = "<h2>Szenen</h2><table><tr><th>ID</th><th>Name</th><th>Beschreibung</th></tr>";
+          [...scenes].forEach(sc => {
+            const id = sc.getAttribute("id");
+            const name = sc.getAttribute("name");
+            const desc = sc.getElementsByTagName("description")[0]?.textContent || "";
+            html += `<tr><td>${id}</td><td>${name}</td><td>${desc}</td></tr>`;
+          });
+          html += "</table>";
+          content.innerHTML = html;
+        }
+        else if (path.includes("workflows")) {
+          const workflows = xml.getElementsByTagName("workflow");
+          let html = "<h2>Workflows</h2><table><tr><th>ID</th><th>Preset</th><th>Szene</th><th>Spielbar</th><th>Beschreibung</th></tr>";
+          [...workflows].forEach(wf => {
+            const id = wf.getAttribute("id");
+            const preset = wf.getAttribute("preset");
+            const scene = wf.getAttribute("scene");
+            const playable = wf.getAttribute("playable") || "";
+            const desc = wf.getElementsByTagName("description")[0]?.textContent || "";
+            html += `<tr><td>${id}</td><td>${preset}</td><td>${scene}</td><td>${playable}</td><td>${desc}</td></tr>`;
+          });
+          html += "</table>";
+          content.innerHTML = html;
+        }
+        else {
           const escaped = xmlText.replace(/</g, "&lt;").replace(/>/g, "&gt;");
           content.innerHTML = `<article><pre>${escaped}</pre></article>`;
         }
