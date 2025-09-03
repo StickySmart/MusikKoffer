@@ -4,20 +4,85 @@
   <meta charset="UTF-8">
   <title>Tiage Music Masterplan 25</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-    header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: #111; color: #fff; }
-    #sidebar { width: 260px; background: #f5f5f5; border-right: 1px solid #ddd; overflow-y: auto; transition: transform 0.3s ease; }
-    #sidebar.hidden { transform: translateX(-100%); }
-    #content { flex: 1; padding: 1rem; overflow-y: auto; }
-    main { display: flex; flex: 1; height: calc(100vh - 60px); }
-    pre { background: #eee; padding: 0.5rem; overflow-x: auto; }
-    table { border-collapse: collapse; margin-top: 1rem; }
-    table, th, td { border: 1px solid #aaa; padding: 4px 8px; }
-    #comments { margin-top: 2rem; padding: 1rem; border-top: 2px solid #ccc; }
-    #comments textarea { width: 100%; height: 80px; }
-    #comments button { margin-top: 0.5rem; padding: 0.3rem 0.6rem; }
-    #topButtons button { background: #444; color: #fff; border: none; padding: 0.3rem 0.6rem; margin-left: 5px; cursor: pointer; }
-    #menuBtn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+    body {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: #111;
+      color: #fff;
+    }
+    #menuBtn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    #topButtons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    #topButtons button {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+    }
+    #sidebar {
+      width: 260px;
+      background: #f5f5f5;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      position: fixed;
+      top: 60px;
+      bottom: 0;
+      left: 0;
+    }
+    #sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    #content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      margin-left: 260px;
+    }
+    main {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
+    }
+    @media (max-width: 768px) {
+      #sidebar {
+        position: absolute;
+        top: 60px;
+        height: calc(100vh - 60px);
+        z-index: 10;
+      }
+      #content {
+        margin-left: 0;
+      }
+    }
+    /* Kommentarbereich */
+    #commentSection {
+      margin-top: 2rem;
+      border-top: 1px solid #ccc;
+      padding-top: 1rem;
+    }
+    #commentInput {
+      width: 100%;
+      height: 80px;
+    }
   </style>
 </head>
 <body>
@@ -52,6 +117,7 @@
         const res = await fetch("manifest.json?v=" + Date.now());
         const manifest = await res.json();
 
+        // Kapitel + Module im Menü
         let html = "<h3>Kapitel</h3>";
         if (manifest.chapters) {
           html += manifest.chapters.map(ch =>
@@ -78,7 +144,6 @@
             } else if (type === "module") {
               await loadModule(path);
             }
-            sidebar.classList.add("hidden");
           });
         });
       } catch (err) {
@@ -91,7 +156,9 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-        content.innerHTML = `<article>${parseMarkdown(text)}</article>` + commentBox(path);
+        const html = marked.parse(text); // Markdown Parser nutzen
+        content.innerHTML = `<article>${html}</article>` + commentBox(path);
+        attachCommentEvents(path);
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
       }
@@ -102,62 +169,61 @@
         const res = await fetch(path);
         if (!res.ok) throw new Error(`${path} → ${res.status}`);
         const text = await res.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, "application/xml");
 
-        let html = `<h2>XML Modul: ${path}</h2>`;
-        html += renderXML(xml.documentElement);
-        content.innerHTML = html + commentBox(path);
+        // XML als Baum darstellen
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(text, "application/xml");
+        const pretty = formatXml(xmlDoc);
+
+        content.innerHTML = `<article><pre>${pretty}</pre></article>` + commentBox(path);
+        attachCommentEvents(path);
       } catch (err) {
         content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
     }
 
-    function renderXML(node) {
-      if (!node.children || node.children.length === 0) {
-        return `<p>${node.tagName}: ${node.textContent}</p>`;
-      }
-      let html = `<h3>${node.tagName}</h3><ul>`;
-      for (let child of node.children) {
-        html += `<li><strong>${child.tagName}:</strong> ${child.textContent} ${renderXML(child)}</li>`;
-      }
-      html += "</ul>";
-      return html;
+    function formatXml(xmlDoc) {
+      const serializer = new XMLSerializer();
+      const xmlStr = serializer.serializeToString(xmlDoc);
+      return xmlStr.replace(/></g, ">\n<");
     }
 
-    function parseMarkdown(md) {
-      return md
-        .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-        .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-        .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-        .replace(/\*\*(.*)\*\*/gim, "<b>$1</b>")
-        .replace(/\*(.*)\*/gim, "<i>$1</i>")
-        .replace(/\n$/gim, "<br/>");
-    }
-
-    function commentBox(id) {
+    // Kommentarbereich HTML
+    function commentBox(path) {
       return `
-        <div id="comments">
-          <h3>Kommentare zu: ${id}</h3>
-          <textarea id="commentInput_${id}"></textarea><br>
-          <button onclick="saveComment('${id}')">Kommentar speichern</button>
-          <div id="commentList_${id}"></div>
+        <div id="commentSection">
+          <h3>Kommentare zu: ${path}</h3>
+          <textarea id="commentInput" placeholder="Kommentar eingeben…"></textarea>
+          <button id="saveComment">Speichern</button>
+          <div id="commentList"></div>
         </div>
       `;
     }
 
-    function saveComment(id) {
-      const input = document.getElementById("commentInput_" + id);
-      const list = document.getElementById("commentList_" + id);
-      if (input.value.trim()) {
-        const p = document.createElement("p");
-        p.textContent = input.value;
-        list.appendChild(p);
-        input.value = "";
+    // Kommentare speichern/laden
+    const allComments = {};
+    function attachCommentEvents(path) {
+      const input = document.getElementById("commentInput");
+      const saveBtn = document.getElementById("saveComment");
+      const list = document.getElementById("commentList");
+
+      if (allComments[path]) {
+        list.innerHTML = allComments[path].map(c => `<p>💬 ${c}</p>`).join("");
       }
+
+      saveBtn.addEventListener("click", () => {
+        const val = input.value.trim();
+        if (!val) return;
+        if (!allComments[path]) allComments[path] = [];
+        allComments[path].push(val);
+        list.innerHTML += `<p>💬 ${val}</p>`;
+        input.value = "";
+      });
     }
 
     loadManifest();
   </script>
+  <!-- Markdown Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 </html>
