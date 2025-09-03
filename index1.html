@@ -105,7 +105,7 @@
 
         let html = "";
 
-        // Kapitel anzeigen
+        // Kapitel anzeigen, falls vorhanden
         if (manifest.chapters && manifest.chapters.length > 0) {
           html += "<h3>Kapitel</h3>";
           html += manifest.chapters.map(ch =>
@@ -113,12 +113,12 @@
           ).join("");
         }
 
-        // Module anzeigen (basierend auf files)
-        if (manifest.files) {
+        // Module anzeigen, falls vorhanden
+        if (manifest.modules && manifest.modules.length > 0) {
           html += "<h3>Module</h3>";
-          for (const [key, path] of Object.entries(manifest.files)) {
-            html += `<p><a href="#" data-type="module" data-path="${path}">${key} – ${path}</a></p>`;
-          }
+          html += manifest.modules.map(mod =>
+            `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
+          ).join("");
         }
 
         sidebar.innerHTML = html || "<p>Keine Kapitel/Module im Manifest gefunden.</p>";
