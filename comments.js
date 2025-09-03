@@ -1,33 +1,71 @@
-// Kommentar Logik
-const commentInput = document.getElementById('commentInput');
-const saveCommentBtn = document.getElementById('saveCommentBtn');
-const exportJSONBtn = document.getElementById('exportJSONBtn');
-
-// Speicher für Kommentare
 let comments = {};
 
-// Kommentar speichern
-saveCommentBtn.addEventListener('click', () => {
-  const currentChapter = document.querySelector('h1').textContent; // Kapitelname als ID
-  const commentText = commentInput.value;
+// Kommentare laden
+function loadComments() {
+  comments = JSON.parse(localStorage.getItem("comments") || "{}");
+}
 
-  if (commentText) {
-    comments[currentChapter] = commentText; // Kommentar speichern
-    alert('Kommentar gespeichert!');
-    commentInput.value = ''; // Eingabefeld zurücksetzen
-  } else {
-    alert('Bitte gib einen Kommentar ein!');
+// Kommentare speichern
+function saveComment(path, text) {
+  if (!comments[path]) comments[path] = [];
+  comments[path].push({ text, status: "open", date: new Date().toISOString() });
+  localStorage.setItem("comments", JSON.stringify(comments));
+  renderComments(path);
+}
+
+// Kommentare rendern
+function renderComments(path) {
+  const list = document.getElementById("commentList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  if (comments[path]) {
+    comments[path].forEach((c, i) => {
+      const div = document.createElement("div");
+      div.className = "commentItem";
+      div.textContent = `[${c.status}] ${c.text}`;
+      list.appendChild(div);
+    });
   }
-});
+}
 
-// Exportieren der Kommentare als JSON
-exportJSONBtn.addEventListener('click', () => {
-  const jsonContent = JSON.stringify(comments, null, 2);
-  
-  // Download der JSON-Datei erstellen
-  const blob = new Blob([jsonContent], { type: 'application/json' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'comments.json';
-  link.click();
+// Export JSON1
+function exportComments() {
+  loadComments();
+  const blob = new Blob([JSON.stringify(comments, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "comments_export.json";
+  a.click();
+}
+
+// Import JSON2 (Anleitung)
+async function importComments(file) {
+  const text = await file.text();
+  const json = JSON.parse(text);
+
+  Object.entries(json).forEach(([path, { actions }]) => {
+    actions.forEach(action => {
+      if (action.type === "insert") {
+        saveComment(path, action.text);
+      }
+      if (action.type === "replace") {
+        saveComment(path, `(REPLACE) ${action.target} -> ${action.text}`);
+      }
+    });
+  });
+}
+
+// Buttons verbinden
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("exportJ1")?.addEventListener("click", exportComments);
+  document.getElementById("importJ2")?.addEventListener("click", () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
+    input.onchange = e => importComments(e.target.files[0]);
+    input.click();
+  });
+  loadComments();
 });
