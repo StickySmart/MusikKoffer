@@ -26,6 +26,17 @@
       font-size: 1.5rem;
       cursor: pointer;
     }
+    #topButtons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    #topButtons button {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+    }
     #sidebar {
       width: 260px;
       background: #f5f5f5;
@@ -63,14 +74,18 @@
 <body>
   <header>
     <h1>Tiage Music Masterplan 25</h1>
-    <button id="menuBtn">☰</button>
+    <div id="topButtons">
+      <button id="exportJ1">ExpJ1</button>
+      <button id="importJ2">ImpJ2</button>
+      <button id="menuBtn">☰</button>
+    </div>
   </header>
 
   <main>
     <nav id="sidebar">Lade Manifest …</nav>
     <section id="content">
       <h2>Willkommen</h2>
-      <p>Bitte Bereich aus dem Menü wählen…</p>
+      <p>Bitte Kapitel oder Modul wählen…</p>
     </section>
   </main>
 
@@ -78,7 +93,6 @@
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
     const content = document.getElementById("content");
-    let manifestData = null;
 
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("hidden");
@@ -87,46 +101,59 @@
     async function loadManifest() {
       try {
         const res = await fetch("manifest.json?v=" + Date.now());
-        manifestData = await res.json();
+        const manifest = await res.json();
 
-        sidebar.innerHTML = manifestData.sections.map(sec =>
-          `<p><a href="#" data-xpath="${sec.xpath}" data-title="${sec.title}">${sec.title}</a></p>`
+        // Kapitel + Module im Menü anzeigen
+        let html = "<h3>Kapitel</h3>";
+        html += manifest.chapters.map(ch =>
+          `<p><a href="#" data-type="chapter" data-path="${ch.path}">${ch.id} – ${ch.title}</a></p>`
         ).join("");
+
+        html += "<h3>Module</h3>";
+        html += manifest.modules.map(mod =>
+          `<p><a href="#" data-type="module" data-path="${mod.source}">${mod.id} – ${mod.purpose}</a></p>`
+        ).join("");
+
+        sidebar.innerHTML = html;
 
         sidebar.querySelectorAll("a").forEach(link => {
           link.addEventListener("click", async e => {
             e.preventDefault();
-            const xpath = e.target.dataset.xpath;
-            const title = e.target.dataset.title;
-            await loadSection(xpath, title);
-            sidebar.classList.add("hidden");
+            const type = e.target.dataset.type;
+            const path = e.target.dataset.path;
+            if (type === "chapter") {
+              await loadChapter(path);
+            } else if (type === "module") {
+              await loadModule(path);
+            }
+            sidebar.classList.add("hidden"); // mobil automatisch schließen
           });
         });
       } catch (err) {
-        sidebar.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Manifests: ${err}</p>`;
       }
     }
 
-    async function loadSection(xpath, title) {
+    async function loadChapter(path) {
       try {
-        const res = await fetch("tiagemusic-setup.xml?v=" + Date.now());
-        const xmlText = await res.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(xmlText, "application/xml");
-
-        const nodes = xml.evaluate(xpath, xml, null, XPathResult.ANY_TYPE, null);
-        let node = nodes.iterateNext();
-        let html = `<h2>${title}</h2><ul>`;
-        while (node) {
-          let label = node.getAttribute("id") || node.getAttribute("name") || node.nodeName;
-          html += `<li>${label}</li>`;
-          node = nodes.iterateNext();
-        }
-        html += "</ul>";
-
-        content.innerHTML = html;
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(`${path} → ${res.status}`);
+        const text = await res.text();
+        content.innerHTML = `<article><pre>${text}</pre></article>`;
       } catch (err) {
-        content.innerHTML = `<p style="color:red">Fehler beim Laden der XML: ${err}</p>`;
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Kapitels: ${err}</p>`;
+      }
+    }
+
+    async function loadModule(path) {
+      try {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(`${path} → ${res.status}`);
+        const text = await res.text();
+        const escaped = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        content.innerHTML = `<article><pre>${escaped}</pre></article>`;
+      } catch (err) {
+        content.innerHTML = `<p style="color:red">Fehler beim Laden des Moduls: ${err}</p>`;
       }
     }
 
