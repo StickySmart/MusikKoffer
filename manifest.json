@@ -1,13 +1,8 @@
 {
   "manifest_version": "1.0",
   "project": "TiageMusic Gerätesetup",
-  "files": {
-    "schema": "tiagemusic-geraetesetup.xsd",
-    "setup": "geraetesetup.xml",
-    "presets": "presets.xml",
-    "scenes": "scenes.xml",
-    "workflows": "workflows.xml"
-  },
+  "description": "Strukturierte Sammlung von Markdown-Kapiteln und XML-Modulen für das TiageMusic-Projekt. Validiert über tiagemusic-geraetesetup.xsd.",
+
   "chapters": [
     {
       "id": "01",
@@ -48,6 +43,34 @@
       "id": "08",
       "title": "Zusammenfassung",
       "path": "chapters/08_zusammenfassung.md"
+    }
+  ],
+
+  "modules": [
+    {
+      "id": "schema",
+      "source": "tiagemusic-geraetesetup.xsd",
+      "purpose": "Definiert die Struktur und Validierung für das Gerätesetup-XML."
+    },
+    {
+      "id": "devices",
+      "source": "geraetesetup.xml",
+      "purpose": "Definiert die Hardwaregeräte (CME U6, Merge 5, Zoom L-6, Roland/Sonicware usw.) und deren Ports."
+    },
+    {
+      "id": "presets",
+      "source": "presets.xml",
+      "purpose": "Definiert die Routing-Presets und deren Filter (Notes, Clock, PC, CC)."
+    },
+    {
+      "id": "scenes",
+      "source": "scenes.xml",
+      "purpose": "Speichert Audio-Mixer-Szenen des Zoom L-6 (z. B. Neutral, Texture Fokus, S-1 Fokus)."
+    },
+    {
+      "id": "workflows",
+      "source": "workflows.xml",
+      "purpose": "Kombinationen aus Presets und Szenen mit Spielbarkeitsangaben (hands, playable)."
     }
   ]
 }
