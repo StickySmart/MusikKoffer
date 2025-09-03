@@ -27,13 +27,3 @@
     },
     {
       "id": "scenes",
-      "source": "scenes.xml",
-      "purpose": "Speichert Audio-Mixer-Szenen des Zoom L-6 (z. B. Neutral, Texture Fokus, S-1 Fokus)."
-    },
-    {
-      "id": "workflows",
-      "source": "workflows.xml",
-      "purpose": "Kombinationen aus Presets und Szenen mit Spielbarkeitsangaben (hands, playable)."
-    }
-  ]
-}
