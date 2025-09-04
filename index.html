@@ -161,9 +161,21 @@ applyBtn.onclick = () => {
 function renderFromManifest(m){
   projName.textContent = m.project || '—';
 
+  const coverEl = document.getElementById('cover');
+  const coverId = (coverEl?.dataset.cid || '').split(':')[0]?.toLowerCase();
+  const coverTitle = coverEl?.querySelector('.hd h2')?.textContent?.trim().toLowerCase();
+  const isCover = ch => {
+    const idStr = String(ch.id).toLowerCase();
+    const titleStr = String(ch.title || '').trim().toLowerCase();
+    return idStr === 'cover' || titleStr === 'cover' ||
+           (coverId && idStr === coverId) ||
+           (coverTitle && titleStr === coverTitle);
+  };
+  const chapters = (m.chapters || []).filter(ch => !isCover(ch));
+
   // NAV aufbauen
   const ul = document.getElementById('navList'); ul.innerHTML = '';
-  (m.chapters||[]).forEach(ch => {
+  chapters.forEach(ch => {
     const li = document.createElement('li');
     const anchorId = `ch${ch.id}`;
     li.innerHTML = `<a href="#${anchorId}">${esc(ch.title||('Kapitel '+ch.id))}</a>`;
@@ -178,7 +190,7 @@ function renderFromManifest(m){
   });
 
   const cid = m.cid_map || {};
-  (m.chapters||[]).forEach(ch => {
+  chapters.forEach(ch => {
     const id = ch.id, title = ch.title || `Kapitel ${id}`;
     const sec = document.createElement('section');
     sec.className = 'card';
