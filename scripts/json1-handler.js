@@ -24,4 +24,3 @@ window.JSON1 = (function(){
   }
   return { load, filterByChapter, markDone, exportFile };
 })();
-
