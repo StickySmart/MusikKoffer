@@ -20,3 +20,4 @@ window.JSON2H = (function(){
   }
   return { createAction, build, exportFile };
 })();
+
