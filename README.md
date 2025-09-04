@@ -10,17 +10,17 @@ Alle Inhalte sind modular aufgebaut:
 
 ## Inhalt
 - **chapters/** → Hauptinhalte als `.md`
-  - 01_cover.md
-  - 02_first_steps_midi_setup.md (+ Subkapitel *Routing Performance*)
-  - 03_first_steps_audio_routing.md
-  - 04_geraeteuebersicht.md + 07_texture_lab.md → kombiniert in Manifest
-  - 05_workflows_audio__recording.md
-  - 05_workflows_audio__performance.md
-  - 05_workflows_audio__mixdown.md
-  - 08_zusammenfassung.md
+  - 100_cover.md
+  - 200_geraeteuebersicht.md
+  - 310_first_steps_audio_routing.md
+  - 320_workflows_audio.md
+  - 330_texture_lab.md
+  - 510_first_steps_midi_setup.md (+ Subkapitel *Routing Performance*)
+  - 520_workflows_midi.md
+  - 800_zusammenfassung.md
 - **docs/** → PDF-Handbücher und Zusatzmaterial
   - Zoom L-6, Roland J-6, T-8, E-4, S-1, Sonicware Texture Lab, CME U6MIDI Pro, etc.
-- **schema/**  
+- **schema/**
   - tiagemusic-geraetesetup.xsd
 - **json/**  
   - presets.xml  
@@ -28,7 +28,7 @@ Alle Inhalte sind modular aufgebaut:
   - workflows.xml  
 
 ## Manifest
-Aktuelle Version: **v1.2**
+Aktuelle Version: **v1.3**
 
 Änderungen gegenüber v1.0:
 - *MIDI Routing Performance* ist Unterpunkt im MIDI-Kapitel.  
