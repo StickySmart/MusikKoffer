@@ -1,27 +1,22 @@
 // scripts/json2-handler.js
-// Erstellt und exportiert Struktur_JSON2.json aus Aktionen
+// Klassische <script>-Variante (legt Funktionen unter window.JSON2H ab)
 
-function createAction(chapterId, cid, type, id, content) {
-  return {
-    chapter_id: chapterId,
-    cid: cid,
-    type: type,        // insert_after, insert_before, append, replace, remove_section
-    id: id,            // z. B. "ACTION_001"
-    content_md: content
-  };
-}
-
-function buildJSON2(actions = []) {
-  return { actions };
-}
-
-async function exportJSON2(json2, path = "exports/Struktur_JSON2.json") {
-  const blob = new Blob([JSON.stringify(json2, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "Struktur_JSON2.json";
-  a.click();
-  URL.revokeObjectURL(url);
-}
+window.JSON2H = (function(){
+  function createAction(chapterId, cid, type, id, contentMd) {
+    return {
+      chapter_id: String(chapterId),
+      cid: String(cid),
+      type,
+      id,
+      content_md: contentMd || ""
+    };
+  }
+  function build(actions = []) { return { actions }; }
+  function exportFile(json2, filename = "Struktur_JSON2.json") {
+    const blob = new Blob([JSON.stringify(json2, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement("a"), {href:url, download:filename});
+    a.click(); URL.revokeObjectURL(url);
+  }
+  return { createAction, build, exportFile };
+})();
