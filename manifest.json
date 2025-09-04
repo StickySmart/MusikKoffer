@@ -1,5 +1,5 @@
 {
-  "manifest_version": "1.2",
+  "manifest_version": "1.3",
   "project": "TiageMusic Gerätesetup",
   "files": {
     "schema": "tiagemusic-geraetesetup.xsd",
@@ -10,12 +10,12 @@
   },
   "chapters": [
     {
-      "id": "01",
+      "id": "100",
       "title": "Cover",
       "path": "chapters/01_cover.md"
     },
     {
-      "id": "02",
+      "id": "200",
       "title": "First Steps – MIDI & Setup",
       "path": "chapters/04_first_steps_midi_setup.md",
       "subchapters": [
@@ -26,12 +26,12 @@
       ]
     },
     {
-      "id": "03",
+      "id": "300",
       "title": "First Steps – Audio & Routing",
       "path": "chapters/03_first_steps_audio_routing.md"
     },
     {
-      "id": "04",
+      "id": "400",
       "title": "Geräteübersicht & Texture Lab",
       "path": "chapters/02_geraeteuebersicht.md",
       "merge_from": [
@@ -49,22 +49,22 @@
       ]
     },
     {
-      "id": "05",
+      "id": "500",
       "title": "Workflows Audio – Recording",
       "path": "chapters/05_workflows_audio__recording.md"
     },
     {
-      "id": "06",
+      "id": "600",
       "title": "Workflows Audio – Performance",
       "path": "chapters/05_workflows_audio__performance.md"
     },
     {
-      "id": "07",
+      "id": "700",
       "title": "Workflows Audio – Mixdown",
       "path": "chapters/05_workflows_audio__mixdown.md"
     },
     {
-      "id": "08",
+      "id": "800",
       "title": "Zusammenfassung",
       "path": "chapters/08_zusammenfassung.md"
     }
@@ -73,5 +73,6 @@
     "MIDI Routing Performance ist Unterpunkt im MIDI-Absatz (kein eigenes Kapitel).",
     "Kapitel 04 kombiniert Geräteübersicht mit Texture Lab; enthält Audio/MIDI-Unterkapitel.",
     "Kapitel 05 wurde aufgeteilt in Recording/Performance/Mixdown."
-  ]
+  ],
+  "overview": "# Überblick Absätze\n\n- Kapitel 100 → Cover\n- Kapitel 200 → First Steps – MIDI & Setup\n- Kapitel 300 → First Steps – Audio & Routing\n- Kapitel 400 → Geräteübersicht & Texture Lab\n- Kapitel 500 → Workflows Audio – Recording\n- Kapitel 600 → Workflows Audio – Performance\n- Kapitel 700 → Workflows Audio – Mixdown\n- Kapitel 800 → Zusammenfassung\n"
 }
