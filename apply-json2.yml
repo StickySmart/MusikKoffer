@@ -1,22 +1,54 @@
-apply-json2:
-  manifest: manifest.json
-  mapping:
-    "100": "chapters/100_cover.md"
-    "200": "chapters/200_geraeteuebersicht.md"
-    "300": "chapters/300_first_steps_audio_routing.md"
-    "400": "chapters/400_workflows_audio.md"
-    "500": "chapters/500_first_steps_midi_setup.md"
-    "600": "chapters/600_workflows_midi.md"
-    "700": "chapters/700_texture_lab.md"
-    "800": "chapters/800_zusammenfassung.md"
+# apply-json2.yml
+version: 1
 
-  comments:
-    css: apply-json.css
-    js: apply-json.js
+# Wie Anker in den .md-Dateien erkannt/erstellt werden
+anchors:
+  block:
+    # Beispiel im Text:
+    # <!-- cid:205:start -->
+    # ... Inhalt ...
+    # <!-- cid:205:end -->
+    start: "<!-- cid:${id}:start -->"
+    end: "<!-- cid:${id}:end -->"
+  single:
+    # Einzelmarker (z. B. für insert_before/insert_after):
+    # <!-- cid:205 -->
+    value: "<!-- cid:${id} -->"
+  heading_id:
+    # Markdown-Überschriften mit ID:
+    # ## Titel {#205}
+    value: "{#${id}}"
 
-  options:
-    marker_style: "inline"
-    unresolved: "highlight"
-    resolved: "remove"
-    auto_create_anchors: true
-    newline: "\n"
+# Standardverhalten der Engine
+defaults:
+  encoding: "utf-8"
+  newline: "\n"
+  create_block_if_missing: true       # fehlenden Blockanker automatisch anlegen
+  insert_if_missing_anchor: true      # fehlenden Single-Anker automatisch anlegen
+
+# Validierungsregeln (werden von der Engine beim Anwenden berücksichtigt)
+validation:
+  # Erlaubte Kapitelnummern
+  chapter_id_pattern: "^(100|200|300|400|500|600|700|800)$"
+
+  # cid muss im Bereich [chapter_id .. chapter_id+99] liegen
+  # Beispiel: chapter_id=200 → gültig: 200–299
+  cid_rule: "cid >= chapter_id && cid <= (chapter_id + 99)"
+
+  # Für diese Operationen MUSS content_md vorhanden sein
+  require_content_for:
+    - insert_after
+    - insert_before
+    - append
+    - replace
+    - replace_block
+
+  # Für diese Operationen darf KEIN content_md vorhanden sein
+  forbid_content_for:
+    - remove_section
+    - delete
+
+# (Optional) Protokollierung/Changelog-Details
+logging:
+  include_preview: false     # bei true: kurzen Diff-Vorschau-Text ins Changelog
+  max_preview_chars: 240
