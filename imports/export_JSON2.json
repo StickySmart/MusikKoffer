@@ -1,5 +1,11 @@
 {
-  "version": "dev",
-  "updated": "2025-08-31T15:07:10.153Z",
-  "items": []
+  "actions": [
+    {
+      "chapter_id": "XXX",        // Kapitelnummer, z. B. "200"
+      "cid": "XXX",               // Absatznummer, z. B. "205"
+      "type": "insert_after",     // Operationstyp, z. B. insert_after, insert_before, append, replace, remove_section
+      "id": "ACTION_NAME",        // frei wählbarer Aktionsname zur besseren Nachvollziehbarkeit
+      "content_md": "MARKDOWN"    // der konkrete Markdown-Text, der eingefügt, ersetzt oder ergänzt werden soll
+    }
+  ]
 }
