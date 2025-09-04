@@ -1,0 +1,12 @@
+# Build-Ordner
+bin/
+obj/
+
+# Visual Studio Cache
+.vs/
+
+# User-spezifische Dateien
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
