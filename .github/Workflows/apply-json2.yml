@@ -1,34 +1,22 @@
-# .github/workflows/apply-json2.yml
-name: Apply JSON2 Changes
+apply-json2:
+  manifest: manifest.json
+  mapping:
+    "100": "chapters/100_cover.md"
+    "200": "chapters/200_geraeteuebersicht.md"
+    "300": "chapters/300_first_steps_audio_routing.md"
+    "400": "chapters/400_workflows_audio.md"
+    "500": "chapters/500_first_steps_midi_setup.md"
+    "600": "chapters/600_workflows_midi.md"
+    "700": "chapters/700_texture_lab.md"
+    "800": "chapters/800_zusammenfassung.md"
 
-on:
-  push:
-    paths:
-      - 'imports/*.json'   # Workflow startet nur, wenn eine JSON2 ins imports/ gelegt wird
+  comments:
+    css: apply-json.css
+    js: apply-json.js
 
-jobs:
-  apply-json2:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm install jsdom
-
-      - name: Run JSON2 processor
-        run: node scripts/apply-json2.js
-
-      - name: Commit changes
-        run: |
-          git config --global user.name "json2-bot"
-          git config --global user.email "bot@example.com"
-          git add chapters/*.md
-          git commit -m "Apply JSON2 changes"
-          git push
+  options:
+    marker_style: "inline"
+    unresolved: "highlight"
+    resolved: "remove"
+    auto_create_anchors: true
+    newline: "\n"

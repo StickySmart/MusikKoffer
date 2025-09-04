@@ -84,6 +84,7 @@ C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\36
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\37
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\39
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3a
+C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3b
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3c
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3d
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3e
@@ -274,6 +275,7 @@ C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\1c\4d01c7be0bb17d808459f
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\1c\dddddb1e20aea549cc66e296189e9afbd07b94
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\1c\ec26767234b99cb6699615b64690ef4c541b14
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\1d\7e6e48836b86b92d81bbe9dc621472c665e029
+C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\1d\c903da639b8c69ba03b68b5a8b3d038434c2d8
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\1d\f020df65688f5bea0f2da2e948cdb3cfb5bf44
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\1e\9eb0b670879db64b1a935d6d9d156a4c56909a
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\1f\bad5ea0189518924f0977cb6fe0c936ae7fa37
@@ -307,6 +309,7 @@ C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\37\fc7fae8fa3dda5d701ede
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\39\9ab74ea4e1dfeb119275c9f686bd2ef7a031f4
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3a\5340460151ebab5efad3439f55db3977fb250b
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3a\b7d79abd7d32d53e61475755dcd0a11a8b672e
+C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3b\7a1e887442d57997a235204f1a41484cf289dc
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3c\bdf4ccd384e33ca952c4e446c9daf591aa6f9f
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3c\cf8b64b18881afa54031c385b8dd577a4081d7
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\3d\2c19b0071dd5433b3544e06d6b058e65ec6a97
@@ -361,6 +364,7 @@ C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\63\576af686dafdabe7d2c73
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\64\26557e04bca6fe0972a572eed7da63b6b833b3
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\64\5b642d63a80284c22d2ad147ccf7ff85fdc278
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\66\2ddba444ad5f93a5a61c2c8b2c973a0a2735ce
+C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\68\16b6fe88b065398997495f2e3d4f905f1fe346
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\68\a539ebe2f9fb2cb96f53c46b1a407a2d85ceaf
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\69\8bf524a38961761dfb8b10109540f9f7b990ec
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\6a\593ce3ebfbe4933957bebdcb44c25557f7731a
@@ -390,6 +394,7 @@ C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\7d\c4cbbd0e266dbc2d9601d
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\7e\7149a11c9c3f4e103ce7cfee78c87ba30f9301
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\7e\ee6aa41328e6907982111e7296cfff509403f9
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\7f\abc2f4e607c3aec800173bdb43c62a231c6385
+C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\7f\f10f0aa62ea94af70a5e3bd5f356686cf75ae7
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\80\3d479e021fae10c1d39d7e787a1389445d6b3b
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\80\bf143052c899f871a6ed22b05026dce7ca4a5a
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\80\d75580eb1a4622158fe25aadb2bbe9435e743a
@@ -438,6 +443,7 @@ C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\9e\83c7b959aa64c06cdad53
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\9f\85b771f072e326939698bbe88183d1dd444ae2
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\a0\4c0e9b4745740abff320b394e6e2a9edc59d1d
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\a1\2b3470ce345b9db42ffd954d095873b4c5b36a
+C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\a1\5e16ac80cf2abfeb052bfbcb64bcce1c5795f5
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\a1\d9fff60b7df69c7c7c7b800d423f40ac864044
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\a2\1b41727f9c49f235f2f727082e49db5e81e6dd
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\a2\3617dca73b0d103f07133f3091278a78082ca0
@@ -551,6 +557,7 @@ C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\ec\5b66001e0a3c1d27d6dfa
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\ed\4f0bad771eeac8dc4f2826af2d63f6d94417db
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\ed\77a8e6873f19af1f439e6dee1f47b5f9d5ce6f
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\ed\afd54c6634001b401162c01635ca14f15ec10c
+C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\ee\0ffee61121aa591d40d54a027eca450850048c
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\ee\c65e2ab8d1e707565f8ddd54e3bc69755d7d17
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\ef\0be0a27cc8bf0a6b2098d19922397ccbdeb95a
 C:\Users\info\Documents\GitHub\MusikKoffer\.git\objects\ef\272735f45312f52921dd53e87426880984937b
@@ -616,6 +623,7 @@ C:\Users\info\Documents\GitHub\MusikKoffer\docs\U6MIDI-Pro-user-manual_English_v
 C:\Users\info\Documents\GitHub\MusikKoffer\docs\Upgrade instructions.pdf
 C:\Users\info\Documents\GitHub\MusikKoffer\docs\UxMIDI-Tools-user-manual_English_v09.pdf
 C:\Users\info\Documents\GitHub\MusikKoffer\docs\Virtual_COM_Port_Driver_V1.5.0.zip
+C:\Users\info\Documents\GitHub\MusikKoffer\exports\Stuktur_JSON1.json
 C:\Users\info\Documents\GitHub\MusikKoffer\imports\Struktur_JSON2.json
 C:\Users\info\Documents\GitHub\MusikKoffer\modules\geraetesetup.xml
 C:\Users\info\Documents\GitHub\MusikKoffer\modules\presets.xml
