@@ -44,3 +44,7 @@ Aktuelle Version: **v1.2**
 ---
 
 © TiageMusic Projekt, 2025
+
+## Development
+
+A minimal `package.json` provides a placeholder test script. Run `npm test` to verify it prints "no tests".
