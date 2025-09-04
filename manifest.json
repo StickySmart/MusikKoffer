@@ -12,12 +12,12 @@
     {
       "id": "100",
       "title": "Cover",
-      "path": "chapters/01_cover.md"
+      "path": "chapters/100_cover.md"
     },
     {
       "id": "200",
       "title": "First Steps – MIDI & Setup",
-      "path": "chapters/04_first_steps_midi_setup.md",
+      "path": "chapters/500_first_steps_midi_setup.md",
       "subchapters": [
         {
           "title": "Routing Performance",
@@ -28,14 +28,14 @@
     {
       "id": "300",
       "title": "First Steps – Audio & Routing",
-      "path": "chapters/03_first_steps_audio_routing.md"
+      "path": "chapters/300_first_steps_audio_routing.md"
     },
     {
       "id": "400",
       "title": "Geräteübersicht & Texture Lab",
-      "path": "chapters/02_geraeteuebersicht.md",
+      "path": "chapters/200_geraeteuebersicht.md",
       "merge_from": [
-        "chapters/07_texture_lab.md"
+        "chapters/700_texture_lab.md"
       ],
       "subchapters": [
         {
@@ -51,22 +51,22 @@
     {
       "id": "500",
       "title": "Workflows Audio – Recording",
-      "path": "chapters/05_workflows_audio__recording.md"
+      "path": "chapters/400_workflows_audio.md"
     },
     {
       "id": "600",
       "title": "Workflows Audio – Performance",
-      "path": "chapters/05_workflows_audio__performance.md"
+      "path": "chapters/400_workflows_audio.md"
     },
     {
       "id": "700",
       "title": "Workflows Audio – Mixdown",
-      "path": "chapters/05_workflows_audio__mixdown.md"
+      "path": "chapters/400_workflows_audio.md"
     },
     {
       "id": "800",
       "title": "Zusammenfassung",
-      "path": "chapters/08_zusammenfassung.md"
+      "path": "chapters/800_zusammenfassung.md"
     }
   ],
   "notes": [
