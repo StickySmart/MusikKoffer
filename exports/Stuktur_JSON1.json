@@ -1,0 +1,12 @@
+{
+  "comments": [
+    {
+      "chapter_id": "XXX",        // Kapitelnummer, z. B. "200" für First Steps - Audio
+      "cid": "XXX",               // Absatznummer, z. B. "205" (Kapitel 200, Absatz 5)
+      "status": "open",           // "open", "done" oder "current" (aktueller Stand)
+      "author": "NAME",           // Name oder Kürzel des Kommentierenden
+      "comment": "TEXT",          // Kommentartext, was angepasst oder geprüft werden soll
+      "created": "YYYY-MM-DDTHH:MM:SSZ" // Zeitstempel der Erstellung (ISO 8601)
+    }
+  ]
+}

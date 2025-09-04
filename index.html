@@ -93,6 +93,8 @@
     section { position:relative; scroll-margin-top: 72px; }
   </style>
 </head>
+<link rel="stylesheet" href="apply-json.css">
+<script src="apply-json.js" defer></script>
 <body>
   <header class="top">
     <div class="brand">🎒 Musik Koffer · Index</div>
@@ -301,6 +303,102 @@
   </div>
 
   <script>
+  <div class="toolbar" style="display:flex; gap:8px; margin:12px 0">
+  <button id="pickFilesBtn">Dateien wählen (.md/.html)</button>
+  <input id="filesInput" type="file" multiple accept=".md,.html,.txt" style="display:none">
+
+  <button id="pickJson2Btn">JSON2 laden</button>
+  <input id="json2Input" type="file" accept=".json,application/json" style="display:none">
+
+  <button id="applyBtn">Anwenden</button>
+</div>
+<div id="output"></div>
+
+<script>
+const files = {};      // filename -> text
+let json2Obj = null;   // dein JSON2
+
+document.getElementById('pickFilesBtn').addEventListener('click', () =>
+  document.getElementById('filesInput').click()
+);
+document.getElementById('pickJson2Btn').addEventListener('click', () =>
+  document.getElementById('json2Input').click()
+);
+
+// .md/.html laden
+document.getElementById('filesInput').addEventListener('change', async (e) => {
+  for (const f of e.target.files) files[f.name] = await f.text();
+  info(`Geladen: ${Object.keys(files).join(', ') || '—'}`);
+});
+
+// JSON2 laden
+document.getElementById('json2Input').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try { json2Obj = JSON.parse(await f.text()); info(`JSON2: ${f.name}`); }
+  catch (err) { error(`JSON2 ungültig: ${err.message}`); }
+});
+
+// Anwenden
+document.getElementById('applyBtn').addEventListener('click', async () => {
+  if (!json2Obj) return error('Bitte zuerst JSON2 laden.');
+  if (!Object.keys(files).length) return error('Bitte Ziel-Dateien wählen.');
+
+  // JSON2 -> Engine-Spec (02 → 200 etc. wird hier abgebildet, falls im JSON2 nur „02_*.md“ steht)
+  const spec = toEngineSpec(json2Obj);
+
+  // Apply
+  const { applyJson } = window.ApplyJsonEngine;
+  const cfg = await fetch('apply-json.config.yml').then(r => r.ok ? r.text() : '');
+  const { files: updated, changelog } = applyJson({ json2: spec, files: {...files}, configYAML: cfg });
+
+  // Ausgabe
+  const out = [];
+  for (const [name, text] of Object.entries(updated)) {
+    out.push(`<h3>${escape(name)}</h3><pre>${escape(text)}</pre>`);
+  }
+  out.push(`<h3>Changelog</h3><pre>${escape(JSON.stringify(changelog, null, 2))}</pre>`);
+  document.getElementById('output').innerHTML = out.join('\\n');
+});
+
+// ---- 02 -> 200 Mapping + Targets ----
+function toEngineSpec(json2){
+  // Erwartet: { "DATEINAME.md": { "actions":[ {type, cid|id, content_md} ] }, ... }
+  const changes = [];
+  for (const [file, block] of Object.entries(json2)) {
+    const actions = block.actions || [];
+    // Falls im JSON2 nur „02_…“ steht, rechne 02 -> 200 um:
+    const m = file.match(/^(\d{2})[_-]/);
+    const pageId = m ? String(parseInt(m[1],10) * 100) : null;
+
+    actions.forEach((a, i) => {
+      const target = { file };             // Datei aus Upload-Dialog
+      if (a.cid) target.cid = a.cid;       // <!-- cid:... -->
+      if (a.id)  target.id  = a.id;        // {#id} (Heading-ID)
+
+      // Optional: wenn dein JSON2 „targetPage“ = "02" enthält, mappe auf 200:
+      if (!target.cid && !target.id && a.targetPage) {
+        target.cid = String(parseInt(a.targetPage,10) * 100); // nur als Fallback
+      }
+
+      changes.push({
+        id: `${pageId || file}#${i+1}`,
+        target,
+        op: a.type,
+        content: a.content_md || a.content || ''
+      });
+    });
+  }
+  return { changes };
+}
+
+function escape(s){return s.replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m]));}
+function info(msg){ document.getElementById('output').innerHTML = `<div class="apply-json-log">${escape(msg)}</div>`; }
+function error(msg){ document.getElementById('output').innerHTML = `<div class="apply-json-log" style="border-color:#ef4444;color:#991b1b">${escape(msg)}</div>`; }
+</script>
+
+  
+  
     const state = {
       version: document.getElementById('ver').textContent,
       sections: ['cover','recording','midi','zoom-l6','roland-j6','roland-t8','roland-e4','sonicware-tl','cme-u6','docs','changelog'],
