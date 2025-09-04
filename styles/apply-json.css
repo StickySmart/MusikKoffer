@@ -1,0 +1,62 @@
+/* apply-json.css */
+:root {
+  --apply-json-badge-radius: 999px;
+  --apply-json-badge-padding: 0.15rem 0.5rem;
+  --apply-json-font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --apply-json-muted: #6b7280;
+  --apply-json-open: #ef4444;
+  --apply-json-active: #f59e0b;
+  --apply-json-done: #10b981;
+  --apply-json-bg: #f9fafb;
+  --apply-json-border: #e5e7eb;
+}
+
+.apply-json-hidden {
+  display: none !important;
+}
+
+.cid-marker {
+  font-family: var(--apply-json-font);
+  font-size: 12px;
+  color: var(--apply-json-muted);
+  user-select: none;
+  opacity: 0.5;
+}
+
+.badge {
+  display: inline-block;
+  padding: var(--apply-json-badge-padding);
+  border-radius: var(--apply-json-badge-radius);
+  font-family: var(--apply-json-font);
+  font-size: 12px;
+  border: 1px solid var(--apply-json-border);
+  background: var(--apply-json-bg);
+}
+
+.badge-open {
+  color: #fff;
+  background: var(--apply-json-open);
+  border-color: var(--apply-json-open);
+}
+
+.badge-active {
+  color: #111827;
+  background: #fef3c7;
+  border-color: var(--apply-json-active);
+}
+
+.badge-done {
+  color: #065f46;
+  background: #ecfdf5;
+  border-color: var(--apply-json-done);
+}
+
+.apply-json-log {
+  font-family: var(--apply-json-font);
+  font-size: 13px;
+  line-height: 1.4;
+  border: 1px dashed var(--apply-json-border);
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #fff;
+}
