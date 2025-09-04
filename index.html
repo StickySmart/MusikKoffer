@@ -1,343 +1,113 @@
-<!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TiageMusic – INDEX (Manifest v1.3)</title>
-<style>
-:root{--bg:#0b0c0f;--ink:#eef3fb;--ink-dim:#b8c2d4;--line:#1f2635;--card:#12141a;--pad:16px;--radius:14px;--shadow:0 8px 24px rgba(0,0,0,.35);--w-nav:280px;--accent:#7ad2ff}
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,Segoe UI,Roboto,Arial,sans-serif}
-a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
-header.top{position:sticky;top:0;z-index:20;display:flex;gap:10px;align-items:center;padding:10px var(--pad);border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(11,12,15,.92),rgba(11,12,15,.75) 60%,rgba(11,12,15,0));backdrop-filter:blur(6px)}
-.brand{font-weight:700}
-.chip{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink-dim)}
-.btn{appearance:none;border:1px solid var(--line);background:#141a24;color:#eaf2fb;padding:.5rem .8rem;border-radius:9px;cursor:pointer}
-.btn:hover{border-color:#3a4661}
-.wrap{display:flex;min-height:calc(100vh - 52px)}
-nav.side{width:var(--w-nav);flex:0 0 var(--w-nav);border-right:1px solid var(--line);padding:18px var(--pad);background:linear-gradient(180deg,#0e1015,#0b0c0f)}
-nav h4{margin:8px 0;font-size:12px;letter-spacing:.12em;color:var(--ink-dim);text-transform:uppercase}
-nav ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-nav li a{display:block;padding:8px 10px;border-radius:10px;color:var(--ink);border:1px solid transparent}
-nav li a:hover{background:#12141a;border-color:var(--line)}
-main{flex:1;padding:20px;max-width:1200px;margin:0 auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:16px 0;overflow:hidden;position:relative}
-.card .hd{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px var(--pad);border-bottom:1px solid var(--line)}
-.card .hd h2{margin:0;font-size:18px}
-.card .bd{padding:16px}
-.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#10141d;border:1px solid var(--line);color:#b8c2d4;font-size:12px}
-.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.kv{display:grid;gap:6px}
-.muted{color:var(--ink-dim)}
-[data-cid]::before{content:attr(data-cid);position:absolute;top:10px;right:10px;font-size:11px;color:var(--ink-dim);background:#0f141c;border:1px solid var(--line);padding:2px 6px;border-radius:999px}
-section{scroll-margin-top:72px}
-pre{background:#0b0f17;color:#e6edf6;border:1px solid #1f2635;padding:10px;border-radius:8px;overflow:auto}
-.log{border:1px solid #3b82f6;color:#cfe0ff;background:#0b1325;padding:.6rem .8rem;border-radius:8px;font-family:ui-monospace,Consolas,monospace;white-space:pre-wrap}
-.log.error{border-color:#ef4444;color:#ffe2e2;background:#220b0b}
-
-/* Off-canvas für kleine Screens */
-#navToggle{display:none}
-@media (max-width: 980px){
-  nav.side{position:fixed;left:-100%;top:52px;height:calc(100vh - 52px);z-index:15;transition:left .25s ease}
-  body.nav-open nav.side{left:0}
-  #navToggle{display:inline-flex}
-  main{padding-top:12px}
-}
-</style>
-</head>
-<body>
-  <header class="top">
-    <button id="navToggle" class="btn" aria-label="Navigation umschalten">☰</button>
-    <div class="brand">🎒 TiageMusic · INDEX</div>
-    <span id="manifestChip" class="chip">Manifest: —</span>
-    <div style="margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap">
-      <button id="pickManifestBtn" class="btn">Manifest laden</button>
-      <input id="manifestInput" type="file" accept=".json,application/json" style="display:none">
-      <button id="saveManifestBtn" class="btn" disabled>Manifest speichern</button>
-
-      <button id="pickFilesBtn" class="btn">Dateien wählen (.md/.html)</button>
-      <input id="filesInput" type="file" multiple accept=".md,.html,.txt" style="display:none">
-      <button id="pickJson2Btn" class="btn">JSON2 laden</button>
-      <input id="json2Input" type="file" accept=".json,application/json" style="display:none">
-      <button id="applyBtn" class="btn">Anwenden</button>
-    </div>
-  </header>
-
-  <div class="wrap">
-    <nav class="side" id="sidebar">
-      <div id="navContainer">
-        <h4>Übersicht</h4>
-        <ul id="navList"><li><a>(Manifest laden…)</a></li></ul>
-      </div>
-    </nav>
-
-    <main id="main">
-      <!-- Deckblatt -->
-      <section id="cover" class="card" data-cid="01:cover">
-        <div class="hd"><h2>Cover</h2><span class="pill">Kapitel 01</span></div>
-        <div class="bd">
-          <div class="grid">
-            <div class="kv"><strong>Projekt</strong><span id="projName">–</span></div>
-            <div class="kv"><strong>Version</strong><span id="ver">v1.3-index</span></div>
-          </div>
-          <p class="muted">Manifest-gesteuerter Index. Kapitel-&Anker kommen direkt aus <code>manifest.json</code> (v1.3).</p>
-        </div>
-      </section>
-
-      <!-- Apply-Engine Ausgabe -->
-      <section class="card">
-        <div class="hd"><h2>Output</h2><span class="pill">Apply JSON2</span></div>
-        <div class="bd" id="output"><div class="log">Bereit. Manifest laden → Kapitel erscheinen. Danach Ziel-Dateien + JSON2 wählen und „Anwenden“.</div></div>
-      </section>
-    </main>
-  </div>
-
-<script>
-let manifest = null;          // geladene Manifest v1.3
-const files = {};             // filename -> text (Zieltexte)
-let json2Obj = null;          // JSON2-Spec
-
-// Sidebar Toggle
-navToggle.onclick = () => document.body.classList.toggle('nav-open');
-
-// Manifest laden
-pickManifestBtn.onclick = () => manifestInput.click();
-manifestInput.onchange = async (e) => {
-  const f = e.target.files[0]; if(!f) return;
-  try {
-    const raw = JSON.parse(await f.text());
-    if (String(raw.manifest_version) !== '1.3') {
-      // Wir heben auf 1.3 an, falls älter: minimaler Patch (ohne Strukturänderung)
-      raw.manifest_version = '1.3';
-    }
-    manifest = raw;
-    renderFromManifest(manifest);
-    manifestChip.textContent = `Manifest: v${manifest.manifest_version || '—'}`;
-    saveManifestBtn.disabled = false;
-    info(`Manifest geladen: ${f.name} (v${manifest.manifest_version})`);
-  } catch (err) {
-    error('Manifest ungültig: ' + err.message);
-  }
-};
-
-// Manifest speichern (exportieren, so wie aktuell im Speicher)
-saveManifestBtn.onclick = () => {
-  if (!manifest) return error('Kein Manifest geladen.');
-  const blob = new Blob([JSON.stringify(manifest, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `manifest_v${manifest.manifest_version || '1.3'}_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-};
-
-// Ziel-Dateien laden
-pickFilesBtn.onclick = () => filesInput.click();
-filesInput.onchange = async (e) => {
-  for (const f of e.target.files) files[f.name] = await f.text();
-  info(`Geladen: ${Object.keys(files).join(', ') || '—'}`);
-};
-
-// JSON2 laden
-pickJson2Btn.onclick = () => json2Input.click();
-json2Input.onchange = async (e) => {
-  const f = e.target.files[0]; if (!f) return;
-  try { json2Obj = JSON.parse(await f.text()); info(`JSON2 geladen: ${f.name}`); }
-  catch(err){ error('JSON2 ist ungültig: ' + err.message); }
-};
-
-// Anwenden (JSON2 → Zieltexte)
-applyBtn.onclick = () => {
-  if (!json2Obj) return error('Bitte zuerst JSON2 laden.');
-  if (!Object.keys(files).length) return error('Bitte zuerst Ziel-Dateien wählen.');
-  const spec = toEngineSpec(json2Obj);
-  const { files: updated, changelog } = ApplyJsonEngine.applyJson({ json2: spec, files: {...files} });
-  const out = [];
-  for (const [name, text] of Object.entries(updated)) out.push(`<h3>${esc(name)}</h3><pre>${esc(text)}</pre>`);
-  out.push(`<h3>Changelog</h3><pre>${esc(JSON.stringify(changelog, null, 2))}</pre>`);
-  output.innerHTML = out.join('\\n');
-};
-
-// Manifest → UI (Nav + Kapitel; CID-Nummerierung aus cid_map)
-function renderFromManifest(m){
-  projName.textContent = m.project || '—';
-
-  // NAV aufbauen
-  const ul = document.getElementById('navList');
-  ul.innerHTML = '';
-  const chapters = (m.chapters || []).filter(ch => {
-    if (!ch?.id || !ch?.title) {
-      console.warn('Skipping chapter due to missing id or title', ch);
-      return false;
-    }
-    return true;
-  });
-  chapters.forEach(ch => {
-    const li = document.createElement('li');
-    const anchorId = `ch${ch.id}`;
-    li.innerHTML = `<a href="#${anchorId}">${esc(ch.title)}</a>`;
-    ul.appendChild(li);
-  });
-
-  // Bestehende Kapitel (außer Cover + Output) entfernen
-  const main = document.getElementById('main');
-  [...main.querySelectorAll('section')].forEach(sec => {
-    const keep = sec.id==='cover' || sec.querySelector('#output');
-    if (!keep) sec.remove();
-  });
-
-  const cid = m.cid_map || {};
-  chapters.forEach(ch => {
-    const id = ch.id, title = ch.title;
-    const sec = document.createElement('section');
-    sec.className = 'card';
-    sec.id = `ch${id}`;
-    sec.setAttribute('data-cid', id);
-
-    const hd = document.createElement('div');
-    hd.className = 'hd';
-    hd.innerHTML = `<h2>${esc(title)}</h2><span class="pill">Kapitel ${esc(id)}</span>`;
-
-    const bd = document.createElement('div');
-    bd.className = 'bd';
-
-    const cmap = cid[id] || {};
-    const c = {
-      one:  (k) => cmap[k] ? `<!-- cid:${esc(cmap[k])} -->` : '',
-      beg:  (k) => cmap[k] ? `<!-- cid:${esc(cmap[k])}:start -->` : '',
-      end:  (k) => cmap[k] ? `<!-- cid:${esc(cmap[k])}:end -->` : ''
-    };
-
-    (ch.subchapters || []).filter(sub => {
-      if (!sub?.id || !sub?.title) {
-        console.warn(`Skipping subchapter in ${ch.id} due to missing id or title`, sub);
-        return false;
-      }
-      return true;
-    });
-
-    // Kapitel-spezifische Skelette – halten sich an manifest 1.3 (z. B. 02: Routing Performance)
-    if (id === '02'){ // MIDI & Setup
-      bd.innerHTML = `
-        ${c.one('intro')}
-        <p class="muted">Grundlagen zu Kanälen, Clock, Ports, Merger und U6-Presets.</p>
-
-        <h3 id="routing-performance">{#routing-performance}Routing Performance</h3>
-        ${c.one('routing_performance')}
-        <ul>
-          <li><b>Clock Master:</b> T-8</li>
-          <li><b>Merger #5:</b> sammelt S-1, T-8, J-6, EZ-AG, Handy (USB→DIN)</li>
-          <li><b>Kanäle:</b> S-1 = CH1 · EZ-AG = CH2 · J-6 = CH6 · T-8 = CH8</li>
-          <li><b>Dual U6:</b> U6-1 verteilt; U6-2 versorgt E-4, TL (Clock only), L-6 (optional)</li>
-        </ul>
-        ${ch.attachments ? `<p class="muted">Anhänge: ${Object.values(ch.attachments).map(v=>`<code>${esc(v)}</code>`).join(', ')}</p>`:''}
-      `;
-    } else if (id === '04'){ // Geräteübersicht & Texture Lab (Audio/MIDI-Abschnitte)
-      bd.innerHTML = `
-        ${c.beg('audio_start')}
-        <h3 id="dev-audio">{#audio}Audio</h3>
-        <p class="muted">Mixer/Recorder, Ein-/Ausgänge, Pegel, FX-Sends.</p>
-        ${c.end('audio_end')}
-
-        ${c.beg('midi_start')}
-        <h3 id="dev-midi">{#midi}MIDI</h3>
-        <p class="muted">Kanäle, Program-Change, Clock-Verteilung, CC-Maps.</p>
-        ${c.end('midi_end')}
-      `;
-    } else {
-      // Generischer Block: setze den ersten bekannten CID-Kommentar als Marker
-      const keys = Object.keys(cmap);
-      bd.innerHTML = keys.length ? `${c.one(Object.keys(cmap)[0])}<p class="muted">Inhalt…</p>` : `<p class="muted">Inhalt…</p>`;
-    }
-
-    sec.appendChild(hd); sec.appendChild(bd);
-    const outputCard = document.getElementById('output').closest('.card');
-    main.insertBefore(sec, outputCard);
-  });
-
-  // Mobile: Nav bei Klick schließen
-  document.querySelectorAll('#navList a').forEach(a=>{
-    a.addEventListener('click', () => {
-      if (window.matchMedia('(max-width:980px)').matches) document.body.classList.remove('nav-open');
-    });
-  });
-}
-
-// JSON2 → Engine-Spez (unterstützt cid, cid_start, cid_end, id)
-function toEngineSpec(json2){
-  const changes = [];
-  for (const [file, block] of Object.entries(json2||{})) {
-    (block.actions || []).forEach((a, i) => {
-      const target = { file };
-      if (a.cid)       target.cid = a.cid;           // "02:intro"
-      if (a.cid_start) target.cid_start = a.cid_start; // "04:audio:start"
-      if (a.cid_end)   target.cid_end = a.cid_end;     // "04:audio:end"
-      if (a.id)        target.id  = a.id;            // "{#routing-performance}"
-      changes.push({ id: `${file}#${i+1}`, target, op: a.type, content: a.content_md || a.content || '' });
-    });
-  }
-  return { changes };
-}
-
-// ApplyJsonEngine – minimal: insert_after_cid | replace_between_cids | insert_at_id | append_to_file
-const ApplyJsonEngine = (function(){
-  const CID_START = n => new RegExp(`<!--\\s*cid:${rx(n)}:start\\s*-->`,'i');
-  const CID_END   = n => new RegExp(`<!--\\s*cid:${rx(n)}:end\\s*-->`,'i');
-  const CID_ONE   = n => new RegExp(`<!--\\s*cid:${rx(n)}\\s*-->`,'i');
-  const MD_ID     = id=> new RegExp(`^.*\\{#${rx(id)}\\}\\s*$`,'m');
-  const HTML_ID   = id=> new RegExp(`id=["']${rx(id)}["']`,'i');
-  function rx(s){ return s.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&'); }
-
-  function insertAfterCid(t, name, content){
-    const m = t.match(CID_ONE(name)); if(!m) return {t, ok:false, reason:`CID ${name} nicht gefunden`};
-    const i = t.search(CID_ONE(name)); const end = i + m[0].length;
-    return { t: t.slice(0,end) + "\n" + content + "\n" + t.slice(end), ok:true };
-  }
-  function replaceBetweenCids(t, startName, endName, content){
-    const sRe = CID_START(startName), eRe = CID_END(endName);
-    const s = t.search(sRe); if (s < 0) return {t, ok:false, reason:`CID-Start ${startName} fehlt`};
-    const after = t.slice(s); const eMatch = after.match(eRe); if(!eMatch) return {t, ok:false, reason:`CID-Ende ${endName} fehlt`};
-    const e = s + after.search(eRe) + eMatch[0].length;
-    const startTag = after.match(sRe)[0], endTag = eMatch[0];
-    return { t: t.slice(0, s) + startTag + "\n" + content + "\n" + endTag + t.slice(e), ok:true };
-  }
-  function insertAtId(t, id, content){
-    const md = t.search(MD_ID(id));
-    if (md >= 0){
-      const lines = t.split(/\r?\n/); let acc=0;
-      for (let i=0;i<lines.length;i++){ const prev=acc; acc += lines[i].length+1; if (prev<=md && md<acc){ lines.splice(i+1,0,content); return {t:lines.join("\n"), ok:true}; } }
-    }
-    const hi = t.search(HTML_ID(id));
-    if (hi >= 0){
-      const lines = t.split(/\r?\n/); let cur=0;
-      for (let i=0;i<lines.length;i++){ const L=lines[i]; if (cur<=hi && hi<cur+L.length+1){ lines.splice(i+1,0,content); return {t:lines.join("\n"), ok:true}; } cur+=L.length+1; }
-    }
-    return { t, ok:false, reason:`ID ${id} nicht gefunden` };
-  }
-  function appendToFile(t, content){ return { t:(t.endsWith("\n")?t:t+"\n") + content + "\n", ok:true }; }
-
-  function applyJson({ json2, files }){
-    const changes = (json2 && json2.changes) || []; const updated = {...files}; const log=[];
-    for (const ch of changes){
-      const { id, target={}, op, content='' } = ch; const name = target.file;
-      if (!name || !(name in updated)){ log.push({id,file:name,ok:false,reason:'Datei nicht geladen'}); continue; }
-      let t = updated[name], res=null;
-      if (op==='insert_after_cid' && target.cid) res = insertAfterCid(t, target.cid, content);
-      else if (op==='replace_between_cids' && target.cid_start && target.cid_end) res = replaceBetweenCids(t, target.cid_start, target.cid_end, content);
-      else if (op==='insert_at_id' && target.id) res = insertAtId(t, target.id, content);
-      else if (op==='append_to_file') res = appendToFile(t, content);
-      else res = { t, ok:false, reason:`Unbekannte/ungültige Operation: ${op}` };
-      if (res.ok){ updated[name]=res.t; log.push({id,file:name,ok:true,op}); }
-      else { log.push({id,file:name,ok:false,op,reason:res.reason}); }
-    }
-    return { files: updated, changelog: log };
-  }
-  return { applyJson };
-})();
-
-// Helpers
-function esc(s){return s.replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m]));}
-function info(msg){ output.innerHTML = `<div class="log">${esc(msg)}</div>`; }
-function error(msg){ output.innerHTML = `<div class="log error">${esc(msg)}</div>`; }
-</script>
-</body>
-</html>
+diff --git a/index.html b/index.html
+index 97ec11282cdccb07302b91d62c99dfc3a064643a..6c9bde69912296e3258810332cbd9a5620e2af7a 100644
+--- a/index.html
++++ b/index.html
+@@ -140,87 +140,103 @@ filesInput.onchange = async (e) => {
+ // JSON2 laden
+ pickJson2Btn.onclick = () => json2Input.click();
+ json2Input.onchange = async (e) => {
+   const f = e.target.files[0]; if (!f) return;
+   try { json2Obj = JSON.parse(await f.text()); info(`JSON2 geladen: ${f.name}`); }
+   catch(err){ error('JSON2 ist ungültig: ' + err.message); }
+ };
+ 
+ // Anwenden (JSON2 → Zieltexte)
+ applyBtn.onclick = () => {
+   if (!json2Obj) return error('Bitte zuerst JSON2 laden.');
+   if (!Object.keys(files).length) return error('Bitte zuerst Ziel-Dateien wählen.');
+   const spec = toEngineSpec(json2Obj);
+   const { files: updated, changelog } = ApplyJsonEngine.applyJson({ json2: spec, files: {...files} });
+   const out = [];
+   for (const [name, text] of Object.entries(updated)) out.push(`<h3>${esc(name)}</h3><pre>${esc(text)}</pre>`);
+   out.push(`<h3>Changelog</h3><pre>${esc(JSON.stringify(changelog, null, 2))}</pre>`);
+   output.innerHTML = out.join('\\n');
+ };
+ 
+ // Manifest → UI (Nav + Kapitel; CID-Nummerierung aus cid_map)
+ function renderFromManifest(m){
+   projName.textContent = m.project || '—';
+ 
+   // NAV aufbauen
+-  const ul = document.getElementById('navList'); ul.innerHTML = '';
+-  (m.chapters||[]).forEach(ch => {
++  const ul = document.getElementById('navList');
++  ul.innerHTML = '';
++  const chapters = (m.chapters || []).filter(ch => {
++    if (!ch?.id || !ch?.title) {
++      console.warn('Skipping chapter due to missing id or title', ch);
++      return false;
++    }
++    return true;
++  });
++  chapters.forEach(ch => {
+     const li = document.createElement('li');
+     const anchorId = `ch${ch.id}`;
+-    li.innerHTML = `<a href="#${anchorId}">${esc(ch.title||('Kapitel '+ch.id))}</a>`;
++    li.innerHTML = `<a href="#${anchorId}">${esc(ch.title)}</a>`;
+     ul.appendChild(li);
+   });
+ 
+   // Bestehende Kapitel (außer Cover + Output) entfernen
+   const main = document.getElementById('main');
+   [...main.querySelectorAll('section')].forEach(sec => {
+     const keep = sec.id==='cover' || sec.querySelector('#output');
+     if (!keep) sec.remove();
+   });
+ 
+   const cid = m.cid_map || {};
+-  (m.chapters||[]).forEach(ch => {
+-    const id = ch.id, title = ch.title || `Kapitel ${id}`;
++  chapters.forEach(ch => {
++    const id = ch.id, title = ch.title;
+     const sec = document.createElement('section');
+     sec.className = 'card';
+     sec.id = `ch${id}`;
+     sec.setAttribute('data-cid', id);
+ 
+     const hd = document.createElement('div');
+     hd.className = 'hd';
+     hd.innerHTML = `<h2>${esc(title)}</h2><span class="pill">Kapitel ${esc(id)}</span>`;
+ 
+     const bd = document.createElement('div');
+     bd.className = 'bd';
+ 
+     const cmap = cid[id] || {};
+     const c = {
+       one:  (k) => cmap[k] ? `<!-- cid:${esc(cmap[k])} -->` : '',
+       beg:  (k) => cmap[k] ? `<!-- cid:${esc(cmap[k])}:start -->` : '',
+       end:  (k) => cmap[k] ? `<!-- cid:${esc(cmap[k])}:end -->` : ''
+     };
+ 
++    ch.subchapters = (ch.subchapters || []).filter(sub => {
++      if (!sub?.id || !sub?.title) {
++        console.warn(`Skipping subchapter in ${ch.id} due to missing id or title`, sub);
++        return false;
++      }
++      return true;
++    });
++
+     // Kapitel-spezifische Skelette – halten sich an manifest 1.3 (z. B. 02: Routing Performance)
+     if (id === '02'){ // MIDI & Setup
+       bd.innerHTML = `
+         ${c.one('intro')}
+         <p class="muted">Grundlagen zu Kanälen, Clock, Ports, Merger und U6-Presets.</p>
+ 
+         <h3 id="routing-performance">{#routing-performance}Routing Performance</h3>
+         ${c.one('routing_performance')}
+         <ul>
+           <li><b>Clock Master:</b> T-8</li>
+           <li><b>Merger #5:</b> sammelt S-1, T-8, J-6, EZ-AG, Handy (USB→DIN)</li>
+           <li><b>Kanäle:</b> S-1 = CH1 · EZ-AG = CH2 · J-6 = CH6 · T-8 = CH8</li>
+           <li><b>Dual U6:</b> U6-1 verteilt; U6-2 versorgt E-4, TL (Clock only), L-6 (optional)</li>
+         </ul>
+         ${ch.attachments ? `<p class="muted">Anhänge: ${Object.values(ch.attachments).map(v=>`<code>${esc(v)}</code>`).join(', ')}</p>`:''}
+       `;
+     } else if (id === '04'){ // Geräteübersicht & Texture Lab (Audio/MIDI-Abschnitte)
+       bd.innerHTML = `
+         ${c.beg('audio_start')}
+         <h3 id="dev-audio">{#audio}Audio</h3>
+         <p class="muted">Mixer/Recorder, Ein-/Ausgänge, Pegel, FX-Sends.</p>
+         ${c.end('audio_end')}
+ 
+         ${c.beg('midi_start')}
+         <h3 id="dev-midi">{#midi}MIDI</h3>
