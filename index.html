@@ -84,6 +84,12 @@ pre{background:#0b0f17;color:#e6edf6;border:1px solid #1f2635;padding:10px;borde
         </div>
       </section>
 
+      <!-- Aktive Geräte -->
+      <section class="card">
+        <div class="hd"><h2>Aktive Geräte</h2></div>
+        <div class="bd"><ul id="active-device-list"></ul></div>
+      </section>
+
       <!-- Apply-Engine Ausgabe -->
       <section class="card">
         <div class="hd"><h2>Output</h2><span class="pill">Apply JSON2</span></div>
@@ -92,6 +98,7 @@ pre{background:#0b0f17;color:#e6edf6;border:1px solid #1f2635;padding:10px;borde
     </main>
   </div>
 
+<script src="scripts/workflow-loader.js"></script>
 <script>
 let manifest = null;          // geladene Manifest v1.3
 const files = {};             // filename -> text (Zieltexte)

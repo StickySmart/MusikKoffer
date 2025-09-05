@@ -1,5 +1,40 @@
-﻿################################################################################
-# Diese .gitignore-Datei wurde von Microsoft(R) Visual Studio automatisch erstellt.
-################################################################################
+
 
 /.vs
+
+
+# Build output
+bin/
+obj/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]*/
+[Ll]og/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider/VS Code (optional)
+.idea/
+.vscode/
+
+# Packages & cache
+packages/
+*.nupkg
+*.snupkg
+*.cache
+*.tmp
+
+# Others
+*.dbmdl
+*.jfm
+*.pdb
+*.ipch
+*.opendb
