@@ -3,28 +3,50 @@ version: 1
 
 anchors:
   block:
+    # Block-Anker im Markdown/Text
     # Beispiel:
-    # <!-- cid:205:start --> ... <!-- cid:205:end -->
+    # <!-- cid:205:start -->
+    # ... Text ...
+    # <!-- cid:205:end -->
     start: "<!-- cid:${id}:start -->"
     end: "<!-- cid:${id}:end -->"
+
   single:
+    # Einzel-Anker:
     # <!-- cid:205 -->
     value: "<!-- cid:${id} -->"
+
   heading_id:
+    # Überschriften mit ID:
     # ## Titel {#205}
     value: "{#${id}}"
 
 defaults:
   encoding: "utf-8"
   newline: "\n"
-  create_block_if_missing: true
-  insert_if_missing_anchor: true
+  create_block_if_missing: true     # fehlenden Blockanker automatisch anlegen
+  insert_if_missing_anchor: true    # fehlenden Single-Anker automatisch anlegen
 
 validation:
+  # Nur Kapitelnummern 100–800 zulassen
   chapter_id_pattern: "^(100|200|300|400|500|600|700|800)$"
+
+  # Jede cid muss innerhalb von Kapitel..Kapitel+99 liegen
+  # Beispiel: Kapitel 200 → gültig sind 200–299
   cid_rule: "cid >= chapter_id && cid <= (chapter_id + 99)"
-  require_content_for: [insert_after, insert_before, append, replace, replace_block]
-  forbid_content_for: [remove_section, delete]
+
+  # Diese Operationen erfordern content_md
+  require_content_for:
+    - insert_after
+    - insert_before
+    - append
+    - replace
+    - replace_block
+
+  # Diese Operationen dürfen KEIN content_md enthalten
+  forbid_content_for:
+    - remove_section
+    - delete
 
 logging:
   include_preview: false
