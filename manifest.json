@@ -1,4 +1,5 @@
 {
+
     "manifest_version": "1.3",
     "project": "TiageMusic Gerätesetup",
     "files": {
@@ -15,6 +16,7 @@
             "title": "Einleitung",
             "path": "chapters/100_Einleitung.md"
         },
+
         {
             "id": "200",
             "title": "Geraeteuebersicht",
