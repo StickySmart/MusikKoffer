@@ -82,7 +82,8 @@
     }
 
     for (const ch of (json2.actions || json2.changes || [])) {
-      const file = ch.target?.file || ch.file || ch.path || ch.chapter_path || ch.chapter || ch.chapter_file || ch.chapterId || ch.chapter_id && files ? null : null;
+     const chapterId = String(ch.chapter_id || "");
+     const file = null; // wir nutzen nur files[] + chapterId-Matching
       // Bei unserem Format: file kommt aus Schlüssel "files" nicht – wir arbeiten auf bereitgestellten files-Map
       const op = ch.op || ch.type;
       const id = String(ch.cid || ch.id || ch.data_cid || "");
