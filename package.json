@@ -4,5 +4,8 @@
   "private": true,
   "scripts": {
     "test": "echo 'no tests'"
+  },
+  "devDependencies": {
+    "eslint": "^9.34.0"
   }
 }
