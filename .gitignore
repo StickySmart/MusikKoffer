@@ -1,3 +1,10 @@
+#
+################################################################################
+# Diese .gitignore-Datei wurde von Microsoft(R) Visual Studio automatisch erstellt.
+################################################################################
+
+/.vs
+
 # Build output
 bin/
 obj/
