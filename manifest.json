@@ -1,78 +1,83 @@
 {
-  "manifest_version": "1.3",
-  "project": "TiageMusic Gerätesetup",
-  "files": {
-    "schema": "tiagemusic-geraetesetup.xsd",
-    "setup": "geraetesetup.xml",
-    "presets": "presets.xml",
-    "scenes": "scenes.xml",
-    "workflows": "workflows.xml"
-  },
-  "chapters": [
-    {
-      "id": "100",
-      "title": "Cover",
-      "path": "chapters/01_cover.md"
+    "manifest_version": "1.3",
+    "project": "TiageMusic Gerätesetup",
+    "files": {
+        "schema": "tiagemusic-geraetesetup.xsd",
+        "setup": "geraetesetup.xml",
+        "presets": "presets.xml",
+        "scenes": "scenes.xml",
+        "workflows": "workflows.xml"
     },
-    {
-      "id": "200",
-      "title": "First Steps – MIDI & Setup",
-      "path": "chapters/04_first_steps_midi_setup.md",
-      "subchapters": [
+
+    "chapters": [
         {
-          "title": "Routing Performance",
-          "anchor": "#routing-performance"
-        }
-      ]
-    },
-    {
-      "id": "300",
-      "title": "First Steps – Audio & Routing",
-      "path": "chapters/03_first_steps_audio_routing.md"
-    },
-    {
-      "id": "400",
-      "title": "Geräteübersicht & Texture Lab",
-      "path": "chapters/02_geraeteuebersicht.md",
-      "merge_from": [
-        "chapters/07_texture_lab.md"
-      ],
-      "subchapters": [
-        {
-          "title": "Audio",
-          "anchor": "#audio"
+            "id": "100",
+            "title": "Einleitung",
+            "path": "chapters/100_Einleitung.md"
         },
         {
-          "title": "MIDI",
-          "anchor": "#midi"
+            "id": "200",
+            "title": "Geraeteuebersicht",
+            "path": "chapters/200_geraeteuebersicht.md"
+
+        },
+
+        {
+            "id": "310",
+            "title": "First Steps – Audio & Routing",
+            "path": "chapters/310_first_steps_audio_routing.md",
+            "subchapters": [
+
+                {
+                    "title": "Audio Devices",
+                    "anchor": "#AudioDevices"
+                }
+
+            ]
+        },
+
+        {
+            "id": "320",
+            "title": "workflows_audio.md",
+            "path": "chapters/320_workflows_audio.md"
+
+        },
+
+        {
+            "id": "330",
+            "title": "texture_lab",
+            "path": "chapters/330_texture_lab.md"
+        },
+
+
+        {
+            "id": "510",
+            "title": "First Steps – MIDI & Routing",
+            "path": "chapters/310_first_steps_midi_routing.md",
+            "subchapters": [
+
+                {
+                    "title": "MIDI Devices",
+                    "anchor": "#MidiDevices"
+                }
+
+            ]
+        },
+
+        {
+            "id": "520",
+            "title": "workflows_audio.md",
+            "path": "chapters/320_workflows_audio.md"
+
+        },
+
+
+
+
+        {
+            "id": "800",
+            "title": "Zusammenfassung",
+            "path": "chapters/800_zusammenfassung.md"
         }
-      ]
-    },
-    {
-      "id": "500",
-      "title": "Workflows Audio – Recording",
-      "path": "chapters/05_workflows_audio__recording.md"
-    },
-    {
-      "id": "600",
-      "title": "Workflows Audio – Performance",
-      "path": "chapters/05_workflows_audio__performance.md"
-    },
-    {
-      "id": "700",
-      "title": "Workflows Audio – Mixdown",
-      "path": "chapters/05_workflows_audio__mixdown.md"
-    },
-    {
-      "id": "800",
-      "title": "Zusammenfassung",
-      "path": "chapters/08_zusammenfassung.md"
-    }
-  ],
-  "notes": [
-    "MIDI Routing Performance ist Unterpunkt im MIDI-Absatz (kein eigenes Kapitel).",
-    "Kapitel 04 kombiniert Geräteübersicht mit Texture Lab; enthält Audio/MIDI-Unterkapitel.",
-    "Kapitel 05 wurde aufgeteilt in Recording/Performance/Mixdown."
-  ],
-  "overview": "# Überblick Absätze\n\n- Kapitel 100 → Cover\n- Kapitel 200 → First Steps – MIDI & Setup\n- Kapitel 300 → First Steps – Audio & Routing\n- Kapitel 400 → Geräteübersicht & Texture Lab\n- Kapitel 500 → Workflows Audio – Recording\n- Kapitel 600 → Workflows Audio – Performance\n- Kapitel 700 → Workflows Audio – Mixdown\n- Kapitel 800 → Zusammenfassung\n"
+    ]
 }
