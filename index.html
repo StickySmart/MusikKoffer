@@ -272,6 +272,7 @@
             <input id="json2Input" type="file" accept=".json,application/json" style="display:none">
             <button id="applyBtn" class="btn">Anwenden</button>
         </div>
+
     </header>
 
     <div class="wrap">
@@ -304,6 +305,27 @@
     </div>
 
     <script>let manifest = null;          // geladene Manifest v1.3
+=======
+      </section>
+
+      <!-- Aktive Geräte -->
+      <section class="card">
+        <div class="hd"><h2>Aktive Geräte</h2></div>
+        <div class="bd"><ul id="active-device-list"></ul></div>
+      </section>
+
+      <!-- Apply-Engine Ausgabe -->
+      <section class="card">
+        <div class="hd"><h2>Output</h2><span class="pill">Apply JSON2</span></div>
+        <div class="bd" id="output"><div class="log">Bereit. Manifest laden → Kapitel erscheinen. Danach Ziel-Dateien + JSON2 wählen und „Anwenden“.</div></div>
+      </section>
+    </main>
+  </div>
+
+<script src="scripts/workflow-loader.js"></script>
+<script>
+let manifest = null;          // geladene Manifest v1.3
+
 const files = {};             // filename -> text (Zieltexte)
 let json2Obj = null;          // JSON2-Spec
 
@@ -371,9 +393,21 @@ applyBtn.onclick = () => {
 function renderFromManifest(m){
   projName.textContent = m.project || '—';
 
+  const coverEl = document.getElementById('cover');
+  const coverId = (coverEl?.dataset.cid || '').split(':')[0]?.toLowerCase();
+  const coverTitle = coverEl?.querySelector('.hd h2')?.textContent?.trim().toLowerCase();
+  const isCover = ch => {
+    const idStr = String(ch.id).toLowerCase();
+    const titleStr = String(ch.title || '').trim().toLowerCase();
+    return idStr === 'cover' || titleStr === 'cover' ||
+           (coverId && idStr === coverId) ||
+           (coverTitle && titleStr === coverTitle);
+  };
+  const chapters = (m.chapters || []).filter(ch => !isCover(ch));
+
   // NAV aufbauen
   const ul = document.getElementById('navList'); ul.innerHTML = '';
-  (m.chapters||[]).forEach(ch => {
+  chapters.forEach(ch => {
     const li = document.createElement('li');
     const anchorId = `ch${ch.id}`;
     li.innerHTML = `<a href="#${anchorId}">${esc(ch.title||('Kapitel '+ch.id))}</a>`;
@@ -388,7 +422,7 @@ function renderFromManifest(m){
   });
 
   const cid = m.cid_map || {};
-  (m.chapters||[]).forEach(ch => {
+  chapters.forEach(ch => {
     const id = ch.id, title = ch.title || `Kapitel ${id}`;
     const sec = document.createElement('section');
     sec.className = 'card';
