@@ -1,0 +1,38 @@
+﻿# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]*/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Paketmanager
+packages/
+*.nupkg
+*.snupkg
+
+# Cache / Temp
+*.dbmdl
+*.jfm
+*.pdb
+*.tmp
+*.cache
+*.opendb
+*.ipch
+
+# Node.js (falls npm benutzt)
+node_modules/
+dist/
