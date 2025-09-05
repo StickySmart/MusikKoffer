@@ -1,4 +1,5 @@
 {
+
   "name": "musikkoffer",
   "version": "1.0.0",
   "description": "Dieses Repository enthält die gesamte Dokumentation und Struktur für das **TiageMusic Gerätesetup**.   Alle Inhalte sind modular aufgebaut:   - **Manifest (`manifest.json`)** → definiert Kapitelstruktur & Dateipfade.   - **Markdown-Kapitel (`chapters/*.md`)** → inhaltliche Texte (Audio, MIDI, Workflows).   - **Dokumente (`docs/*.pdf`)** → Original-Handbücher, Referenzen.   - **Schema (`.xsd`)** → strukturelle Validierung.",
