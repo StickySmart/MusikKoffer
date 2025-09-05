@@ -1,87 +1,311 @@
 <!doctype html>
 <html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TiageMusic – INDEX (Manifest v1.3)</title>
-<style>
-:root{--bg:#0b0c0f;--ink:#eef3fb;--ink-dim:#b8c2d4;--line:#1f2635;--card:#12141a;--pad:16px;--radius:14px;--shadow:0 8px 24px rgba(0,0,0,.35);--w-nav:280px;--accent:#7ad2ff}
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,Segoe UI,Roboto,Arial,sans-serif}
-a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
-header.top{position:sticky;top:0;z-index:20;display:flex;gap:10px;align-items:center;padding:10px var(--pad);border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(11,12,15,.92),rgba(11,12,15,.75) 60%,rgba(11,12,15,0));backdrop-filter:blur(6px)}
-.brand{font-weight:700}
-.chip{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink-dim)}
-.btn{appearance:none;border:1px solid var(--line);background:#141a24;color:#eaf2fb;padding:.5rem .8rem;border-radius:9px;cursor:pointer}
-.btn:hover{border-color:#3a4661}
-.wrap{display:flex;min-height:calc(100vh - 52px)}
-nav.side{width:var(--w-nav);flex:0 0 var(--w-nav);border-right:1px solid var(--line);padding:18px var(--pad);background:linear-gradient(180deg,#0e1015,#0b0c0f)}
-nav h4{margin:8px 0;font-size:12px;letter-spacing:.12em;color:var(--ink-dim);text-transform:uppercase}
-nav ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-nav li a{display:block;padding:8px 10px;border-radius:10px;color:var(--ink);border:1px solid transparent}
-nav li a:hover{background:#12141a;border-color:var(--line)}
-main{flex:1;padding:20px;max-width:1200px;margin:0 auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:16px 0;overflow:hidden;position:relative}
-.card .hd{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px var(--pad);border-bottom:1px solid var(--line)}
-.card .hd h2{margin:0;font-size:18px}
-.card .bd{padding:16px}
-.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#10141d;border:1px solid var(--line);color:#b8c2d4;font-size:12px}
-.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.kv{display:grid;gap:6px}
-.muted{color:var(--ink-dim)}
-[data-cid]::before{content:attr(data-cid);position:absolute;top:10px;right:10px;font-size:11px;color:var(--ink-dim);background:#0f141c;border:1px solid var(--line);padding:2px 6px;border-radius:999px}
-section{scroll-margin-top:72px}
-pre{background:#0b0f17;color:#e6edf6;border:1px solid #1f2635;padding:10px;border-radius:8px;overflow:auto}
-.log{border:1px solid #3b82f6;color:#cfe0ff;background:#0b1325;padding:.6rem .8rem;border-radius:8px;font-family:ui-monospace,Consolas,monospace;white-space:pre-wrap}
-.log.error{border-color:#ef4444;color:#ffe2e2;background:#220b0b}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TiageMusic – INDEX (Manifest v1.3)</title>
+    <style>
+        :root {
+            --bg: #0b0c0f;
+            --ink: #eef3fb;
+            --ink-dim: #b8c2d4;
+            --line: #1f2635;
+            --card: #12141a;
+            --pad: 16px;
+            --radius: 14px;
+            --shadow: 0 8px 24px rgba(0,0,0,.35);
+            --w-nav: 280px;
+            --accent: #7ad2ff
+        }
 
-/* Off-canvas für kleine Screens */
-#navToggle{display:none}
-@media (max-width: 980px){
-  nav.side{position:fixed;left:-100%;top:52px;height:calc(100vh - 52px);z-index:15;transition:left .25s ease}
-  body.nav-open nav.side{left:0}
-  #navToggle{display:inline-flex}
-  main{padding-top:12px}
-}
-</style>
+        * {
+            box-sizing: border-box
+        }
+
+        html, body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 15px/1.55 system-ui,Segoe UI,Roboto,Arial,sans-serif
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none
+        }
+
+            a:hover {
+                text-decoration: underline
+            }
+
+        header.top {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px var(--pad);
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(180deg,rgba(11,12,15,.92),rgba(11,12,15,.75) 60%,rgba(11,12,15,0));
+            backdrop-filter: blur(6px)
+        }
+
+        .brand {
+            font-weight: 700
+        }
+
+        .chip {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            color: var(--ink-dim)
+        }
+
+        .btn {
+            appearance: none;
+            border: 1px solid var(--line);
+            background: #141a24;
+            color: #eaf2fb;
+            padding: .5rem .8rem;
+            border-radius: 9px;
+            cursor: pointer
+        }
+
+            .btn:hover {
+                border-color: #3a4661
+            }
+
+        .wrap {
+            display: flex;
+            min-height: calc(100vh - 52px)
+        }
+
+        nav.side {
+            width: var(--w-nav);
+            flex: 0 0 var(--w-nav);
+            border-right: 1px solid var(--line);
+            padding: 18px var(--pad);
+            background: linear-gradient(180deg,#0e1015,#0b0c0f)
+        }
+
+        nav h4 {
+            margin: 8px 0;
+            font-size: 12px;
+            letter-spacing: .12em;
+            color: var(--ink-dim);
+            text-transform: uppercase
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 6px
+        }
+
+        nav li a {
+            display: block;
+            padding: 8px 10px;
+            border-radius: 10px;
+            color: var(--ink);
+            border: 1px solid transparent
+        }
+
+            nav li a:hover {
+                background: #12141a;
+                border-color: var(--line)
+            }
+
+        main {
+            flex: 1;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin: 16px 0;
+            overflow: hidden;
+            position: relative
+        }
+
+            .card .hd {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                align-items: center;
+                padding: 14px var(--pad);
+                border-bottom: 1px solid var(--line)
+            }
+
+                .card .hd h2 {
+                    margin: 0;
+                    font-size: 18px
+                }
+
+            .card .bd {
+                padding: 16px
+            }
+
+        .pill {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #10141d;
+            border: 1px solid var(--line);
+            color: #b8c2d4;
+            font-size: 12px
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit,minmax(260px,1fr))
+        }
+
+        .kv {
+            display: grid;
+            gap: 6px
+        }
+
+        .muted {
+            color: var(--ink-dim)
+        }
+
+        [data-cid]::before {
+            content: attr(data-cid);
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 11px;
+            color: var(--ink-dim);
+            background: #0f141c;
+            border: 1px solid var(--line);
+            padding: 2px 6px;
+            border-radius: 999px
+        }
+
+        section {
+            scroll-margin-top: 72px
+        }
+
+        pre {
+            background: #0b0f17;
+            color: #e6edf6;
+            border: 1px solid #1f2635;
+            padding: 10px;
+            border-radius: 8px;
+            overflow: auto
+        }
+
+        .log {
+            border: 1px solid #3b82f6;
+            color: #cfe0ff;
+            background: #0b1325;
+            padding: .6rem .8rem;
+            border-radius: 8px;
+            font-family: ui-monospace,Consolas,monospace;
+            white-space: pre-wrap
+        }
+
+            .log.error {
+                border-color: #ef4444;
+                color: #ffe2e2;
+                background: #220b0b
+            }
+
+        /* Off-canvas für kleine Screens */
+        #navToggle {
+            display: none
+        }
+
+        @media (max-width: 980px) {
+            nav.side {
+                position: fixed;
+                left: -100%;
+                top: 52px;
+                height: calc(100vh - 52px);
+                z-index: 15;
+                transition: left .25s ease
+            }
+
+            body.nav-open nav.side {
+                left: 0
+            }
+
+            #navToggle {
+                display: inline-flex
+            }
+
+            main {
+                padding-top: 12px
+            }
+        }
+    </style>
 </head>
 <body>
-  <header class="top">
-    <button id="navToggle" class="btn" aria-label="Navigation umschalten">☰</button>
-    <div class="brand">🎒 TiageMusic · INDEX</div>
-    <span id="manifestChip" class="chip">Manifest: —</span>
-    <div style="margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap">
-      <button id="pickManifestBtn" class="btn">Manifest laden</button>
-      <input id="manifestInput" type="file" accept=".json,application/json" style="display:none">
-      <button id="saveManifestBtn" class="btn" disabled>Manifest speichern</button>
+    <header class="top">
+        <button id="navToggle" class="btn" aria-label="Navigation umschalten">☰</button>
+        <div class="brand">🎒 TiageMusic · INDEX</div>
+        <span id="manifestChip" class="chip">Manifest: —</span>
+        <div style="margin-left:auto;display:flex;gap:.5rem;flex-wrap:wrap">
+            <button id="pickManifestBtn" class="btn">Manifest laden</button>
+            <input id="manifestInput" type="file" accept=".json,application/json" style="display:none">
+            <button id="saveManifestBtn" class="btn" disabled>Manifest speichern</button>
 
-      <button id="pickFilesBtn" class="btn">Dateien wählen (.md/.html)</button>
-      <input id="filesInput" type="file" multiple accept=".md,.html,.txt" style="display:none">
-      <button id="pickJson2Btn" class="btn">JSON2 laden</button>
-      <input id="json2Input" type="file" accept=".json,application/json" style="display:none">
-      <button id="applyBtn" class="btn">Anwenden</button>
-    </div>
-  </header>
-
-  <div class="wrap">
-    <nav class="side" id="sidebar">
-      <div id="navContainer">
-        <h4>Übersicht</h4>
-        <ul id="navList"><li><a>(Manifest laden…)</a></li></ul>
-      </div>
-    </nav>
-
-    <main id="main">
-      <!-- Deckblatt -->
-      <section id="cover" class="card" data-cid="01:cover">
-        <div class="hd"><h2>Cover</h2><span class="pill">Kapitel 01</span></div>
-        <div class="bd">
-          <div class="grid">
-            <div class="kv"><strong>Projekt</strong><span id="projName">–</span></div>
-            <div class="kv"><strong>Version</strong><span id="ver">v1.3-index</span></div>
-          </div>
-          <p class="muted">Manifest-gesteuerter Index. Kapitel-&Anker kommen direkt aus <code>manifest.json</code> (v1.3).</p>
+            <button id="pickFilesBtn" class="btn">Dateien wählen (.md/.html)</button>
+            <input id="filesInput" type="file" multiple accept=".md,.html,.txt" style="display:none">
+            <button id="pickJson2Btn" class="btn">JSON2 laden</button>
+            <input id="json2Input" type="file" accept=".json,application/json" style="display:none">
+            <button id="applyBtn" class="btn">Anwenden</button>
         </div>
+
+    </header>
+
+    <div class="wrap">
+        <nav class="side" id="sidebar">
+            <div id="navContainer">
+                <h4>Übersicht</h4>
+                <ul id="navList"><li><a>(Manifest laden…)</a></li></ul>
+            </div>
+        </nav>
+
+        <main id="main">
+            <!-- Deckblatt -->
+            <section id="cover" class="card" data-cid="01:cover">
+                <div class="hd"><h2>Cover</h2><span class="pill">Kapitel 01</span></div>
+                <div class="bd">
+                    <div class="grid">
+                        <div class="kv"><strong>Projekt</strong><span id="projName">–</span></div>
+                        <div class="kv"><strong>Version</strong><span id="ver">v1.3-index</span></div>
+                    </div>
+                    <p class="muted">Manifest-gesteuerter Index. Kapitel-&Anker kommen direkt aus <code>manifest.json</code> (v1.3).</p>
+                </div>
+            </section>
+
+            <!-- Apply-Engine Ausgabe -->
+            <section class="card">
+                <div class="hd"><h2>Output</h2><span class="pill">Apply JSON2</span></div>
+                <div class="bd" id="output"><div class="log">Bereit. Manifest laden → Kapitel erscheinen. Danach Ziel-Dateien + JSON2 wählen und „Anwenden“.</div></div>
+            </section>
+        </main>
+    </div>
+
+    <script>let manifest = null;          // geladene Manifest v1.3
+=======
       </section>
 
       <!-- Aktive Geräte -->
@@ -101,6 +325,7 @@ pre{background:#0b0f17;color:#e6edf6;border:1px solid #1f2635;padding:10px;borde
 <script src="scripts/workflow-loader.js"></script>
 <script>
 let manifest = null;          // geladene Manifest v1.3
+
 const files = {};             // filename -> text (Zieltexte)
 let json2Obj = null;          // JSON2-Spec
 
@@ -223,7 +448,6 @@ function renderFromManifest(m){
       bd.innerHTML = `
         ${c.one('intro')}
         <p class="muted">Grundlagen zu Kanälen, Clock, Ports, Merger und U6-Presets.</p>
-
         <h3 id="routing-performance">{#routing-performance}Routing Performance</h3>
         ${c.one('routing_performance')}
         <ul>
@@ -240,7 +464,6 @@ function renderFromManifest(m){
         <h3 id="dev-audio">{#audio}Audio</h3>
         <p class="muted">Mixer/Recorder, Ein-/Ausgänge, Pegel, FX-Sends.</p>
         ${c.end('audio_end')}
-
         ${c.beg('midi_start')}
         <h3 id="dev-midi">{#midi}MIDI</h3>
         <p class="muted">Kanäle, Program-Change, Clock-Verteilung, CC-Maps.</p>
@@ -340,7 +563,6 @@ const ApplyJsonEngine = (function(){
 // Helpers
 function esc(s){return s.replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m]));}
 function info(msg){ output.innerHTML = `<div class="log">${esc(msg)}</div>`; }
-function error(msg){ output.innerHTML = `<div class="log error">${esc(msg)}</div>`; }
-</script>
+function error(msg){ output.innerHTML = `<div class="log error">${esc(msg)}</div>`; }</script>
 </body>
 </html>
