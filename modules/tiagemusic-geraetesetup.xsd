@@ -1,34 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           elementFormDefault="qualified"
-           attributeFormDefault="unqualified">
-
-  <xs:simpleType name="bool">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="true"/>
-      <xs:enumeration value="false"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="portDirection">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="MIDI In"/>
-      <xs:enumeration value="MIDI Out"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="connectorType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="DIN"/>
-      <xs:enumeration value="TRS-A"/>
-      <xs:enumeration value="TRS-B"/>
-      <xs:enumeration value="USB"/>
-      <xs:enumeration value="Other"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="signalType">
-    <xs:restriction base="xs:string">
+@@ -32,50 +32,52 @@
       <xs:enumeration value="Clock"/>
       <xs:enumeration value="Notes"/>
       <xs:enumeration value="Clock+Notes"/>
@@ -54,6 +24,8 @@
       <xs:element name="connections" type="ConnectionsType" minOccurs="0"/>
       <xs:element name="presets" type="PresetsType" minOccurs="0"/>
       <xs:element name="scenes" type="ScenesType" minOccurs="0"/>
+      <!-- Optional workflow definitions -->
+      <xs:element name="workflows" type="WorkflowsType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -79,56 +51,7 @@
       <xs:element name="port" type="PortType" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-
-  <xs:complexType name="PortType">
-    <xs:attribute name="id"        type="xs:string"       use="required"/>
-    <xs:attribute name="type"      type="portDirection"   use="required"/>
-    <xs:attribute name="connector" type="connectorType"   use="optional" default="DIN"/>
-    <xs:attribute name="active"    type="bool"            use="optional" default="true"/>
-  </xs:complexType>
-
-  <xs:complexType name="NotesType">
-    <xs:sequence>
-      <xs:element name="section" type="SectionType" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="SectionType" mixed="true">
-    <xs:attribute name="name" type="xs:string" use="required"/>
-  </xs:complexType>
-
-  <xs:complexType name="ConnectionsType">
-    <xs:sequence>
-      <xs:element name="connection" type="ConnectionType" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="ConnectionType">
-    <xs:attribute name="id"        type="xs:ID"        use="required"/>
-    <xs:attribute name="fromDevice" type="xs:string"   use="required"/>
-    <xs:attribute name="fromPort"   type="xs:string"   use="required"/>
-    <xs:attribute name="toDevice"   type="xs:string"   use="required"/>
-    <xs:attribute name="toPort"     type="xs:string"   use="required"/>
-    <xs:attribute name="signal"     type="signalType"  use="optional" default="Clock+Notes"/>
-  </xs:complexType>
-
-  <xs:complexType name="PresetsType">
-    <xs:sequence>
-      <xs:element name="preset" type="PresetType" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="PresetType">
-    <xs:sequence>
-      <xs:element name="name"        type="xs:string"/>
-      <xs:element name="description" type="xs:string" minOccurs="0"/>
-      <xs:element name="routing"     type="RoutingType" minOccurs="0"/>
-    </xs:sequence>
-    <xs:attribute name="id" type="xs:ID" use="required"/>
-  </xs:complexType>
-
-  <xs:complexType name="RoutingType">
-    <xs:sequence>
+@@ -132,50 +134,86 @@
       <xs:element name="map" type="MapType" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
@@ -152,6 +75,42 @@
     </xs:sequence>
     <xs:attribute name="id"   type="xs:ID"     use="required"/>
     <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="WorkflowsType">
+    <xs:sequence>
+      <xs:element name="workflow" type="WorkflowType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="WorkflowType">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="startSceneRef" type="xs:IDREF"/>
+      <xs:element name="l6State" type="xs:string"/>
+      <xs:element name="u6Presets" type="U6PresetsType"/>
+      <xs:element name="activeConnections" type="ActiveConnectionsType"/>
+      <xs:element name="activeDevices" type="ActiveDevicesType"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="U6PresetsType">
+    <xs:sequence>
+      <xs:element name="presetRef" type="xs:IDREF" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ActiveConnectionsType">
+    <xs:sequence>
+      <xs:element name="connectionRef" type="xs:IDREF" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ActiveDevicesType">
+    <xs:sequence>
+      <xs:element name="deviceRef" type="xs:IDREF" maxOccurs="unbounded"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:key name="deviceKey">
@@ -179,12 +138,3 @@
     <xs:selector xpath="connections/connection"/>
     <xs:field xpath="@fromDevice"/>
     <xs:field xpath="@fromPort"/>
-  </xs:keyref>
-
-  <xs:keyref name="toPortRef" refer="portKey">
-    <xs:selector xpath="connections/connection"/>
-    <xs:field xpath="@toDevice"/>
-    <xs:field xpath="@toPort"/>
-  </xs:keyref>
-
-</xs:schema>
