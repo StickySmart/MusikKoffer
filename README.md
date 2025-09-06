@@ -41,6 +41,15 @@ Aktuelle Version: **v1.3**
 3. **Referenzen nutzen**: PDFs in `docs/` dienen nur als Nachschlagewerk.  
 4. **Import/Export**: JSON2-Workflow erlaubt automatisches Einspielen von Kommentaren & Versionen über die Workbench.  
 
+
+## Linting
+Installiere zuerst die Abhängigkeiten und führe anschließend ESLint aus:
+
+```bash
+npm install
+npm run lint
+```
+
 ---
 
 © TiageMusic Projekt, 2025
