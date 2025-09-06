@@ -10,7 +10,7 @@ Alle Inhalte sind modular aufgebaut:
 
 ## Inhalt
 - **chapters/** → Hauptinhalte als `.md`
-  - 100_cover.md
+  - 100_einleitung.md
   - 200_geraeteuebersicht.md
   - 310_first_steps_audio_routing.md
   - 320_workflows_audio.md
