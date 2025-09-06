@@ -7,14 +7,16 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo 'No tests specified'",
+    "test": "jest",
     "lint": "eslint ."
+		
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "eslint": "^9.35.0"
+    "eslint": "^9.35.0",
+    "jest": "^30.1.3"
   }
 }
