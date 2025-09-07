@@ -7,7 +7,8 @@ Alle Inhalte sind modular aufgebaut:
 das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.  
 - **Markdown-Kapitel (`chapters/*.md`)** → inhaltliche Texte (Audio, MIDI, Workflows).  
 - **Dokumente (`docs/*.pdf`)** → Original-Handbücher, Referenzen.  
-- **Schema (`.xsd`)** → strukturelle Validierung.  
+- **Schema (`modules/*.xsd`)** → strukturelle Validierung.  
+- **Modules (`.xlm`)** → settings.
 
 ## Inhalt
 - **chapters/** → Hauptinhalte als `.md`
