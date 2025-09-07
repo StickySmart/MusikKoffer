@@ -21,6 +21,7 @@ das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.
   - 510_First_steps_midi_routing.md 
   - 520_Workflows_midi.md
   - 800_Zusammenfassung.md
+
 - **docs/** → PDF-Handbücher und Zusatzmaterial
   - Zoom L-6, Roland J-6, T-8, E-4, S-1, Sonicware Texture Lab, CME U6MIDI Pro, etc.
 - **schema/**
@@ -50,7 +51,5 @@ Es sind nur Unterkapitel Möglich und erlaubt. Nummernkreis 1xx-8xx bleibt unber
 7. **Import/Export**: JSON2-Workflow erlaubt automatisches Einspielen von Kommentaren & Versionen über die Workbench. 
 8. **Workflows**: mit preset.xml (2x CME U6 MIDI PRo) und scenes.xml können verschiedene Einstellungen am System gepeichert 
 werden. Die Workflows sind in Bezug zum Signalfluss zu kopien, zu ändern dann bzgl. Möglichkeiten der Steuerung zu bewerten und schließlich zu speichern.  
-
----
 
 © TiageMusic Projekt, 2025
