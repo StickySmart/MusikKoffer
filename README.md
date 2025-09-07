@@ -3,21 +3,25 @@
 ## Überblick
 Dieses Repository enthält die gesamte Dokumentation und Struktur für das **TiageMusic Gerätesetup**.  
 Alle Inhalte sind modular aufgebaut:  
-- **Manifest (`manifest.json`)** → definiert Kapitelstruktur & Dateipfade.  
+- **Manifest (`manifest.json`)** → definiert Kapitelstruktur & Dateipfade. 
+das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.  
 - **Markdown-Kapitel (`chapters/*.md`)** → inhaltliche Texte (Audio, MIDI, Workflows).  
 - **Dokumente (`docs/*.pdf`)** → Original-Handbücher, Referenzen.  
 - **Schema (`.xsd`)** → strukturelle Validierung.  
 
 ## Inhalt
 - **chapters/** → Hauptinhalte als `.md`
-  - 100_einleitung.md
-  - 200_geraeteuebersicht.md
-  - 310_first_steps_audio_routing.md
-  - 320_workflows_audio.md
-  - 330_texture_lab.md
-  - 510_first_steps_midi_setup.md (+ Subkapitel *Routing Performance*)
-  - 520_workflows_midi.md
-  - 800_zusammenfassung.md
+  - 100_Einleitung.md
+  - 200_Geraeteuebersicht.md
+  - 300_Audio
+  - 310_First_steps_audio_routing.md
+  - 320_Workflows_audio.md
+  - 330_Texture_lab.md
+  - 500_Midi
+  - 510_First_steps_midi_routing.md 
+  - 520_Workflows_midi.md
+  - 800_Zusammenfassung.md
+
 - **docs/** → PDF-Handbücher und Zusatzmaterial
   - Zoom L-6, Roland J-6, T-8, E-4, S-1, Sonicware Texture Lab, CME U6MIDI Pro, etc.
 - **schema/**
@@ -25,31 +29,27 @@ Alle Inhalte sind modular aufgebaut:
 - **json/**  
   - presets.xml  
   - scenes.xml  
-  - workflows.xml  
+  - workflows.xml 
+  
 
 ## Manifest
-Aktuelle Version: **v1.3**
+Aktuelle Version: **v1.4**
 
-Änderungen gegenüber v1.0:
-- *MIDI Routing Performance* ist Unterpunkt im MIDI-Kapitel.  
-- Kapitel 04 kombiniert Geräteübersicht mit Texture Lab, mit Unterpunkten *Audio* und *MIDI*.  
-- Kapitel 05 aufgeteilt in **Recording / Performance / Mixdown**.  
+ Gibt in der jeweilig aktuellsten Version strikt die Kapitelstruktur vor. Wenn keine MD datei mit dem 
+ Titel innerhalb des Documents vorhanden ist wird diese md datei leer angelegt 
 
 ## Workflow
-1. **Inhalt bearbeiten**: Markdown-Dateien (`chapters/*.md`).  
-2. **Struktur pflegen**: Änderungen an `manifest.json` eintragen.  
-3. **Referenzen nutzen**: PDFs in `docs/` dienen nur als Nachschlagewerk.  
-4. **Import/Export**: JSON2-Workflow erlaubt automatisches Einspielen von Kommentaren & Versionen über die Workbench.  
-
-
-## Linting
-Installiere zuerst die Abhängigkeiten und führe anschließend ESLint aus:
-
-```bash
-npm install
-npm run lint
-```
-
----
+1. **Inhalt kommentieren**: comment.Json speichert alle kommentare bezogen auf Kapitel MD's gemäß Inhaltsstruktur.
+2. **Json1**: Exportieren der `comment.json` und weiterleiten an chatGPT
+3. **Prozessieren**: ChatGPT sammelt anhand der Kommentare bezogen auf den Kapitelinhalt und 
+dessen Struktur für jeden Kommentar nacheinander mit dem User Verbesserungs -und Ergänzungsvorschläge 
+für das jeweilige Kapitel und sammelt die Anpassungen  mit den Referenzen zum Kapitel in`Json2.json` nach Bestätigung mit "OK übernehmen") . 
+4. **Markdown-Dateien anpassen** `Apply.Json` ändert die `chapters/*.md`.  
+5. **Struktur bleibt**: Bei wünschen bzgl. weiteren Kapiteln Änderungen in `manifest.json` eintragen.
+Es sind nur Unterkapitel Möglich und erlaubt. Nummernkreis 1xx-8xx bleibt unberührt. 
+6. **Referenzen nutzen**: PDFs in `docs/` dienen nur als Nachschlagewerk.  
+7. **Import/Export**: JSON2-Workflow erlaubt automatisches Einspielen von Kommentaren & Versionen über die Workbench. 
+8. **Workflows**: mit preset.xml (2x CME U6 MIDI PRo) und scenes.xml können verschiedene Einstellungen am System gepeichert 
+werden. Die Workflows sind in Bezug zum Signalfluss zu kopien, zu ändern dann bzgl. Möglichkeiten der Steuerung zu bewerten und schließlich zu speichern.  
 
 © TiageMusic Projekt, 2025
