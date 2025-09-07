@@ -1,7 +1,7 @@
 {
   "manifest_version": "1.4",
   "project": "TiageMusic Gerätesetup",
-  "files": {
+  "modules": {
     "schema": "tiagemusic-geraetesetup.xsd",
     "setup": "geraetesetup.xml",
     "presets": "presets.xml",
