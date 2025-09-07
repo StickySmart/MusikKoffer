@@ -138,3 +138,34 @@
     <xs:selector xpath="connections/connection"/>
     <xs:field xpath="@fromDevice"/>
     <xs:field xpath="@fromPort"/>
+  </xs:keyref>
+
+  <xs:key name="connectionKey">
+    <xs:selector xpath="connections/connection"/>
+    <xs:field xpath="@id"/>
+  </xs:key>
+
+  <xs:key name="presetKey">
+    <xs:selector xpath="presets/preset"/>
+    <xs:field xpath="@id"/>
+  </xs:key>
+
+  <xs:key name="sceneKey">
+    <xs:selector xpath="scenes/scene"/>
+    <xs:field xpath="@id"/>
+  </xs:key>
+
+  <xs:keyref name="startSceneRefKey" refer="sceneKey">
+    <xs:selector xpath="workflows/workflow"/>
+    <xs:field xpath="startSceneRef"/>
+  </xs:keyref>
+
+  <xs:keyref name="presetRefKey" refer="presetKey">
+    <xs:selector xpath="workflows/workflow/u6Presets/presetRef"/>
+    <xs:field xpath="."/>
+  </xs:keyref>
+
+  <xs:keyref name="connectionRefKey" refer="connectionKey">
+    <xs:selector xpath="workflows/workflow/activeConnections/connectionRef"/>
+    <xs:field xpath="."/>
+  </xs:keyref>

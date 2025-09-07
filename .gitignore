@@ -1,6 +1,4 @@
-
 /.vs
-
 
 # Build output
 bin/
@@ -25,6 +23,7 @@ x86/
 .vscode/
 
 # Packages & cache
+node_modules/
 packages/
 *.nupkg
 *.snupkg
@@ -37,3 +36,5 @@ packages/
 *.pdb
 *.ipch
 *.opendb
+Verzeichnisstruktur.txt
+
