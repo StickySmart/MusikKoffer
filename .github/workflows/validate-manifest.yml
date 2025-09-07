@@ -1,0 +1,23 @@
+name: validate-manifest
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  validate:
+    name: manifest.json must be valid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure file exists
+        run: test -f manifest.json || { echo "manifest.json is missing"; exit 1; }
+      - name: Validate JSON & version
+        run: |
+          jq -e empty manifest.json
+          # optional: enforce manifest_version = "1.4"
+          test "$(jq -r '.manifest_version' manifest.json)" = "1.4" || {
+            echo "manifest_version must be \"1.4\""; exit 1; 
+
+
