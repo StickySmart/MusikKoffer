@@ -1,5 +1,5 @@
 {
-  "manifest_version": "1.3",
+  "manifest_version": "1.4",
   "project": "TiageMusic Gerätesetup",
   "files": {
     "schema": "tiagemusic-geraetesetup.xsd",
@@ -11,68 +11,58 @@
   "chapters": [
     {
       "id": "100",
-      "title": "Cover",
-      "path": "chapters/100_cover.md"
+      "title": "Einleitung",
+      "path": "chapters/100_Einleitung.md"
     },
     {
       "id": "200",
-      "title": "First Steps – MIDI & Setup",
-      "path": "chapters/500_first_steps_midi_setup.md",
-      "subchapters": [
-        {
-          "title": "Routing Performance",
-          "anchor": "#routing-performance"
-        }
-      ]
+      "title": "Geräteübersicht",
+      "path": "chapters/200_Geraeteuebersicht.md"
     },
     {
       "id": "300",
-      "title": "First Steps – Audio & Routing",
-      "path": "chapters/300_first_steps_audio_routing.md"
-    },
-    {
-      "id": "400",
-      "title": "Geräteübersicht & Texture Lab",
-      "path": "chapters/200_geraeteuebersicht.md",
-      "merge_from": [
-        "chapters/700_texture_lab.md"
-      ],
+      "title": "Audio",
+      "path": "chapters/300_Audio",
       "subchapters": [
         {
-          "title": "Audio",
-          "anchor": "#audio"
+          "id": "310",
+          "title": "First Steps Audio Routing",
+          "path": "chapters/310_First_steps_audio_routing.md"
         },
         {
-          "title": "MIDI",
-          "anchor": "#midi"
+          "id": "320",
+          "title": "Workflows Audio",
+          "path": "chapters/320_Workflows_audio.md"
+        },
+        {
+          "id": "330",
+          "title": "Texture Lab",
+          "path": "chapters/330_Texture_lab.md"
         }
       ]
     },
     {
       "id": "500",
-      "title": "Workflows Audio – Recording",
-      "path": "chapters/400_workflows_audio.md"
-    },
-    {
-      "id": "600",
-      "title": "Workflows Audio – Performance",
-      "path": "chapters/400_workflows_audio.md"
-    },
-    {
-      "id": "700",
-      "title": "Workflows Audio – Mixdown",
-      "path": "chapters/400_workflows_audio.md"
+      "title": "MIDI",
+      "path": "chapters/500_Midi",
+      "subchapters": [
+        {
+          "id": "510",
+          "title": "First Steps MIDI Routing",
+          "path": "chapters/510_First_steps_midi_routing.md"
+        },
+        {
+          "id": "520",
+          "title": "Workflows MIDI",
+          "path": "chapters/520_Workflows_midi.md"
+        }
+      ]
     },
     {
       "id": "800",
       "title": "Zusammenfassung",
-      "path": "chapters/800_zusammenfassung.md"
+      "path": "chapters/800_Zusammenfassung.md"
     }
   ],
-  "notes": [
-    "MIDI Routing Performance ist Unterpunkt im MIDI-Absatz (kein eigenes Kapitel).",
-    "Kapitel 04 kombiniert Geräteübersicht mit Texture Lab; enthält Audio/MIDI-Unterkapitel.",
-    "Kapitel 05 wurde aufgeteilt in Recording/Performance/Mixdown."
-  ],
-  "overview": "# Überblick Absätze\n\n- Kapitel 100 → Cover\n- Kapitel 200 → First Steps – MIDI & Setup\n- Kapitel 300 → First Steps – Audio & Routing\n- Kapitel 400 → Geräteübersicht & Texture Lab\n- Kapitel 500 → Workflows Audio – Recording\n- Kapitel 600 → Workflows Audio – Performance\n- Kapitel 700 → Workflows Audio – Mixdown\n- Kapitel 800 → Zusammenfassung\n"
+  "overview": "# Überblick Absätze\n\n- Kapitel 100 → Einleitung\n- Kapitel 200 → Geräteübersicht\n- Kapitel 300 → Audio (310 First Steps, 320 Workflows, 330 Texture Lab)\n- Kapitel 500 → MIDI (510 First Steps, 520 Workflows)\n- Kapitel 800 → Zusammenfassung\n"
 }
