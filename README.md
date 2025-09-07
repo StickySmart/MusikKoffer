@@ -24,13 +24,12 @@ das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.
 
 - **docs/** → PDF-Handbücher und Zusatzmaterial
   - Zoom L-6, Roland J-6, T-8, E-4, S-1, Sonicware Texture Lab, CME U6MIDI Pro, etc.
-- **schema/**
-  - tiagemusic-geraetesetup.xsd
-- **json/**  
+- **Modules/**
+  - tiagemusic-geraetesetup.xsd  
   - presets.xml  
   - scenes.xml  
   - workflows.xml 
-  
+  - TiageMusic-setup.xml
 
 ## Manifest
 Aktuelle Version: **v1.4**
