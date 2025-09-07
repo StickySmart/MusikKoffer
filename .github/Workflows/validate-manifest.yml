@@ -1,10 +1,9 @@
 name: validate-manifest
 
 on:
-  pull_request:            # validate on PRs (all branches)
-    types: [opened, synchronize, reopened, ready_for_review]
-  push:                    # also validate direct pushes, any branch
+  push:
     branches: ["**"]
+  pull_request:
 
 jobs:
   validate:
@@ -12,22 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-            node-version: 20
-
-      - name: Check file exists
+      - name: Ensure file exists
+        run: test -f manifest.json || { echo "manifest.json is missing"; exit 1; }
+      - name: Validate JSON & version
         run: |
-          test -f manifest.json || { echo "manifest.json is missing"; exit 1; }
+          jq -e empty manifest.json
+          # optional: enforce manifest_version = "1.4"
+          test "$(jq -r '.manifest_version' manifest.json)" = "1.4" || {
+            echo "manifest_version must be \"1.4\""; exit 1; 
 
-      - name: Validate manifest_version
-        run: |
-          node -e '
-            const fs = require("fs");
-            const m = JSON.parse(fs.readFileSync("manifest.json","utf8"));
-            if (m.manifest_version !== "1.4") {
-              console.error(`manifest_version must be "1.4" (got: ${m.manifest_version})`);
-              process.exit(1);
-            }
-          '
+
