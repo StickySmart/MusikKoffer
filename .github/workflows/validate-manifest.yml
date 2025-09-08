@@ -19,5 +19,4 @@ jobs:
           # optional: enforce manifest_version = "1.4"
           test "$(jq -r '.manifest_version' manifest.json)" = "1.4" || {
             echo "manifest_version must be \"1.4\""; exit 1; 
-
-
+          }
