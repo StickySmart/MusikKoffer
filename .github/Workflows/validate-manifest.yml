@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # fetch full history so we can inspect manifest history
       - name: Ensure file exists
         run: test -f manifest.json || { echo "manifest.json is missing"; exit 1; }
       - name: Validate JSON & version
@@ -18,5 +20,23 @@ jobs:
           jq -e empty manifest.json
           # optional: enforce manifest_version = "1.4"
           test "$(jq -r '.manifest_version' manifest.json)" = "1.4" || {
-            echo "manifest_version must be \"1.4\""; exit 1; 
+            echo "manifest_version must be \"1.4\""; exit 1;
           }
+      # Fail fast if manifest.json in the base branch is newer than in the PR.
+      # Contributors may need to rebase when this check fails.
+      - name: Fetch base branch
+        if: ${{ github.event_name == 'pull_request' }}
+        run: git fetch origin ${{ github.event.pull_request.base.ref }}
+      - name: Ensure manifest up to date
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          base_ref="${{ github.event.pull_request.base.ref }}"
+          base_ts=$(git log -1 --format=%ct origin/$base_ref -- manifest.json || echo 0)
+          pr_ts=$(git log -1 --format=%ct HEAD -- manifest.json || echo 0)
+          echo "Base manifest timestamp: $base_ts"
+          echo "PR manifest timestamp: $pr_ts"
+          if [ "$base_ts" -gt "$pr_ts" ]; then
+            echo "manifest.json on $base_ref is newer; please rebase to include the latest manifest." >&2
+            exit 1
+          fi
+
