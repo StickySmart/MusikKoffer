@@ -1,40 +1,18 @@
-/.vs
-
-# Build output
-bin/
-obj/
-[Bb]uild/
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-[Aa][Rr][Mm]*/
-[Ll]og/
-
-# Visual Studio
-.vs/
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Rider/VS Code (optional)
-.idea/
-.vscode/
-
-# Packages & cache
+# dependencies
 node_modules/
-packages/
-*.nupkg
-*.snupkg
-*.cache
-*.tmp
+.bin/
+dist/
+build/
+.cache/
+.temp/
+.pnpm-store/
+.bun/
 
-# Others
-*.dbmdl
-*.jfm
-*.pdb
-*.ipch
-*.opendb
-Verzeichnisstruktur.txt
+# env / secrets
+.env
+.env.*
 
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
