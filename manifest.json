@@ -1,5 +1,5 @@
 {
-  "manifest_version": "1.4",
+  "manifest_version": "1.5",
   "project": "TiageMusic Geraetesetup",
   "chapters": [
     { "id": "100", "title": "Einleitung", "path": "chapters/100_Einleitung.md" },
