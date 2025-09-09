@@ -1,4 +1,4 @@
-// Lädt die Browser-Variante, registriert window.JSON1
+// Lädt die Browser-Variante, registriert globalThis.JSON1
 require('../scripts/json1-handler');
 
 describe('JSON1 handler (browser helpers)', () => {
@@ -17,11 +17,11 @@ describe('JSON1 handler (browser helpers)', () => {
     global.URL.revokeObjectURL = jest.fn();
 
     // <a> mit klickbarem Link mocken
-    document.createElement = jest.fn(() => ({ click: jest.fn() }));
+    globalThis.document = { createElement: jest.fn(() => ({ click: jest.fn() })) };
   });
 
   test('load() lädt Kommentare via fetch', async () => {
-    const data = await window.JSON1.load('imports/Struktur_JSON1.json');
+    const data = await globalThis.JSON1.load('imports/Struktur_JSON1.json');
     expect(fetch).toHaveBeenCalled();
     expect(Array.isArray(data)).toBe(true);
     expect(data).toHaveLength(2);
@@ -32,19 +32,19 @@ describe('JSON1 handler (browser helpers)', () => {
       { chapter_id: '100', cid: '1' },
       { chapter_id: '200', cid: '2' }
     ];
-    const res = window.JSON1.filterByChapter(list, '100');
+    const res = globalThis.JSON1.filterByChapter(list, '100');
     expect(res).toEqual([{ chapter_id: '100', cid: '1' }]);
   });
 
   test('markDone() setzt status=done', () => {
     const list = [{ chapter_id: '100', cid: '1', status: 'todo' }];
-    const out = window.JSON1.markDone(list, '1');
+    const out = globalThis.JSON1.markDone(list, '1');
     expect(out[0].status).toBe('done');
   });
 
   test('exportFile() erzeugt Download über <a> und Blob-URL', () => {
     const comments = [{ chapter_id: '100', cid: '1', status: 'done' }];
-    window.JSON1.exportFile(comments, 'Struktur_JSON1.json');
+    globalThis.JSON1.exportFile(comments, 'Struktur_JSON1.json');
 
     expect(URL.createObjectURL).toHaveBeenCalled();
     // a.click() wurde aufgerufen
