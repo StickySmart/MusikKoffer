@@ -1,7 +1,7 @@
 // scripts/json1-handler.js
-// Klassische <script>-Variante (legt Funktionen unter window.JSON1 ab)
+// Klassische <script>-Variante (legt Funktionen unter globalThis.JSON1 ab)
 
-window.JSON1 = (function(){
+globalThis.JSON1 = (function(){
   async function load(path = "imports/Struktur_JSON1.json") {
     const r = await fetch(path);
     if (!r.ok) throw new Error(`Konnte ${path} nicht laden (${r.status})`);

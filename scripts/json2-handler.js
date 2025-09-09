@@ -1,7 +1,7 @@
 // scripts/json2-handler.js
-// Klassische <script>-Variante (legt Funktionen unter window.JSON2H ab)
+// Klassische <script>-Variante (legt Funktionen unter globalThis.JSON2H ab)
 
-window.JSON2H = (function(){
+globalThis.JSON2H = (function(){
   function createAction(chapterId, cid, type, id, contentMd) {
     return {
       chapter_id: String(chapterId),
