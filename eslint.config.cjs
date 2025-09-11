@@ -50,13 +50,8 @@ module.exports = [
         URL: 'readonly',
         Blob: 'readonly'
       }
-<<<<<<< HEAD
-=======
-      }
+}
 },
-// eslint.config.cjs
-//module.exports = [
-  /* … bestehende Konfiguration … */
 
   // Override: Jest/Node-Umgebung für Testdateien
   {
@@ -73,7 +68,7 @@ module.exports = [
         beforeEach: 'readonly',
         afterEach:  'readonly'
       }
->>>>>>> ebdcbbb (Eslint confg klammer jest)
+
     }
   }
 ];
