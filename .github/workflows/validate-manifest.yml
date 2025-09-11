@@ -19,8 +19,8 @@ jobs:
         run: |
           jq -e empty manifest.json
           # optional: enforce manifest_version = "1.4"
-          test "$(jq -r '.manifest_version' manifest.json)" = "1.4" || {
-            echo "manifest_version must be \"1.4\""; exit 1;
+          test "$(jq -r '.manifest_version' manifest.json)" = "1.5" || {
+            echo "manifest_version must be \"1.5\""; exit 1;
           }
       # Fail fast if manifest.json in the base branch is newer than in the PR.
       # Contributors may need to rebase when this check fails.
