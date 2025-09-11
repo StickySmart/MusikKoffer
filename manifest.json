@@ -1,4 +1,5 @@
-{ "manifest_version": "1.5",
+{
+	"manifest_version": "1.5",
     "project": "TiageMusic Geraetesetup",
     "chapters": [
         {
@@ -14,9 +15,7 @@
         {
             "id": "300",
             "title": "Audio",
-
             "path": "chapters/300_Audio.md",
-
             "subchapters": [
                 {
                     "id": "310",
@@ -38,9 +37,7 @@
         {
             "id": "500",
             "title": "MIDI",
-
             "path": "chapters/500_Midi.md",
-
             "subchapters": [
                 {
                     "id": "510",
