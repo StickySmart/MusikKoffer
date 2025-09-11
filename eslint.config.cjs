@@ -50,6 +50,7 @@ module.exports = [
         URL: 'readonly',
         Blob: 'readonly'
       }
+      }
 },
 // eslint.config.cjs
 //module.exports = [
