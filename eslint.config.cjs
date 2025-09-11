@@ -49,7 +49,7 @@ module.exports = [
         fetch: 'readonly',
         URL: 'readonly',
         Blob: 'readonly'
-      }
+      },
 
 // eslint.config.cjs
 //module.exports = [
