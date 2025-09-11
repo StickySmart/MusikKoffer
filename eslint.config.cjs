@@ -50,7 +50,26 @@ module.exports = [
         URL: 'readonly',
         Blob: 'readonly'
       }
+
+// eslint.config.cjs
+//module.exports = [
+  /* … bestehende Konfiguration … */
+
+  // Override: Jest/Node-Umgebung für Testdateien
+  {
+    files: ['__tests__/**/*.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        require: 'readonly',
+        module:  'readonly',
+        describe: 'readonly',
+        test:     'readonly',
+        expect:   'readonly',
+        beforeEach: 'readonly',
+        afterEach:  'readonly'
+      }
     }
   }
 ];
-
+    
