@@ -5,12 +5,12 @@
         {
             "id": "100",
             "title": "Einleitung",
-            "path": "chapters/100_Einleitung.md"
+            "path": "chapters/100_einleitung.md"
         },
         {
             "id": "200",
             "title": "Geraeteuebersicht",
-            "path": "chapters/200_Geraeteuebersicht.md"
+            "path": "chapters/200_geraeteuebersicht.md"
         },
         {
             "id": "300",
@@ -20,17 +20,17 @@
                 {
                     "id": "310",
                     "title": "First Steps Audio Routing",
-                    "path": "chapters/310_First_steps_audio_routing.md"
+                    "path": "chapters/310_first_steps_audio_routing.md"
                 },
                 {
                     "id": "320",
                     "title": "Workflows Audio",
-                    "path": "chapters/320_Workflows_audio.md"
+                    "path": "chapters/320_workflows_audio.md"
                 },
                 {
                     "id": "330",
                     "title": "Texture Lab",
-                    "path": "chapters/330_Texture_lab.md"
+                    "path": "chapters/330_texture_lab.md"
                 }
             ]
         },
@@ -42,19 +42,19 @@
                 {
                     "id": "510",
                     "title": "First Steps MIDI Routing",
-                    "path": "chapters/510_First_steps_midi_routing.md"
+                    "path": "chapters/510_first_steps_midi_routing.md"
                 },
                 {
                     "id": "520",
                     "title": "Workflows MIDI",
-                    "path": "chapters/520_Workflows_midi.md"
+                    "path": "chapters/520_workflows_midi.md"
                 }
             ]
         },
         {
             "id": "800",
             "title": "Zusammenfassung",
-            "path": "chapters/800_Zusammenfassung.md"
+            "path": "chapters/800_zusammenfassung.md"
         }
     ]
 }
