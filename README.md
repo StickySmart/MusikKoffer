@@ -15,16 +15,16 @@ das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.
 <a id="inhalt"></a>
 ## Inhalt
 - **chapters/** → Hauptinhalte als `.md`
-  - 100_Einleitung.md
-  - 200_Geraeteuebersicht.md
-  - 300_Audio
-  - 310_First_steps_audio_routing.md
-  - 320_Workflows_audio.md
-  - 330_Texture_lab.md
-  - 500_Midi
-  - 510_First_steps_midi_routing.md 
-  - 520_Workflows_midi.md
-  - 800_Zusammenfassung.md
+  - 100_einleitung.md
+  - 200_geraeteuebersicht.md
+  - 300_Audio.md
+  - 310_first_steps_audio_routing.md
+  - 320_workflows_audio.md
+  - 330_texture_lab.md
+  - 500_Midi.md
+  - 510_first_steps_midi_routing.md 
+  - 520_workflows_midi.md
+  - 800_zusammenfassung.md
 
 - **docs/** → PDF-Handbücher und Zusatzmaterial
   - Zoom L-6, Roland J-6, T-8, E-4, S-1, Sonicware Texture Lab, CME U6MIDI Pro, etc.
@@ -37,7 +37,7 @@ das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.
 
 <a id="manifest"></a>
 ## Manifest
-Aktuelle Version: **v1.4**
+Aktuelle Version: **v1.6**
 
  Gibt in der jeweilig aktuellsten Version strikt die Kapitelstruktur vor. Wenn keine MD datei mit dem 
  Titel innerhalb des Documents vorhanden ist wird diese md datei leer angelegt 

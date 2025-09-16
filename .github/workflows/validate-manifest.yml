@@ -15,13 +15,13 @@ jobs:
           fetch-depth: 0 # fetch full history so we can inspect manifest history
       - name: Ensure file exists
         run: test -f manifest.json || { echo "manifest.json is missing"; exit 1; }
-      - name: Validate JSON & version
-        run: |
-          jq -e empty manifest.json
-          # optional: enforce manifest_version = "1.5"
-          test "$(jq -r '.manifest_version' manifest.json)" = "1.5" || {
-            echo "manifest_version must be \"1.5\""; exit 1;
-          }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate manifest JSON
+        run: jq -e empty manifest.json
+      - name: Ensure README and manifest versions match
+        run: node scripts/check-manifest-version.js
       # Fail fast if manifest.json in the base branch is newer than in the PR.
       # Contributors may need to rebase when this check fails.
       - name: Fetch base branch
@@ -39,4 +39,3 @@ jobs:
             echo "manifest.json on $base_ref is newer; please rebase to include the latest manifest." >&2
             exit 1
           fi
-
