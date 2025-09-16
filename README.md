@@ -37,7 +37,7 @@ das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.
 
 <a id="manifest"></a>
 ## Manifest
-Aktuelle Version: **v1.4**
+Aktuelle Version: **v1.6**
 
  Gibt in der jeweilig aktuellsten Version strikt die Kapitelstruktur vor. Wenn keine MD datei mit dem 
  Titel innerhalb des Documents vorhanden ist wird diese md datei leer angelegt 
