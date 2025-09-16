@@ -1,5 +1,7 @@
+<a id="readme-tiagemusic-geraetesetup"></a>
 # 📘 README – TiageMusic Gerätesetup
 
+<a id="ueberblick"></a>
 ## Überblick
 Dieses Repository enthält die gesamte Dokumentation und Struktur für das **TiageMusic Gerätesetup**.  
 Alle Inhalte sind modular aufgebaut:  
@@ -10,6 +12,7 @@ das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.
 - **Schema (`modules/*.xsd`)** → strukturelle Validierung.  
 - **Modules (`.xlm`)** → settings.
 
+<a id="inhalt"></a>
 ## Inhalt
 - **chapters/** → Hauptinhalte als `.md`
   - 100_einleitung.md
@@ -32,12 +35,14 @@ das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.
   - workflows.xml 
   - TiageMusic-setup.xml
 
+<a id="manifest"></a>
 ## Manifest
 Aktuelle Version: **v1.4**
 
  Gibt in der jeweilig aktuellsten Version strikt die Kapitelstruktur vor. Wenn keine MD datei mit dem 
  Titel innerhalb des Documents vorhanden ist wird diese md datei leer angelegt 
 
+<a id="workflow"></a>
 ## Workflow
 1. **Inhalt kommentieren**: comment.Json speichert alle kommentare bezogen auf Kapitel MD's gemäß Inhaltsstruktur.
 2. **Json1**: Exportieren der `comment.json` und weiterleiten an chatGPT
