@@ -372,19 +372,10 @@
     const loop = document.getElementById('bgLoop');
     const loopToggle = document.getElementById('bgLoopToggle');
     if(loop){
-      // Hintergrundmusik folgt den Autoplay-Richtlinien von Chrome:
-      // https://developer.chrome.com/blog/autoplay
       loop.volume = 0.4;
 
-      const gestureEvents = ['pointerdown', 'click', 'keydown', 'touchstart'];
-      let gesturesBound = false;
-      let pendingPlay = null;
-      let autoplayBlockedLogged = false;
-
-      function hasUserGesture(){
-        const activation = navigator.userActivation;
-        return Boolean(activation?.isActive || activation?.hasBeenActive);
-      }
+      const gestureEvents = ['pointerdown', 'keydown', 'touchstart'];
+      let autoplayHintShown = false;
 
       function updateToggle(){
         if(!loopToggle) return;
@@ -394,6 +385,69 @@
         loopToggle.textContent = playing ? '🔇 Musik stoppen' : '🔊 Musik starten';
       }
 
+      async function playLoop(source){
+        try {
+          await loop.play();
+        } catch (err) {
+          if(err?.name === 'NotAllowedError'){
+            if(source !== 'toggle' && !autoplayHintShown){
+              autoplayHintShown = true;
+              console.info('Autoplay blockiert – bitte den Musik-Schalter betätigen.');
+            }
+          } else if(err){
+            console.error('Loop konnte nicht gestartet werden:', err);
+          }
+        } finally {
+          updateToggle();
+        }
+      }
+
+      function bindInitialGesture(){
+        gestureEvents.forEach(type => {
+          const options = { once: true };
+          if(type !== 'keydown'){
+            options.passive = true;
+          }
+          document.addEventListener(type, handleInitialGesture, options);
+        });
+      }
+
+      function handleInitialGesture(){
+        gestureEvents.forEach(type => {
+          document.removeEventListener(type, handleInitialGesture);
+        });
+        playLoop('gesture');
+      }
+
+      if(loopToggle){
+        loopToggle.hidden = true;
+        loopToggle.addEventListener('click', () => {
+          if(loop.paused){
+            playLoop('toggle');
+          } else {
+            loop.pause();
+            updateToggle();
+          }
+        });
+      }
+
+      loop.addEventListener('play', updateToggle);
+      loop.addEventListener('pause', updateToggle);
+      loop.addEventListener('error', () => {
+        const mediaError = loop.error;
+        if(mediaError){
+          console.error('Fehler im Hintergrundloop:', mediaError.message || mediaError.code);
+        } else {
+          console.error('Unbekannter Fehler im Hintergrundloop.');
+        }
+      });
+
+      const activation = navigator.userActivation;
+      if(activation?.isActive || activation?.hasBeenActive){
+        playLoop('auto');
+      } else {
+        bindInitialGesture();
+      }
       function handleError(err){
         const name = err?.name;
         if(name === 'NotAllowedError' || name === 'AbortError'){
