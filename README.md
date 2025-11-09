@@ -20,7 +20,7 @@ das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.
   - 300_Audio.md
   - 310_first_steps_audio_routing.md
   - 320_workflows_audio.md
-  - 330_texture_lab.md
+  - 330_Ambient0.md
   - 500_Midi.md
   - 510_first_steps_midi_routing.md 
   - 520_workflows_midi.md
