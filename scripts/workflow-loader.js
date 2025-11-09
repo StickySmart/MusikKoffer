@@ -370,57 +370,119 @@
     }
 
     const loop = document.getElementById('bgLoop');
+    const loopToggle = document.getElementById('bgLoopToggle');
     if(loop){
+      // Hintergrundmusik folgt den Autoplay-Richtlinien von Chrome:
+      // https://developer.chrome.com/blog/autoplay
       loop.volume = 0.4;
-      const events = ['pointerdown', 'click', 'keydown', 'touchstart'];
+
+      const gestureEvents = ['pointerdown', 'click', 'keydown', 'touchstart'];
+      let gesturesBound = false;
       let pendingPlay = null;
+      let autoplayBlockedLogged = false;
 
-      function cleanup(){
-        events.forEach(type => document.removeEventListener(type, resume, true));
-        loop.removeEventListener('play', cleanup);
-      }
-
-      function shouldAutoStart(){
+      function hasUserGesture(){
         const activation = navigator.userActivation;
-        return Boolean(activation?.hasBeenActive || activation?.isActive);
+        return Boolean(activation?.isActive || activation?.hasBeenActive);
       }
 
-      function resume(event){
-        if(!loop.paused){
-          cleanup();
-          return;
-        }
+      function updateToggle(){
+        if(!loopToggle) return;
+        const playing = !loop.paused && !loop.ended;
+        loopToggle.hidden = false;
+        loopToggle.setAttribute('aria-pressed', playing ? 'true' : 'false');
+        loopToggle.textContent = playing ? '🔇 Musik stoppen' : '🔊 Musik starten';
+      }
 
-        if(!event && !shouldAutoStart()){
-          return;
+      function handleError(err){
+        const name = err?.name;
+        if(name === 'NotAllowedError' || name === 'AbortError'){
+          if(!autoplayBlockedLogged){
+            autoplayBlockedLogged = true;
+            console.info('Autoplay blockiert – warte auf Benutzergeste oder den Musik-Schalter.');
+          }
+          bindGestureListeners();
+        } else {
+          console.error('Loop konnte nicht gestartet werden:', err);
         }
+      }
 
-        if(pendingPlay){
+      function attemptPlay(){
+        if(!loop.paused || pendingPlay){
           return;
         }
 
         pendingPlay = loop.play().then(() => {
-          cleanup();
+          unbindGestureListeners();
         }).catch(err => {
-          const name = err?.name;
-          if(name === 'NotAllowedError' || name === 'AbortError'){
-            if(event){
-              console.info('Loop konnte nach einer Interaktion nicht gestartet werden. Versuche erneut …');
-            }
-          } else {
-            console.error('Loop konnte nicht gestartet werden:', err);
-          }
+          handleError(err);
         }).finally(() => {
           pendingPlay = null;
+          updateToggle();
         });
       }
 
-      loop.addEventListener('play', cleanup, { once: true });
-      events.forEach(type => document.addEventListener(type, resume, { capture: true }));
-
-      if(shouldAutoStart()){
-        resume();
+      function bindGestureListeners(){
+        if(gesturesBound) return;
+        gesturesBound = true;
+        gestureEvents.forEach(type => document.addEventListener(type, handleGesture, { capture: true }));
       }
+
+      function unbindGestureListeners(){
+        if(!gesturesBound) return;
+        gesturesBound = false;
+        gestureEvents.forEach(type => document.removeEventListener(type, handleGesture, true));
+      }
+
+      function handleGesture(){
+        if(loop.paused){
+          attemptPlay();
+        } else {
+          unbindGestureListeners();
+        }
+      }
+
+      loop.addEventListener('play', () => {
+        autoplayBlockedLogged = false;
+        updateToggle();
+      });
+      loop.addEventListener('pause', () => {
+        updateToggle();
+        bindGestureListeners();
+      });
+      loop.addEventListener('error', () => {
+        const mediaError = loop.error;
+        if(mediaError){
+          console.error('Fehler im Hintergrundloop:', mediaError.message || mediaError.code);
+        } else {
+          console.error('Unbekannter Fehler im Hintergrundloop.');
+        }
+      });
+      document.addEventListener('visibilitychange', () => {
+        if(document.visibilityState === 'visible' && loop.paused && hasUserGesture()){
+          attemptPlay();
+        }
+      });
+
+      if(loopToggle){
+        loopToggle.hidden = true;
+        loopToggle.addEventListener('click', () => {
+          if(pendingPlay) return;
+          if(loop.paused){
+            attemptPlay();
+          } else {
+            loop.pause();
+          }
+        });
+      }
+
+      if(hasUserGesture()){
+        attemptPlay();
+      } else {
+        bindGestureListeners();
+      }
+
+      updateToggle();
     }
 
     const exportBtn = document.querySelector('#btnExportJSON2');
