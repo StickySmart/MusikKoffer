@@ -448,6 +448,94 @@
       } else {
         bindInitialGesture();
       }
+      function handleError(err){
+        const name = err?.name;
+        if(name === 'NotAllowedError' || name === 'AbortError'){
+          if(!autoplayBlockedLogged){
+            autoplayBlockedLogged = true;
+            console.info('Autoplay blockiert – warte auf Benutzergeste oder den Musik-Schalter.');
+          }
+          bindGestureListeners();
+        } else {
+          console.error('Loop konnte nicht gestartet werden:', err);
+        }
+      }
+
+      function attemptPlay(){
+        if(!loop.paused || pendingPlay){
+          return;
+        }
+
+        pendingPlay = loop.play().then(() => {
+          unbindGestureListeners();
+        }).catch(err => {
+          handleError(err);
+        }).finally(() => {
+          pendingPlay = null;
+          updateToggle();
+        });
+      }
+
+      function bindGestureListeners(){
+        if(gesturesBound) return;
+        gesturesBound = true;
+        gestureEvents.forEach(type => document.addEventListener(type, handleGesture, { capture: true }));
+      }
+
+      function unbindGestureListeners(){
+        if(!gesturesBound) return;
+        gesturesBound = false;
+        gestureEvents.forEach(type => document.removeEventListener(type, handleGesture, true));
+      }
+
+      function handleGesture(){
+        if(loop.paused){
+          attemptPlay();
+        } else {
+          unbindGestureListeners();
+        }
+      }
+
+      loop.addEventListener('play', () => {
+        autoplayBlockedLogged = false;
+        updateToggle();
+      });
+      loop.addEventListener('pause', () => {
+        updateToggle();
+        bindGestureListeners();
+      });
+      loop.addEventListener('error', () => {
+        const mediaError = loop.error;
+        if(mediaError){
+          console.error('Fehler im Hintergrundloop:', mediaError.message || mediaError.code);
+        } else {
+          console.error('Unbekannter Fehler im Hintergrundloop.');
+        }
+      });
+      document.addEventListener('visibilitychange', () => {
+        if(document.visibilityState === 'visible' && loop.paused && hasUserGesture()){
+          attemptPlay();
+        }
+      });
+
+      if(loopToggle){
+        loopToggle.hidden = true;
+        loopToggle.addEventListener('click', () => {
+          if(pendingPlay) return;
+          if(loop.paused){
+            attemptPlay();
+          } else {
+            loop.pause();
+          }
+        });
+      }
+
+      if(hasUserGesture()){
+        attemptPlay();
+      } else {
+        bindGestureListeners();
+      }
+
       updateToggle();
     }
 
