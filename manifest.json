@@ -1,5 +1,5 @@
 {
-  "manifest_version",
+  "manifest_version": 1,
   "project": "TiageMusic Geraetesetup",
   "chapters": [
     {
