@@ -18,8 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Validate manifest JSON
-        run: jq -e empty manifest.json
+- name: Validate manifest JSON
+  run: jq '.' manifest.json
       - name: Ensure README and manifest versions match
         run: node scripts/check-manifest-version.js
       # Fail fast if manifest.json in the base branch is newer than in the PR.
