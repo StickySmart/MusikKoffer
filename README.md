@@ -27,7 +27,7 @@ das manifest ist deckungsgleich mit dem ##Inhalt dieser README datei.
   - 800_zusammenfassung.md
 
 - **docs/** → PDF-Handbücher und Zusatzmaterial
-  - Zoom L-6, Roland J-6, T-8, E-4, S-1, Sonicware Texture Lab, CME U6MIDI Pro, etc.
+  - Zoom L-6, Roland J-6, TR-6S, E-4, S-1, Sonicware Ambient0, CME U6MIDI Pro, etc.
 - **Modules/**
   - tiagemusic-geraetesetup.xsd  
   - presets.xml  
