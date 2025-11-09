@@ -367,17 +367,60 @@
           renderReviewPanel(ensureStore());
         }
       });
-const loop = document.getElementById('bgLoop');
-if (loop) {
-  const resume = () => {
-    loop.volume = 0.4; // optional
-    loop.play().catch(err => console.warn('Loop konnte nicht gestartet werden:', err));
-    document.removeEventListener('pointerdown', resume);
-  };
-  document.addEventListener('pointerdown', resume, { once: true });
-}
+    }
 
-      
+    const loop = document.getElementById('bgLoop');
+    if(loop){
+      loop.volume = 0.4;
+      const events = ['pointerdown', 'click', 'keydown', 'touchstart'];
+      let pendingPlay = null;
+
+      function cleanup(){
+        events.forEach(type => document.removeEventListener(type, resume, true));
+        loop.removeEventListener('play', cleanup);
+      }
+
+      function shouldAutoStart(){
+        const activation = navigator.userActivation;
+        return Boolean(activation?.hasBeenActive || activation?.isActive);
+      }
+
+      function resume(event){
+        if(!loop.paused){
+          cleanup();
+          return;
+        }
+
+        if(!event && !shouldAutoStart()){
+          return;
+        }
+
+        if(pendingPlay){
+          return;
+        }
+
+        pendingPlay = loop.play().then(() => {
+          cleanup();
+        }).catch(err => {
+          const name = err?.name;
+          if(name === 'NotAllowedError' || name === 'AbortError'){
+            if(event){
+              console.info('Loop konnte nach einer Interaktion nicht gestartet werden. Versuche erneut …');
+            }
+          } else {
+            console.error('Loop konnte nicht gestartet werden:', err);
+          }
+        }).finally(() => {
+          pendingPlay = null;
+        });
+      }
+
+      loop.addEventListener('play', cleanup, { once: true });
+      events.forEach(type => document.addEventListener(type, resume, { capture: true }));
+
+      if(shouldAutoStart()){
+        resume();
+      }
     }
 
     const exportBtn = document.querySelector('#btnExportJSON2');
