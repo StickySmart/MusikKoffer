@@ -367,6 +367,17 @@
           renderReviewPanel(ensureStore());
         }
       });
+const loop = document.getElementById('bgLoop');
+if (loop) {
+  const resume = () => {
+    loop.volume = 0.4; // optional
+    loop.play().catch(err => console.warn('Loop konnte nicht gestartet werden:', err));
+    document.removeEventListener('pointerdown', resume);
+  };
+  document.addEventListener('pointerdown', resume, { once: true });
+}
+
+      
     }
 
     const exportBtn = document.querySelector('#btnExportJSON2');
