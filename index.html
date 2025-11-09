@@ -34,6 +34,22 @@
     #err{color:#b00020;margin-left:12px;display:none;white-space:pre-wrap}
     .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
     .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#000;color:#fff;font-size:.8rem;min-width:1.2rem;text-align:center}
+    .audio-toggle{
+      border:1px solid #000;
+      background:#fff;
+      color:#000;
+      padding:.45rem .75rem;
+      font-size:.9rem;
+      cursor:pointer;
+    }
+    .audio-toggle[aria-pressed="true"]{
+      background:#000;
+      color:#fff;
+    }
+    .audio-toggle:focus{
+      outline:2px solid #111;
+      outline-offset:2px;
+    }
     .wrap{display:grid;grid-template-columns:var(--nav-w) 1fr;min-height:calc(100vh - 64px)}
     aside{
       border-right:1px solid #000;
@@ -115,6 +131,7 @@
   <div class="toolbar">
     <button id="btnOpenReview">Kommentar-Review <span id="badgeComments" class="badge">0</span></button>
     <button id="btnExportJSON2" disabled>JSON 2 erzeugen</button>
+    <button id="bgLoopToggle" type="button" class="audio-toggle" aria-pressed="false" hidden>🔊 Musik starten</button>
   </div>
 </header>
 <button id="navFab" aria-expanded="false" aria-controls="nav">☰ Inhalt</button>
@@ -122,10 +139,11 @@
   <aside id="nav" aria-label="Inhaltsverzeichnis">
     <div id="toc" class="toc">Manifest wird geladen …</div>
   <audio id="bgLoop"
-       src="assets/audio/bg-loop.wav"
-       preload="auto"
-       loop
-       hidden></audio>
+         src="Freude2025.wav"
+         preload="auto"
+         loop
+         playsinline
+         hidden></audio>
   
   </aside>
   <main>

@@ -367,17 +367,122 @@
           renderReviewPanel(ensureStore());
         }
       });
-const loop = document.getElementById('bgLoop');
-if (loop) {
-  const resume = () => {
-    loop.volume = 0.4; // optional
-    loop.play().catch(err => console.warn('Loop konnte nicht gestartet werden:', err));
-    document.removeEventListener('pointerdown', resume);
-  };
-  document.addEventListener('pointerdown', resume, { once: true });
-}
+    }
 
-      
+    const loop = document.getElementById('bgLoop');
+    const loopToggle = document.getElementById('bgLoopToggle');
+    if(loop){
+      // Hintergrundmusik folgt den Autoplay-Richtlinien von Chrome:
+      // https://developer.chrome.com/blog/autoplay
+      loop.volume = 0.4;
+
+      const gestureEvents = ['pointerdown', 'click', 'keydown', 'touchstart'];
+      let gesturesBound = false;
+      let pendingPlay = null;
+      let autoplayBlockedLogged = false;
+
+      function hasUserGesture(){
+        const activation = navigator.userActivation;
+        return Boolean(activation?.isActive || activation?.hasBeenActive);
+      }
+
+      function updateToggle(){
+        if(!loopToggle) return;
+        const playing = !loop.paused && !loop.ended;
+        loopToggle.hidden = false;
+        loopToggle.setAttribute('aria-pressed', playing ? 'true' : 'false');
+        loopToggle.textContent = playing ? '🔇 Musik stoppen' : '🔊 Musik starten';
+      }
+
+      function handleError(err){
+        const name = err?.name;
+        if(name === 'NotAllowedError' || name === 'AbortError'){
+          if(!autoplayBlockedLogged){
+            autoplayBlockedLogged = true;
+            console.info('Autoplay blockiert – warte auf Benutzergeste oder den Musik-Schalter.');
+          }
+          bindGestureListeners();
+        } else {
+          console.error('Loop konnte nicht gestartet werden:', err);
+        }
+      }
+
+      function attemptPlay(){
+        if(!loop.paused || pendingPlay){
+          return;
+        }
+
+        pendingPlay = loop.play().then(() => {
+          unbindGestureListeners();
+        }).catch(err => {
+          handleError(err);
+        }).finally(() => {
+          pendingPlay = null;
+          updateToggle();
+        });
+      }
+
+      function bindGestureListeners(){
+        if(gesturesBound) return;
+        gesturesBound = true;
+        gestureEvents.forEach(type => document.addEventListener(type, handleGesture, { capture: true }));
+      }
+
+      function unbindGestureListeners(){
+        if(!gesturesBound) return;
+        gesturesBound = false;
+        gestureEvents.forEach(type => document.removeEventListener(type, handleGesture, true));
+      }
+
+      function handleGesture(){
+        if(loop.paused){
+          attemptPlay();
+        } else {
+          unbindGestureListeners();
+        }
+      }
+
+      loop.addEventListener('play', () => {
+        autoplayBlockedLogged = false;
+        updateToggle();
+      });
+      loop.addEventListener('pause', () => {
+        updateToggle();
+        bindGestureListeners();
+      });
+      loop.addEventListener('error', () => {
+        const mediaError = loop.error;
+        if(mediaError){
+          console.error('Fehler im Hintergrundloop:', mediaError.message || mediaError.code);
+        } else {
+          console.error('Unbekannter Fehler im Hintergrundloop.');
+        }
+      });
+      document.addEventListener('visibilitychange', () => {
+        if(document.visibilityState === 'visible' && loop.paused && hasUserGesture()){
+          attemptPlay();
+        }
+      });
+
+      if(loopToggle){
+        loopToggle.hidden = true;
+        loopToggle.addEventListener('click', () => {
+          if(pendingPlay) return;
+          if(loop.paused){
+            attemptPlay();
+          } else {
+            loop.pause();
+          }
+        });
+      }
+
+      if(hasUserGesture()){
+        attemptPlay();
+      } else {
+        bindGestureListeners();
+      }
+
+      updateToggle();
     }
 
     const exportBtn = document.querySelector('#btnExportJSON2');
