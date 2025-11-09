@@ -1,60 +1,60 @@
 {
-	"manifest_version": "1.6",
-    "project": "TiageMusic Geraetesetup",
-    "chapters": [
+  "manifest_version": "1.6",
+  "project": "TiageMusic Geraetesetup",
+  "chapters": [
+    {
+      "id": "100",
+      "title": "Einleitung",
+      "path": "chapters/100_einleitung.md"
+    },
+    {
+      "id": "200",
+      "title": "Geraeteuebersicht",
+      "path": "chapters/200_geraeteuebersicht.md"
+    },
+    {
+      "id": "300",
+      "title": "Audio",
+      "path": "chapters/300_Audio.md",
+      "subchapters": [
         {
-            "id": "100",
-            "title": "Einleitung",
-            "path": "chapters/100_einleitung.md"
+          "id": "310",
+          "title": "First Steps Audio Routing",
+          "path": "chapters/310_first_steps_audio_routing.md"
         },
         {
-            "id": "200",
-            "title": "Geraeteuebersicht",
-            "path": "chapters/200_geraeteuebersicht.md"
+          "id": "320",
+          "title": "Workflows Audio",
+          "path": "chapters/320_workflows_audio.md"
         },
         {
-            "id": "300",
-            "title": "Audio",
-            "path": "chapters/300_Audio.md",
-            "subchapters": [
-                {
-                    "id": "310",
-                    "title": "First Steps Audio Routing",
-                    "path": "chapters/310_first_steps_audio_routing.md"
-                },
-                {
-                    "id": "320",
-                    "title": "Workflows Audio",
-                    "path": "chapters/320_workflows_audio.md"
-                },
-                {
-                    "id": "330",
-                    "title": "Texture Lab",
-                    "path": "chapters/330_texture_lab.md"
-                }
-            ]
-        },
-        {
-            "id": "500",
-            "title": "MIDI",
-            "path": "chapters/500_Midi.md",
-            "subchapters": [
-                {
-                    "id": "510",
-                    "title": "First Steps MIDI Routing",
-                    "path": "chapters/510_first_steps_midi_routing.md"
-                },
-                {
-                    "id": "520",
-                    "title": "Workflows MIDI",
-                    "path": "chapters/520_workflows_midi.md"
-                }
-            ]
-        },
-        {
-            "id": "800",
-            "title": "Zusammenfassung",
-            "path": "chapters/800_zusammenfassung.md"
+          "id": "330",
+          "title": "Texture Lab",
+          "path": "chapters/330_texture_lab.md"
         }
-    ]
+      ]
+    },
+    {
+      "id": "500",
+      "title": "MIDI",
+      "path": "chapters/500_Midi.md",
+      "subchapters": [
+        {
+          "id": "510",
+          "title": "First Steps MIDI Routing",
+          "path": "chapters/510_first_steps_midi_routing.md"
+        },
+        {
+          "id": "520",
+          "title": "Workflows MIDI",
+          "path": "chapters/520_workflows_midi.md"
+        }
+      ]
+    },
+    {
+      "id": "800",
+      "title": "Zusammenfassung",
+      "path": "chapters/800_zusammenfassung.md"
+    }
+  ]
 }
