@@ -375,8 +375,18 @@
     if(loop){
       loop.volume = 0.4;
 
-      const gestureEvents = ['pointerdown', 'keydown', 'touchstart'];
-      let autoplayHintShown = false;
+      const gestureEvents = ['pointerdown', 'touchstart', 'keydown'];
+      const gestureOptions = { capture: true };
+      let pendingPlay = null;
+      let gesturesBound = false;
+      let userGestureSeen = false;
+      let autoplayNoticeShown = false;
+
+      function hasUserGesture(){
+        if(userGestureSeen) return true;
+        const activation = navigator.userActivation;
+        return Boolean(activation?.isActive || activation?.hasBeenActive);
+      }
 
       function updateToggle(){
         if(!loopToggle) return;
@@ -386,125 +396,69 @@
         loopToggle.textContent = playing ? '🔇 Musik stoppen' : '🔊 Musik starten';
       }
 
-      async function playLoop(source){
-        try {
-          await loop.play();
-        } catch (err) {
-          if(err?.name === 'NotAllowedError'){
-            if(source !== 'toggle' && !autoplayHintShown){
-              autoplayHintShown = true;
-              console.info('Autoplay blockiert – bitte den Musik-Schalter betätigen.');
-            }
-          } else if(err){
-            console.error('Loop konnte nicht gestartet werden:', err);
-          }
-        } finally {
-          updateToggle();
-        }
+      function unbindGestureListeners(){
+        if(!gesturesBound) return;
+        gesturesBound = false;
+        gestureEvents.forEach(type => document.removeEventListener(type, handleGesture, gestureOptions));
       }
 
-      function bindInitialGesture(){
-        gestureEvents.forEach(type => {
-          const options = { once: true };
-          if(type !== 'keydown'){
-            options.passive = true;
-          }
-          document.addEventListener(type, handleInitialGesture, options);
-        });
-      }
-
-      function handleInitialGesture(){
-        gestureEvents.forEach(type => {
-          document.removeEventListener(type, handleInitialGesture);
-        });
-        playLoop('gesture');
-      }
-
-      if(loopToggle){
-        loopToggle.hidden = true;
-        loopToggle.addEventListener('click', () => {
-          if(loop.paused){
-            playLoop('toggle');
-          } else {
-            loop.pause();
-            updateToggle();
-          }
-        });
-      }
-
-      loop.addEventListener('play', updateToggle);
-      loop.addEventListener('pause', updateToggle);
-      loop.addEventListener('error', () => {
-        const mediaError = loop.error;
-        if(mediaError){
-          console.error('Fehler im Hintergrundloop:', mediaError.message || mediaError.code);
-        } else {
-          console.error('Unbekannter Fehler im Hintergrundloop.');
-        }
-      });
-
-      const activation = navigator.userActivation;
-      if(activation?.isActive || activation?.hasBeenActive){
-        playLoop('auto');
-      } else {
-        bindInitialGesture();
-      }
-      function handleError(err){
-        const name = err?.name;
-        if(name === 'NotAllowedError' || name === 'AbortError'){
-          if(!autoplayBlockedLogged){
-            autoplayBlockedLogged = true;
-            console.info('Autoplay blockiert – warte auf Benutzergeste oder den Musik-Schalter.');
-          }
-          bindGestureListeners();
-        } else {
-          console.error('Loop konnte nicht gestartet werden:', err);
-        }
-      }
-
-      function attemptPlay(){
-        if(!loop.paused || pendingPlay){
+      function handleGesture(event){
+        if(event?.type === 'keydown' && event.key && ![' ', 'Enter'].includes(event.key)){
           return;
         }
-
-        pendingPlay = loop.play().then(() => {
-          unbindGestureListeners();
-        }).catch(err => {
-          handleError(err);
-        }).finally(() => {
-          pendingPlay = null;
-          updateToggle();
-        });
+        userGestureSeen = true;
+        requestPlay('gesture');
       }
 
       function bindGestureListeners(){
         if(gesturesBound) return;
         gesturesBound = true;
-        gestureEvents.forEach(type => document.addEventListener(type, handleGesture, { capture: true }));
+        gestureEvents.forEach(type => document.addEventListener(type, handleGesture, gestureOptions));
       }
 
-      function unbindGestureListeners(){
-        if(!gesturesBound) return;
-        gesturesBound = false;
-        gestureEvents.forEach(type => document.removeEventListener(type, handleGesture, true));
-      }
-
-      function handleGesture(){
-        if(loop.paused){
-          attemptPlay();
-        } else {
-          unbindGestureListeners();
+      function handlePlayError(err, source){
+        const name = err?.name;
+        if(name === 'NotAllowedError' || name === 'AbortError'){
+          if(source !== 'toggle' && !autoplayNoticeShown){
+            autoplayNoticeShown = true;
+            console.info('Autoplay blockiert – bitte den Musik-Schalter betätigen.');
+          }
+          bindGestureListeners();
+        } else if(err){
+          console.error('Loop konnte nicht gestartet werden:', err);
         }
       }
 
+      function requestPlay(source){
+        if(!loop.paused && !loop.ended){
+          updateToggle();
+          return Promise.resolve();
+        }
+        if(pendingPlay){
+          return pendingPlay;
+        }
+        pendingPlay = loop.play().then(() => {
+          unbindGestureListeners();
+        }).catch(err => {
+          handlePlayError(err, source);
+        }).finally(() => {
+          pendingPlay = null;
+          updateToggle();
+        });
+        return pendingPlay;
+      }
+
       loop.addEventListener('play', () => {
-        autoplayBlockedLogged = false;
         updateToggle();
       });
+
       loop.addEventListener('pause', () => {
         updateToggle();
-        bindGestureListeners();
+        if(!hasUserGesture()){
+          bindGestureListeners();
+        }
       });
+
       loop.addEventListener('error', () => {
         const mediaError = loop.error;
         if(mediaError){
@@ -513,18 +467,20 @@
           console.error('Unbekannter Fehler im Hintergrundloop.');
         }
       });
+
       document.addEventListener('visibilitychange', () => {
         if(document.visibilityState === 'visible' && loop.paused && hasUserGesture()){
-          attemptPlay();
+          requestPlay('visibility');
         }
       });
 
       if(loopToggle){
         loopToggle.hidden = true;
         loopToggle.addEventListener('click', () => {
+          userGestureSeen = true;
           if(pendingPlay) return;
           if(loop.paused){
-            attemptPlay();
+            requestPlay('toggle');
           } else {
             loop.pause();
           }
@@ -532,7 +488,7 @@
       }
 
       if(hasUserGesture()){
-        attemptPlay();
+        requestPlay('auto');
       } else {
         bindGestureListeners();
       }
