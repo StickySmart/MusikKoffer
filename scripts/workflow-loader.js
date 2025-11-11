@@ -2,8 +2,9 @@
   'use strict';
 
   const config = window.WORKFLOW_CONFIG || {};
-  const manifestUrl = config.manifestUrl || new URL('manifest.json', window.location.href).href;
-  const repoRoot = config.repoRoot || deriveRepoRoot(manifestUrl);
+  const defaultManifestUrl = new URL('manifest.json', window.location.href).href;
+  const manifestUrl = config.manifestUrl || defaultManifestUrl;
+  let repoRoot = config.repoRoot || deriveRepoRoot(manifestUrl);
 
   const state = {
     manifest: null,
@@ -571,14 +572,44 @@
     });
   }
 
+  async function loadManifest(url){
+    const failures = [];
+    const candidates = [];
+
+    if(url) candidates.push(url);
+    const raw = pagesToRaw(url);
+    if(raw && raw !== url) candidates.push(raw);
+    if(defaultManifestUrl && !candidates.includes(defaultManifestUrl)){
+      candidates.push(defaultManifestUrl);
+    }
+
+    let lastErr = null;
+    for(const candidate of candidates){
+      try {
+        const manifest = await fetchJSON(candidate);
+        return { manifest, usedUrl: candidate, failures };
+      } catch (err) {
+        lastErr = err;
+        failures.push(`${candidate} → ${err?.message || err}`);
+      }
+    }
+
+    const message = failures.length ? failures.join('\n') : (lastErr?.message || 'Unbekannter Fehler');
+    throw new Error(message);
+  }
+
   async function buildTOC(){
     try {
       setErr('');
       setStatus('Manifest laden …');
-      const manifest = await fetchJSON(manifestUrl);
+      const { manifest, usedUrl, failures } = await loadManifest(manifestUrl);
+      repoRoot = deriveRepoRoot(usedUrl);
       state.manifest = manifest;
       renderTOC(manifest);
       setStatus('Bereit. Kapitel wählen …');
+      if(failures.length){
+        setErr(`Manifest-Fallback aktiv:\n${failures.join('\n')}\nVerwende ${usedUrl}.`);
+      }
     } catch (err) {
       setStatus('');
       setErr(`Manifest konnte nicht geladen werden: ${err?.message || err}`);
