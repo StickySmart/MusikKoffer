@@ -37,10 +37,6 @@ Das Zoom L-6 fungiert als zentraler Audio-Hub für das gesamte MusikKoffer-Setup
 - Bei USB: erscheint als separate Spur im L-6
 - Bei Klinke: Input Gain -15 dBu (sehr sauberes Signal)
 
-**CME Air Keyboard**
-- Nur MIDI-Verbindung, kein Audio-Signal
-- Steuert andere Geräte via MIDI
-
 ### Verkabelungs-Diagramm
 
 ```
