@@ -343,9 +343,17 @@
       if(contentEl) contentEl.textContent = markdown;
       const store = ensureStore();
       setStatus(`Fertig. ${unresolvedCount(store)} offene Kommentare.`);
+
+      // Zeige TODO-Eingabefeld für ausgewähltes Kapitel
+      if(window.TODO_HANDLER){
+        const chapterFile = entry.url.split('/').pop(); // z.B. "300_Audio.md"
+        window.TODO_HANDLER.showInput(chapterFile, entry.id);
+      }
     } catch (err) {
       setStatus('');
       if(contentEl) contentEl.textContent = 'Kapitel konnte nicht geladen werden.';
+      // Verstecke TODO-Eingabefeld bei Fehler
+      if(window.TODO_HANDLER) window.TODO_HANDLER.hideInput();
     }
 
     if(window.matchMedia && window.matchMedia('(max-width: 900px)').matches){
