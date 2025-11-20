@@ -132,7 +132,7 @@
     alert(msg);
   }
 
-  // Verarbeite TODOs (zeigt Hinweis für Claude)
+  // Verarbeite TODOs (exportiert und zeigt Anleitung)
   function processTodos(){
     const todos = loadTodos();
     const pending = todos.filter(t => t.status === 'pending');
@@ -154,12 +154,44 @@
 
     if(!confirmed) return;
 
-    alert(
-      'TODO-Verarbeitung wird gestartet.\n\n' +
-      'Führe in Claude Code aus:\n' +
-      '/process-todos\n\n' +
-      `Claude wird ${pending.length} TODO(s) verarbeiten.`
-    );
+    // Exportiere TODOs als JSON-Datei
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `musikkoffer-todos-${timestamp}.json`;
+    const data = {
+      exported: new Date().toISOString(),
+      totalTodos: pending.length,
+      todos: pending.map(t => ({
+        chapterFile: t.chapterFile,
+        chapterId: t.chapterId,
+        text: t.text,
+        priority: t.priority,
+        category: t.category,
+        createdAt: t.createdAt
+      }))
+    };
+
+    // Download als Datei
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    // Zeige Anleitung
+    setTimeout(() => {
+      alert(
+        `✅ TODOs exportiert: ${filename}\n\n` +
+        `NÄCHSTE SCHRITTE:\n\n` +
+        `1. Die Datei wurde heruntergeladen\n` +
+        `2. Teile die Datei mit Claude Code\n` +
+        `3. Claude wird die TODOs automatisch verarbeiten\n\n` +
+        `Alternativ: Kopiere den Dateiinhalt und sende ihn an Claude.`
+      );
+    }, 500);
   }
 
   // Setup Event Listeners
