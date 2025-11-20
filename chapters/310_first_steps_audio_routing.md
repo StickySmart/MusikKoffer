@@ -31,7 +31,7 @@ Layout-Vorschlag (Draufsicht):
     │  [1][2] [3][4] [5][6]       │
     └──────────────────────────────┘
          ↓
-    [Ambient Ø]  [E-4]  [CME Air]
+    [Ambient Ø]  [E-4]
 ```
 
 ### Phase 2: Audio-Verkabelung (10 Minuten)
