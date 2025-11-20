@@ -18,11 +18,10 @@ Die Geräte reagieren nicht wie klassische Orchester-Instrumente, sondern wie AI
 Gerät	MIDI-Kanal	Aufgabe	Notenquelle
 TR-6S	10	Rhythmische Begleitung / Timpani	MIDI-Drum-Pattern (Kick-Snare auf Zählzeiten)
 J-6	1	Hauptakkorde + Harmonien	4-stimmige Chord Progression (C–G–Am–F)
-E-4	3	Vocal-„Freude“-Echo (Vocoder)	empfängt die Melodie als Modulator-Signal
-S-1	4	Lead-Melodie „Freu-de, schö-ner…“	monophone Notenfolge (C4-C4-D4-E4…)
+E-4	3	Vocal-„Freude"-Echo (Vocoder)	empfängt die Melodie als Modulator-Signal
+S-1	4	Lead-Melodie „Freu-de, schö-ner…"	monophone Notenfolge (C4-C4-D4-E4…)
 Liven Ambient Ø	2	Reverb-Flächen & Drone-Hintergrund	lange gehaltende Pads (Cmaj)
 Zoom L-6	–	Mixer / Recorder	summiert alle Audio-Signale
-CME Air Keyboard	–	manueller Eingriff / Expression	sendet Velocity-Dynamik und Filter-CC
 CME H4 WC	Master	Clock & Sync-Router	verteilt BPM = 120, Start/Stop
 🎹 3. MIDI-Stream – „Ode Theme“
 
@@ -49,21 +48,18 @@ C2 sustained whole-note pad, 4 bars fade-in
 Track 5 – E-4 Vocoder (Ch 3)
 Receives Lead as MIDI-In, Audio carrier = pink noise, Output mix 50/50
 
-Track 6 – Air Keyboard (Control)
-CC74 → Filter, CC11 → Expression, Random Velocity
-
 Global:
-All start with MIDI Clock 120 BPM (sent by H4)
+All start with MIDI Clock 120 BPM (sent by CME H4)
 
 🧠 4. Generativer Twist
 
 Damit es nicht „mechanisch“ klingt, bekommt der Stream KI-like Modulation:
 
 Effekt	Quelle	Ziel
-Random Velocity ±8	Script oder Ableton MIDI-Effect „Velocity“	S-1, J-6
+Random Velocity ±8	Script oder Ableton MIDI-Effect „Velocity"	S-1, J-6
 LFO CC#74 Filter Sweep	Live MIDI LFO (1/16, Depth 40%)	Ambient Ø, S-1
 Humanize Start ±10 ms	MIDI Utility	Lead + Chords
-E-4 Formant Drift	CC#21 ±5 %	per Air Keyboard
+E-4 Formant Drift	CC#21 ±5 %	via MIDI Controller oder Automation
 🎧 5. Technische Umsetzung
 Variante A – direkt aus Ableton Live
 
