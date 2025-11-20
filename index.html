@@ -31,8 +31,9 @@
     }
     header h1{margin:0;font-size:1.35rem;flex:1}
     #status{font-size:.9rem;color:#000}
+    #todoStats{display:flex;align-items:center;gap:0.5rem;width:100%;justify-content:flex-end;}
     #err{color:#b00020;margin-left:12px;display:none;white-space:pre-wrap}
-    .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    .toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;width:100%;}
     .badge{display:none;margin-left:.4rem;padding:.1rem .4rem;border-radius:999px;background:#000;color:#fff;font-size:.8rem;min-width:1.2rem;text-align:center}
     .audio-toggle{
       border:1px solid #000;
@@ -127,6 +128,10 @@
 <header>
   <h1>Musik Koffer – Workbench</h1>
   <div id="status">Bereit. Kapitel wählen …</div>
+  <div id="todoStats" style="font-size:0.9rem;color:#666;margin-left:auto;">
+    <span id="todoPendingCount" style="background:#ff9800;color:#fff;padding:0.2rem 0.6rem;border-radius:12px;font-weight:600;">0 offen</span>
+    <span id="todoProcessedCount" style="margin-left:0.5rem;color:#4caf50;font-weight:600;">0 bearbeitet</span>
+  </div>
   <div id="err"></div>
   <div class="toolbar">
     <button id="btnListTodos">📋 TODOs anzeigen</button>
@@ -134,6 +139,9 @@
     <button id="bgLoopToggle" type="button" class="audio-toggle" aria-pressed="false" hidden>🔊 Musik starten</button>
   </div>
 </header>
+<div id="progressBar" style="display:none;position:fixed;top:64px;left:0;right:0;height:4px;background:#e0e0e0;z-index:1000;">
+  <div id="progressBarFill" style="height:100%;width:0%;background:#4caf50;transition:width 0.3s ease;"></div>
+</div>
 <button id="navFab" aria-expanded="false" aria-controls="nav">☰ Inhalt</button>
 <div class="wrap">
   <aside id="nav" aria-label="Inhaltsverzeichnis">

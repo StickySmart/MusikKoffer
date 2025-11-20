@@ -98,6 +98,25 @@
     exportTodosForClaude(todos);
   }
 
+  // Aktualisiere TODO-Statistik-Anzeige
+  function updateStats(){
+    const todos = loadTodos();
+    const pending = todos.filter(t => t.status === 'pending');
+    const processed = todos.filter(t => t.status === 'processed');
+
+    const pendingEl = document.getElementById('todoPendingCount');
+    const processedEl = document.getElementById('todoProcessedCount');
+
+    if(pendingEl) {
+      pendingEl.textContent = `${pending.length} offen`;
+      pendingEl.style.background = pending.length > 0 ? '#ff9800' : '#9e9e9e';
+    }
+
+    if(processedEl) {
+      processedEl.textContent = `${processed.length} bearbeitet`;
+    }
+  }
+
   // Exportiere TODOs als JSON-Datei für Claude
   function exportTodosForClaude(todos){
     const pendingTodos = todos.filter(t => t.status === 'pending');
@@ -108,6 +127,9 @@
 
     console.log('📝 Gespeicherte TODOs:', pendingTodos.length);
     console.log('Zugriff via: window.MUSIKKOFFER_TODOS');
+
+    // Aktualisiere Anzeige
+    updateStats();
   }
 
   // Zeige TODO-Liste
@@ -132,8 +154,28 @@
     alert(msg);
   }
 
+  // Zeige Fortschrittsbalken
+  function showProgress(percent){
+    const bar = document.getElementById('progressBar');
+    const fill = document.getElementById('progressBarFill');
+    if(bar) bar.style.display = 'block';
+    if(fill) fill.style.width = `${percent}%`;
+  }
+
+  // Verstecke Fortschrittsbalken
+  function hideProgress(){
+    const bar = document.getElementById('progressBar');
+    if(bar) {
+      setTimeout(() => {
+        bar.style.display = 'none';
+        const fill = document.getElementById('progressBarFill');
+        if(fill) fill.style.width = '0%';
+      }, 500);
+    }
+  }
+
   // Verarbeite TODOs (exportiert und zeigt Anleitung)
-  function processTodos(){
+  async function processTodos(){
     const todos = loadTodos();
     const pending = todos.filter(t => t.status === 'pending');
 
@@ -154,7 +196,12 @@
 
     if(!confirmed) return;
 
+    // Zeige Fortschritt
+    showProgress(10);
+    await new Promise(r => setTimeout(r, 200));
+
     // Exportiere TODOs als JSON-Datei
+    showProgress(30);
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `musikkoffer-todos-${timestamp}.json`;
     const data = {
@@ -170,6 +217,9 @@
       }))
     };
 
+    showProgress(60);
+    await new Promise(r => setTimeout(r, 300));
+
     // Download als Datei
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -179,7 +229,14 @@
     document.body.appendChild(a);
     a.click();
     a.remove();
+
+    showProgress(100);
+    await new Promise(r => setTimeout(r, 400));
+
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    // Verstecke Fortschritt
+    hideProgress();
 
     // Zeige Anleitung
     setTimeout(() => {
@@ -187,11 +244,12 @@
         `✅ TODOs exportiert: ${filename}\n\n` +
         `NÄCHSTE SCHRITTE:\n\n` +
         `1. Die Datei wurde heruntergeladen\n` +
-        `2. Teile die Datei mit Claude Code\n` +
-        `3. Claude wird die TODOs automatisch verarbeiten\n\n` +
-        `Alternativ: Kopiere den Dateiinhalt und sende ihn an Claude.`
+        `2. Öffne die Datei und kopiere den Inhalt\n` +
+        `3. Sende den Inhalt an Claude Code\n` +
+        `4. Claude wird die TODOs automatisch verarbeiten\n\n` +
+        `Die bearbeiteten TODOs werden dann in den Kapiteln erscheinen!`
       );
-    }, 500);
+    }, 600);
   }
 
   // Setup Event Listeners
@@ -214,6 +272,9 @@
 
     // Exportiere initial gespeicherte TODOs
     exportTodosForClaude(loadTodos());
+
+    // Aktualisiere Statistik-Anzeige
+    updateStats();
   }
 
   // Öffentliche API für workflow-loader.js
