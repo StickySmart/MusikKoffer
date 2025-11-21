@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Device-Profile für MusikKoffer
+  Version: 1.0
+  Datum: 2025-05-21
+
+  Dokumentiert MIDI-Kanäle, CC-Nummern, Parameter, Limits und Rollen
+  für alle Geräte im Koffer-Setup.
+-->
+<device-profiles version="1.0">
+
+  <!-- ============================================================
+       CME H4 WIDI CORE - Zentraler MIDI-Hub
+       ============================================================ -->
+  <profile deviceId="cme_h4" manufacturer="CME" model="H4 WIDI Core">
+    <name>CME H4 WIDI Core</name>
+    <category>MIDI Hub / Router</category>
+
+    <ports>
+      <port id="midi1_in" type="MIDI In" connector="DIN" label="MIDI 1 IN">
+        <connected-to>Zoom L-6 (Pad Notes → Preset Switch)</connected-to>
+      </port>
+      <port id="midi1_out" type="MIDI Out" connector="DIN" label="MIDI 1 OUT">
+        <connected-to>Zoom L-6 (PC/MMC)</connected-to>
+      </port>
+      <port id="midi2_in" type="MIDI In" connector="DIN" label="MIDI 2 IN">
+        <connected-to>TR-6S (Clock Master)</connected-to>
+      </port>
+      <port id="midi2_out" type="MIDI Out" connector="DIN" label="MIDI 2 OUT">
+        <connected-to>Liven Ambient Ø</connected-to>
+      </port>
+      <port id="usb_a" type="USB Host" connector="USB-A" label="USB-A">
+        <connected-to>USB Hub (S-1, J-6, E-4)</connected-to>
+      </port>
+      <port id="usb_c" type="USB Device" connector="USB-C" label="USB-C">
+        <connected-to>Optional: Computer/Tablet</connected-to>
+      </port>
+    </ports>
+
+    <role primary="router" secondary="clock-distributor">
+      <description>Zentraler MIDI-Hub, verteilt Clock und routet Notes</description>
+    </role>
+
+    <!-- H4 Presets (schaltbar via L-6 Pads) -->
+    <presets count="4">
+      <preset id="H4_P1" number="1" name="Standard Jam">
+        <description>TR-6S Clock → alle; USB-Geräte isoliert</description>
+        <routing>
+          <route from="midi2_in" to="usb_a,midi2_out" filter="clock,start,stop"/>
+          <route from="midi1_in" to="internal" filter="notes" action="preset-switch"/>
+          <route from="usb_a" to="midi1_out" filter="pc,mmc"/>
+        </routing>
+      </preset>
+      <preset id="H4_P2" number="2" name="J-6 → Ambient">
+        <description>J-6 Notes werden an Ambient Ø geroutet</description>
+        <routing>
+          <route from="midi2_in" to="usb_a,midi2_out" filter="clock"/>
+          <route from="usb_a" to="midi2_out" filter="notes" source="j6"/>
+        </routing>
+      </preset>
+      <preset id="H4_P3" number="3" name="S-1 → Ambient">
+        <description>S-1 Notes werden an Ambient Ø geroutet</description>
+        <routing>
+          <route from="midi2_in" to="usb_a,midi2_out" filter="clock"/>
+          <route from="usb_a" to="midi2_out" filter="notes" source="s1"/>
+        </routing>
+      </preset>
+      <preset id="H4_P4" number="4" name="Full Route">
+        <description>Alle USB-Geräte → Ambient Ø</description>
+        <routing>
+          <route from="midi2_in" to="usb_a,midi2_out" filter="clock"/>
+          <route from="usb_a" to="midi2_out" filter="notes"/>
+        </routing>
+      </preset>
+    </presets>
+  </profile>
+
+  <!-- ============================================================
+       Roland TR-6S - Drum Machine / Clock Master
+       ============================================================ -->
+  <profile deviceId="tr6s" manufacturer="Roland" model="TR-6S">
+    <name>Roland TR-6S</name>
+    <category>Drum Machine</category>
+
+    <midi>
+      <channel default="10" configurable="true" range="1-16"/>
+      <clockMode role="master" output="on" ppqn="24"/>
+      <noteRange min="C1" max="B2" description="Drum Trigger Notes"/>
+    </midi>
+
+    <limits>
+      <polyphony voices="11" type="drum-kit" description="11 Instrumente gleichzeitig"/>
+      <velocityRange min="1" max="127"/>
+      <velocityRecommended min="80" max="127" reason="Drums brauchen Punch"/>
+      <patterns count="128" barsPerPattern="1-8" chainable="true"/>
+    </limits>
+
+    <controlChanges>
+      <!-- Global -->
+      <cc number="7" name="Master Volume" min="0" max="127"/>
+      <cc number="10" name="Pan" min="0" max="127" center="64"/>
+      <!-- Per-Instrument (Beispiel für BD) -->
+      <cc number="20" name="BD Level" min="0" max="127"/>
+      <cc number="21" name="BD Tune" min="0" max="127" center="64"/>
+      <cc number="22" name="BD Decay" min="0" max="127"/>
+      <cc number="23" name="SD Level" min="0" max="127"/>
+      <cc number="24" name="SD Tune" min="0" max="127" center="64"/>
+      <!-- Effekte -->
+      <cc number="91" name="Reverb Send" min="0" max="127"/>
+      <cc number="93" name="Delay Send" min="0" max="127"/>
+    </controlChanges>
+
+    <programChanges>
+      <bank msb="0" lsb="0" name="User Kits" count="128"/>
+    </programChanges>
+
+    <drumMap>
+      <note midi="36" name="BD" description="Bass Drum"/>
+      <note midi="38" name="SD" description="Snare Drum"/>
+      <note midi="42" name="CH" description="Closed Hi-Hat"/>
+      <note midi="46" name="OH" description="Open Hi-Hat"/>
+      <note midi="43" name="LT" description="Low Tom"/>
+      <note midi="47" name="MT" description="Mid Tom"/>
+      <note midi="50" name="HT" description="High Tom"/>
+      <note midi="49" name="CC" description="Crash Cymbal"/>
+      <note midi="51" name="RC" description="Ride Cymbal"/>
+      <note midi="39" name="CP" description="Clap"/>
+      <note midi="56" name="CB" description="Cowbell"/>
+    </drumMap>
+
+    <role primary="drums" secondary="clock-master">
+      <description>Rhythmus-Grundlage und Clock-Quelle für das gesamte Setup</description>
+      <bestFor>Beats, Percussion, Tempo-Kontrolle</bestFor>
+    </role>
+
+    <connection>
+      <output to="cme_h4" port="midi2_in" signal="Clock+Notes"/>
+    </connection>
+  </profile>
+
+  <!-- ============================================================
+       Roland S-1 - Monophoner Synthesizer
+       ============================================================ -->
+  <profile deviceId="s1" manufacturer="Roland" model="S-1">
+    <name>Roland S-1</name>
+    <category>Synthesizer</category>
+
+    <midi>
+      <channel default="2" configurable="true" range="1-16"/>
+      <clockMode role="slave" sync="external"/>
+      <noteRange min="C0" max="G10"/>
+    </midi>
+
+    <limits>
+      <polyphony voices="1" type="monophonic"/>
+      <velocityRange min="1" max="127"/>
+      <velocityRecommended min="64" max="120" reason="Guter Attack ohne Übersteuerung"/>
+      <patterns count="64" barsPerPattern="1-4" chainable="true"/>
+    </limits>
+
+    <controlChanges>
+      <!-- Standard MIDI CCs -->
+      <cc number="1" name="Modulation" min="0" max="127"/>
+      <cc number="5" name="Portamento Time" min="0" max="127"/>
+      <cc number="7" name="Volume" min="0" max="127"/>
+      <cc number="10" name="Pan" min="0" max="127" center="64"/>
+      <!-- Synth-spezifisch -->
+      <cc number="74" name="Filter Cutoff" min="0" max="127" default="64"/>
+      <cc number="71" name="Resonance" min="0" max="127"/>
+      <cc number="73" name="Attack Time" min="0" max="127"/>
+      <cc number="72" name="Release Time" min="0" max="127"/>
+      <cc number="75" name="Decay Time" min="0" max="127"/>
+      <cc number="76" name="Vibrato Rate" min="0" max="127"/>
+      <cc number="77" name="Vibrato Depth" min="0" max="127"/>
+      <!-- Arpeggiator -->
+      <cc number="102" name="Arp On/Off" min="0" max="127" threshold="64"/>
+      <cc number="103" name="Arp Mode" min="0" max="127"/>
+    </controlChanges>
+
+    <programChanges>
+      <bank msb="0" lsb="0" name="User Patches" count="64"/>
+      <pc number="1" name="Init"/>
+      <pc number="5" name="Acid Bass"/>
+      <pc number="12" name="Lead Saw"/>
+      <pc number="20" name="Sub Bass"/>
+    </programChanges>
+
+    <role primary="lead" secondary="bass">
+      <description>Monophone Lead-Lines, Bassläufe, Arpeggios</description>
+      <bestFor>Melodien, Soli, 303-artige Basslines, Acid</bestFor>
+    </role>
+
+    <connection>
+      <input from="cme_h4" port="usb_a" signal="Clock+Notes"/>
+      <output to="cme_h4" port="usb_a" signal="Notes"/>
+    </connection>
+  </profile>
+
+  <!-- ============================================================
+       Roland J-6 - Chord Synthesizer
+       ============================================================ -->
+  <profile deviceId="j6" manufacturer="Roland" model="J-6">
+    <name>Roland J-6</name>
+    <category>Chord Synthesizer</category>
+
+    <midi>
+      <channel default="1" configurable="true" range="1-16"/>
+      <clockMode role="slave" sync="external"/>
+      <noteRange min="C2" max="C6" description="Chord Trigger Range"/>
+    </midi>
+
+    <limits>
+      <polyphony voices="4" type="polyphonic" description="4-stimmige Akkorde"/>
+      <velocityRange min="1" max="127"/>
+      <velocityRecommended min="80" max="127" reason="Akkorde brauchen Präsenz"/>
+      <patterns count="64" barsPerPattern="1-4" chainable="true"/>
+      <chordMemory slots="100" description="Gespeicherte Akkordfolgen"/>
+    </limits>
+
+    <controlChanges>
+      <cc number="1" name="Modulation" min="0" max="127"/>
+      <cc number="7" name="Volume" min="0" max="127"/>
+      <cc number="10" name="Pan" min="0" max="127" center="64"/>
+      <cc number="74" name="Filter Cutoff" min="0" max="127" default="80"/>
+      <cc number="71" name="Resonance" min="0" max="127"/>
+      <cc number="73" name="Attack" min="0" max="127"/>
+      <cc number="72" name="Release" min="0" max="127"/>
+      <cc number="91" name="Reverb" min="0" max="127"/>
+      <cc number="93" name="Chorus" min="0" max="127"/>
+    </controlChanges>
+
+    <programChanges>
+      <bank msb="0" lsb="0" name="Chord Sets" count="64"/>
+    </programChanges>
+
+    <role primary="chords" secondary="pads">
+      <description>Akkord-Maschine für harmonische Grundlage</description>
+      <bestFor>Akkordfolgen, Pads, Juno-artige Sounds</bestFor>
+    </role>
+
+    <connection>
+      <input from="cme_h4" port="usb_a" signal="Clock"/>
+      <output to="cme_h4" port="usb_a" signal="Notes+CC"/>
+    </connection>
+  </profile>
+
+  <!-- ============================================================
+       Roland E-4 - Voice Tweaker
+       ============================================================ -->
+  <profile deviceId="e4" manufacturer="Roland" model="E-4">
+    <name>Roland E-4</name>
+    <category>Voice Processor / Vocoder</category>
+
+    <midi>
+      <channel default="3" configurable="true" range="1-16"/>
+      <clockMode role="slave" sync="external"/>
+      <noteRange min="C2" max="C5" description="Vocoder Carrier Notes"/>
+    </midi>
+
+    <limits>
+      <polyphony voices="1" type="monophonic" description="Vocoder ist monophon"/>
+      <velocityRange min="1" max="127"/>
+      <velocityRecommended min="64" max="100" reason="Stimme sollte nicht übersteuern"/>
+    </limits>
+
+    <controlChanges>
+      <cc number="7" name="Volume" min="0" max="127"/>
+      <cc number="74" name="Formant Shift" min="0" max="127" center="64"/>
+      <cc number="71" name="Effect Depth" min="0" max="127"/>
+      <cc number="91" name="Reverb" min="0" max="127"/>
+      <cc number="1" name="Modulation" min="0" max="127"/>
+    </controlChanges>
+
+    <programChanges>
+      <bank msb="0" lsb="0" name="Voice Presets" count="32"/>
+      <pc number="1" name="Natural"/>
+      <pc number="5" name="Robot"/>
+      <pc number="10" name="Vocoder"/>
+      <pc number="15" name="Harmony"/>
+    </programChanges>
+
+    <role primary="vocoder" secondary="voice-fx">
+      <description>Stimm-Effekte und Vocoder</description>
+      <bestFor>Vocals, Vocoder-Sounds, Robot-Voice</bestFor>
+    </role>
+
+    <connection>
+      <input from="cme_h4" port="usb_a" signal="Clock+Notes"/>
+      <audio-input description="Mikrofon/Line für Carrier"/>
+    </connection>
+  </profile>
+
+  <!-- ============================================================
+       Sonicware Liven Ambient Ø
+       ============================================================ -->
+  <profile deviceId="ambient_o" manufacturer="Sonicware" model="Liven Ambient Ø">
+    <name>Liven Ambient Ø</name>
+    <category>Ambient Synthesizer</category>
+
+    <midi>
+      <channel default="5" configurable="true" range="1-16"/>
+      <clockMode role="slave" sync="external"/>
+      <noteRange min="C1" max="C7"/>
+    </midi>
+
+    <limits>
+      <polyphony voices="4" type="polyphonic" description="4-stimmig"/>
+      <velocityRange min="1" max="127"/>
+      <velocityRecommended min="40" max="100" reason="Ambient braucht Dynamik, aber sanft"/>
+      <patterns count="64" barsPerPattern="1-4"/>
+    </limits>
+
+    <controlChanges>
+      <cc number="1" name="Modulation" min="0" max="127"/>
+      <cc number="7" name="Volume" min="0" max="127"/>
+      <cc number="74" name="Filter Cutoff" min="0" max="127"/>
+      <cc number="71" name="Resonance" min="0" max="127"/>
+      <cc number="91" name="Reverb" min="0" max="127" default="100"/>
+      <cc number="93" name="Delay" min="0" max="127" default="80"/>
+      <cc number="73" name="Attack" min="0" max="127" default="40"/>
+      <cc number="72" name="Release" min="0" max="127" default="100"/>
+      <!-- Ambient-spezifisch -->
+      <cc number="16" name="Texture" min="0" max="127"/>
+      <cc number="17" name="Movement" min="0" max="127"/>
+      <cc number="18" name="Space" min="0" max="127"/>
+    </controlChanges>
+
+    <programChanges>
+      <bank msb="0" lsb="0" name="Ambient Presets" count="64"/>
+      <pc number="1" name="Soft Pad"/>
+      <pc number="10" name="Evolving Texture"/>
+      <pc number="20" name="Deep Drone"/>
+      <pc number="30" name="Shimmer"/>
+    </programChanges>
+
+    <role primary="ambient" secondary="pads">
+      <description>Atmosphärische Flächen und Drones</description>
+      <bestFor>Ambient-Texturen, Reverb-Flächen, Drones, Soundscapes</bestFor>
+    </role>
+
+    <connection>
+      <input from="cme_h4" port="midi2_out" signal="Clock+Notes"/>
+    </connection>
+  </profile>
+
+  <!-- ============================================================
+       Zoom L-6 LiveTrak - Mixer / Recorder
+       ============================================================ -->
+  <profile deviceId="zoom_l6" manufacturer="Zoom" model="LiveTrak L-6">
+    <name>Zoom L-6</name>
+    <category>Mixer / Recorder</category>
+
+    <midi>
+      <channel default="omni" configurable="true"/>
+      <receives>PC, MMC, Note-On (Pads)</receives>
+      <sends>Note-On/Off (Pads)</sends>
+    </midi>
+
+    <limits>
+      <audioChannels inputs="6" outputs="2"/>
+      <scenes count="9" switchableVia="PC"/>
+      <sdCardRecording tracks="14" format="WAV"/>
+    </limits>
+
+    <programChanges description="Scene-Wechsel">
+      <pc number="1" name="Scene 1 - Jam Full"/>
+      <pc number="2" name="Scene 2 - Instrumental"/>
+      <pc number="3" name="Scene 3 - Vocals"/>
+      <pc number="4" name="Scene 4 - User"/>
+      <pc number="5" name="Scene 5 - User"/>
+      <pc number="6" name="Scene 6 - User"/>
+      <pc number="7" name="Scene 7 - User"/>
+      <pc number="8" name="Scene 8 - User"/>
+      <pc number="9" name="Scene 9 - User"/>
+    </programChanges>
+
+    <mmc description="Machine Control">
+      <command id="play" name="Play" action="Startet Wiedergabe"/>
+      <command id="stop" name="Stop" action="Stoppt Wiedergabe"/>
+      <command id="record" name="Record" action="Startet Aufnahme"/>
+      <command id="pause" name="Pause" action="Pausiert"/>
+    </mmc>
+
+    <!-- Pad-Mapping für H4 Preset-Wechsel -->
+    <pads count="6" midiOutput="Note-On">
+      <pad id="1" note="36" velocity="127" action="H4 Preset 1"/>
+      <pad id="2" note="37" velocity="127" action="H4 Preset 2"/>
+      <pad id="3" note="38" velocity="127" action="H4 Preset 3"/>
+      <pad id="4" note="39" velocity="127" action="H4 Preset 4"/>
+      <pad id="5" note="40" velocity="127" action="Frei"/>
+      <pad id="6" note="41" velocity="127" action="Frei"/>
+    </pads>
+
+    <audioInputMap>
+      <input channel="1-2" device="TR-6S" type="Stereo"/>
+      <input channel="3-4" device="J-6" type="Stereo"/>
+      <input channel="5" device="E-4" type="Mono"/>
+      <input channel="6" device="S-1" type="Mono"/>
+      <input channel="USB" device="Ambient Ø / Computer" type="Stereo"/>
+    </audioInputMap>
+
+    <role primary="mixer" secondary="recorder">
+      <description>Audio-Zentrale, Recording, Scene-Management</description>
+      <bestFor>Live-Mixing, Multitrack-Recording, Preset-Steuerung</bestFor>
+    </role>
+
+    <connection>
+      <input from="cme_h4" port="midi1_out" signal="PC+MMC"/>
+      <output to="cme_h4" port="midi1_in" signal="Pad Notes"/>
+    </connection>
+  </profile>
+
+  <!-- ============================================================
+       STUDIO-ERWEITERUNG (Optional)
+       ============================================================ -->
+
+  <!-- Rockjam RJMK Keyboard (am Tablet) -->
+  <profile deviceId="rockjam_rjmk" manufacturer="Rockjam" model="RJMK" optional="true">
+    <name>Rockjam RJMK</name>
+    <category>MIDI Controller Keyboard</category>
+
+    <midi>
+      <channel default="1" configurable="true"/>
+      <noteRange min="C2" max="C7" keys="61"/>
+    </midi>
+
+    <limits>
+      <velocitySensitive>true</velocitySensitive>
+      <velocityRange min="1" max="127"/>
+      <aftertouch>false</aftertouch>
+    </limits>
+
+    <controlChanges>
+      <cc number="1" name="Mod Wheel" min="0" max="127"/>
+      <cc number="64" name="Sustain Pedal" min="0" max="127" threshold="64"/>
+    </controlChanges>
+
+    <role primary="controller" secondary="input">
+      <description>MIDI-Keyboard für Ableton/KI-Experimente</description>
+      <bestFor>Melodie-Eingabe, Live-Spielen, Controller</bestFor>
+    </role>
+
+    <connection>
+      <output to="YOGA11e Tablet" port="USB" signal="Notes+CC"/>
+    </connection>
+  </profile>
+
+</device-profiles>

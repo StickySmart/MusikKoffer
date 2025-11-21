@@ -1,136 +1,249 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tiagemusic-setup version="1.3">
+<!--
+  TiageMusic Gerätesetup
+  Version: 2.0
+  Datum: 2025-05-21
+
+  Koffer-Setup mit CME H4 WIDI Core als zentralem MIDI-Hub
+-->
+<tiagemusic-setup version="2.0">
 
   <devices>
 
-    <!-- CME U6 #1 -->
-    <device id="cme_u6_1" manufacturer="CME" type="MIDI Interface">
-      <name>CME U6 #1</name>
+    <!-- ============================================================
+         CME H4 WIDI Core - Zentraler MIDI-Hub
+         ============================================================ -->
+    <device id="cme_h4" manufacturer="CME" type="MIDI Hub">
+      <name>CME H4 WIDI Core</name>
       <ports>
-        <port id="in1" type="MIDI In" connector="DIN" status="active"/>
-        <port id="in2" type="MIDI In" connector="DIN" status="not-in-use"/>
-        <port id="in3" type="MIDI In" connector="DIN" status="not-in-use"/>
-        <port id="out1" type="MIDI Out" connector="DIN" status="active"/>
-        <port id="out2" type="MIDI Out" connector="DIN" status="active"/>
-        <port id="out3" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="midi1_in" type="MIDI In" connector="DIN" status="active"/>
+        <port id="midi1_out" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="midi2_in" type="MIDI In" connector="DIN" status="active"/>
+        <port id="midi2_out" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="usb_a" type="USB Host" connector="USB-A" status="active"/>
+        <port id="usb_c" type="USB Device" connector="USB-C" status="not-in-use"/>
       </ports>
+      <notes>
+        Zentraler MIDI-Router mit 4 Presets.
+        MIDI 1: Bidirektional mit L-6 (PC/MMC + Pad-Steuerung).
+        MIDI 2 IN: Clock von TR-6S.
+        MIDI 2 OUT: Clock + Notes an Ambient Ø.
+        USB-A: Hub mit S-1, J-6, E-4.
+      </notes>
     </device>
 
-    <!-- CME U6 #2 -->
-    <device id="cme_u6_2" manufacturer="CME" type="MIDI Interface">
-      <name>CME U6 #2</name>
+    <!-- ============================================================
+         Roland TR-6S - Drum Machine / Clock Master
+         ============================================================ -->
+    <device id="tr6s" manufacturer="Roland" type="Drum Machine">
+      <name>Roland TR-6S</name>
       <ports>
-        <port id="in1" type="MIDI In" connector="DIN" status="active"/>
-        <port id="in2" type="MIDI In" connector="DIN" status="not-in-use"/>
-        <port id="in3" type="MIDI In" connector="DIN" status="not-in-use"/>
-        <port id="out1" type="MIDI Out" connector="DIN" status="active"/>
-        <port id="out2" type="MIDI Out" connector="DIN" status="active"/>
-        <port id="out3" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="midi_out" type="MIDI Out" connector="TRS-A" status="active"/>
+        <port id="audio_out_l" type="Audio Out" connector="TRS" status="active"/>
+        <port id="audio_out_r" type="Audio Out" connector="TRS" status="active"/>
       </ports>
+      <notes>
+        Clock Master (24 PPQN).
+        Sendet Clock + Drum-Notes an H4.
+        Audio → L-6 Kanal 1-2 (Stereo).
+      </notes>
     </device>
 
-    <!-- Doremidi Merge 5 -->
-    <device id="merge5" manufacturer="Doremidi" type="MIDI Merge Box">
-      <name>Merge 5</name>
+    <!-- ============================================================
+         Roland J-6 - Chord Synthesizer
+         ============================================================ -->
+    <device id="j6" manufacturer="Roland" type="Chord Synth">
+      <name>Roland J-6</name>
       <ports>
-        <port id="in1" type="MIDI In" connector="DIN" status="active"/>
-        <port id="in2" type="MIDI In" connector="DIN" status="active"/>
-        <port id="in3" type="MIDI In" connector="DIN" status="active"/>
-        <port id="in4" type="MIDI In" connector="DIN" status="active"/>
-        <port id="in5" type="MIDI In" connector="DIN" status="active"/>
-        <port id="outA" type="MIDI Out" connector="DIN" status="active"/>
-        <port id="outB" type="MIDI Out" connector="DIN" status="active"/>
+        <port id="usb" type="USB MIDI" connector="USB-C" status="active"/>
+        <port id="audio_out_l" type="Audio Out" connector="TRS" status="active"/>
+        <port id="audio_out_r" type="Audio Out" connector="TRS" status="active"/>
       </ports>
+      <notes>
+        4-stimmiger Akkord-Synthesizer.
+        USB-MIDI via H4 Hub.
+        MIDI Kanal 1.
+        Audio → L-6 Kanal 3-4 (Stereo).
+      </notes>
     </device>
 
-    <!-- Zoom L-6 -->
+    <!-- ============================================================
+         Roland S-1 - Monophoner Synthesizer
+         ============================================================ -->
+    <device id="s1" manufacturer="Roland" type="Synth">
+      <name>Roland S-1</name>
+      <ports>
+        <port id="usb" type="USB MIDI" connector="USB-C" status="active"/>
+        <port id="audio_out" type="Audio Out" connector="TRS" status="active"/>
+      </ports>
+      <notes>
+        Monophoner Analog-Modeling Synth.
+        USB-MIDI via H4 Hub.
+        MIDI Kanal 2.
+        Audio → L-6 Kanal 6 (Mono).
+      </notes>
+    </device>
+
+    <!-- ============================================================
+         Roland E-4 - Voice Tweaker
+         ============================================================ -->
+    <device id="e4" manufacturer="Roland" type="Voice Processor">
+      <name>Roland E-4</name>
+      <ports>
+        <port id="usb" type="USB MIDI" connector="USB-C" status="active"/>
+        <port id="mic_in" type="Audio In" connector="XLR" status="active"/>
+        <port id="audio_out" type="Audio Out" connector="TRS" status="active"/>
+      </ports>
+      <notes>
+        Vocoder und Voice-Effekte.
+        USB-MIDI via H4 Hub.
+        MIDI Kanal 3.
+        Audio → L-6 Kanal 5 (Mono).
+      </notes>
+    </device>
+
+    <!-- ============================================================
+         Sonicware Liven Ambient Ø
+         ============================================================ -->
+    <device id="ambient_o" manufacturer="Sonicware" type="Synth">
+      <name>Liven Ambient Ø</name>
+      <ports>
+        <port id="midi_in" type="MIDI In" connector="TRS-A" status="active"/>
+        <port id="audio_out_l" type="Audio Out" connector="TRS" status="active"/>
+        <port id="audio_out_r" type="Audio Out" connector="TRS" status="active"/>
+      </ports>
+      <notes>
+        4-stimmiger Ambient-Synthesizer.
+        Empfängt Clock + Notes von H4 MIDI 2 OUT.
+        MIDI Kanal 5.
+        Audio → L-6 USB (Stereo).
+      </notes>
+    </device>
+
+    <!-- ============================================================
+         Zoom L-6 LiveTrak - Mixer / Recorder
+         ============================================================ -->
     <device id="zoom_l6" manufacturer="Zoom" type="Mixer/Recorder">
       <name>Zoom L-6</name>
       <ports>
         <port id="midi_in" type="MIDI In" connector="TRS-A" status="active"/>
-        <port id="midi_out" type="MIDI Out" connector="TRS-A" status="not-in-use"/>
+        <port id="midi_out" type="MIDI Out" connector="TRS-A" status="active"/>
+        <port id="usb" type="USB Audio/MIDI" connector="USB-B" status="active"/>
+        <port id="ch1" type="Audio In" connector="Combo" status="active"/>
+        <port id="ch2" type="Audio In" connector="Combo" status="active"/>
+        <port id="ch3" type="Audio In" connector="Combo" status="active"/>
+        <port id="ch4" type="Audio In" connector="Combo" status="active"/>
+        <port id="ch5" type="Audio In" connector="TRS" status="active"/>
+        <port id="ch6" type="Audio In" connector="TRS" status="active"/>
+        <port id="main_out_l" type="Audio Out" connector="TRS" status="active"/>
+        <port id="main_out_r" type="Audio Out" connector="TRS" status="active"/>
       </ports>
       <notes>
-        Empfängt Program Change (PC 1–9) → Szenenwechsel.
-        Empfängt MMC → Start/Stop/Rec.
-        Pads senden Note-On/Off (nur Out).
+        Audio-Zentrale und MIDI-Empfänger.
+        MIDI IN: PC/MMC von H4 für Scene-Wechsel.
+        MIDI OUT: Pad-Noten für H4 Preset-Wechsel.
+        USB: Optional für Studio-Erweiterung.
+        9 Scenes via PC 1-9 umschaltbar.
       </notes>
-    </device>
-
-    <!-- Quellen / Ziele -->
-    <device id="t8" manufacturer="Roland" type="Rhythm Machine">
-      <name>Roland T-8</name>
-      <ports>
-        <port id="out" type="MIDI Out" connector="TRS-A" status="active"/>
-      </ports>
-    </device>
-
-    <device id="j6" manufacturer="Roland" type="Synth/Sequencer">
-      <name>Roland J-6</name>
-      <ports>
-        <port id="out" type="MIDI Out" connector="TRS-A" status="active"/>
-        <port id="in" type="MIDI In" connector="TRS-A" status="active"/>
-      </ports>
-    </device>
-
-    <device id="s1" manufacturer="Roland" type="Synth">
-      <name>Roland S-1</name>
-      <ports>
-        <port id="out" type="MIDI Out" connector="TRS-A" status="active"/>
-        <port id="in" type="MIDI In" connector="TRS-A" status="active"/>
-      </ports>
     </device>
 
   </devices>
 
-  <!-- Grundverkabelung -->
+  <!-- ============================================================
+       MIDI-Verbindungen
+       ============================================================ -->
   <connections>
-    <connection id="conn_t8_merge" fromDevice="t8" fromPort="out" toDevice="merge5" toPort="in1" signal="Clock+Notes"/>
-    <connection id="conn_j6_merge" fromDevice="j6" fromPort="out" toDevice="merge5" toPort="in2" signal="Notes"/>
-    <connection id="conn_s1_merge" fromDevice="s1" fromPort="out" toDevice="merge5" toPort="in3" signal="Notes"/>
-    <connection id="conn_merge_u6_1" fromDevice="merge5" fromPort="outA" toDevice="cme_u6_1" toPort="in1" signal="All merged"/>
-    <connection id="conn_merge_u6_2" fromDevice="merge5" fromPort="outB" toDevice="cme_u6_2" toPort="in1" signal="All merged"/>
-    <connection id="conn_u6_1_out1_j6" fromDevice="cme_u6_1" fromPort="out1" toDevice="j6" toPort="in" signal="Clock"/>
-    <connection id="conn_u6_1_out2_s1" fromDevice="cme_u6_1" fromPort="out2" toDevice="s1" toPort="in" signal="Clock"/>
-    <connection id="conn_u6_2_out2_zoom" fromDevice="cme_u6_2" fromPort="out2" toDevice="zoom_l6" toPort="midi_in" signal="PC+MMC"/>
+    <!-- TR-6S (Clock Master) → H4 -->
+    <connection id="conn_tr6s_h4"
+                fromDevice="tr6s" fromPort="midi_out"
+                toDevice="cme_h4" toPort="midi2_in"
+                signal="Clock+Notes"/>
+
+    <!-- H4 → USB-Geräte (Clock Distribution) -->
+    <connection id="conn_h4_usb"
+                fromDevice="cme_h4" fromPort="usb_a"
+                toDevice="j6,s1,e4" toPort="usb"
+                signal="Clock"/>
+
+    <!-- H4 → Ambient Ø (Clock + Notes) -->
+    <connection id="conn_h4_ambient"
+                fromDevice="cme_h4" fromPort="midi2_out"
+                toDevice="ambient_o" toPort="midi_in"
+                signal="Clock+Notes"/>
+
+    <!-- H4 → L-6 (PC/MMC für Scenes) -->
+    <connection id="conn_h4_l6_out"
+                fromDevice="cme_h4" fromPort="midi1_out"
+                toDevice="zoom_l6" toPort="midi_in"
+                signal="PC+MMC"/>
+
+    <!-- L-6 → H4 (Pad Notes für Preset-Wechsel) -->
+    <connection id="conn_l6_h4_in"
+                fromDevice="zoom_l6" fromPort="midi_out"
+                toDevice="cme_h4" toPort="midi1_in"
+                signal="Notes"/>
   </connections>
 
-  <!-- Presets -->
+  <!-- ============================================================
+       H4 Presets (MIDI Routing-Szenarien)
+       ============================================================ -->
   <presets>
-    <preset id="P01" name="Standard-Jam">
-      <description>T-8 Clock an alle; J-6 Notes → S-1.</description>
+    <preset id="H4_P1" name="Standard Jam">
+      <description>TR-6S Clock an alle; USB-Geräte isoliert; nur Clock-Sync.</description>
     </preset>
-    <preset id="P02" name="Ambient">
-      <description>T-8 Clock an alle; J-6 + Ambient Ø Pads; S-1 Bass-Lines.</description>
+    <preset id="H4_P2" name="J-6 → Ambient">
+      <description>J-6 Notes werden an Ambient Ø geroutet; Akkorde steuern Pads.</description>
+    </preset>
+    <preset id="H4_P3" name="S-1 → Ambient">
+      <description>S-1 Notes werden an Ambient Ø geroutet; Basslines triggern Texturen.</description>
+    </preset>
+    <preset id="H4_P4" name="Full Route">
+      <description>Alle USB-Geräte (J-6, S-1, E-4) → Ambient Ø; maximale Interaktion.</description>
     </preset>
   </presets>
 
-  <!-- Scenes -->
+  <!-- ============================================================
+       L-6 Scenes (Audio-Mixing-Szenarien)
+       ============================================================ -->
   <scenes>
-    <scene id="S01" name="Jam / Full Setup" pc="1"/>
-    <scene id="S02" name="Instrumental Fokus" pc="2"/>
-    <scene id="S03" name="Performance Fokus (Vocals)" pc="3"/>
+    <scene id="S01" name="Jam Full" pc="1">
+      <description>Alle Kanäle aktiv, ausgewogener Mix.</description>
+    </scene>
+    <scene id="S02" name="Instrumental" pc="2">
+      <description>Vocals (E-4) gemutet, Fokus auf Synths und Drums.</description>
+    </scene>
+    <scene id="S03" name="Performance" pc="3">
+      <description>Vocals im Vordergrund, Instrumente zurückgenommen.</description>
+    </scene>
+    <scene id="S04" name="Ambient Focus" pc="4">
+      <description>Ambient Ø prominent, Drums gedämpft.</description>
+    </scene>
+    <scene id="S05" name="Recording" pc="5">
+      <description>Optimiert für Multitrack-Recording.</description>
+    </scene>
   </scenes>
 
-  <!-- Workflows -->
+  <!-- ============================================================
+       Workflows (Kombinationen aus H4-Preset + L-6 Scene)
+       ============================================================ -->
   <workflows>
-    <workflow id="W01" scene="S01" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
-      <description>Jam Setup: J-6 spielt S-1, Clock an alle. → Gut spielbar mit 2 Händen.</description>
+    <workflow id="W01" h4Preset="H4_P1" scene="S01" playable="true" hands="2">
+      <description>Standard-Jam: Clock-Sync, alle Geräte unabhängig spielbar.</description>
     </workflow>
-    <workflow id="W02" scene="S01" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
-      <description>Jam Setup: Ambient-Fokus. J-6 + Ambient Ø Pads, S-1 Bass. → Live gut machbar.</description>
+    <workflow id="W02" h4Preset="H4_P2" scene="S04" playable="true" hands="1">
+      <description>Ambient-Session: J-6 Akkorde steuern Ambient Ø Texturen.</description>
     </workflow>
-    <workflow id="W03" scene="S02" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
-      <description>Instrumental Fokus: Vocals gemutet. J-6 → S-1. → Gut live spielbar.</description>
+    <workflow id="W03" h4Preset="H4_P3" scene="S04" playable="true" hands="1">
+      <description>Bass-Drone: S-1 Basslines triggern Ambient Ø Flächen.</description>
     </workflow>
-    <workflow id="W04" scene="S02" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
-      <description>Instrumental Fokus: Ambient Ø Pads, S-1 minimal. → Sehr spielbar.</description>
+    <workflow id="W04" h4Preset="H4_P4" scene="S01" playable="true" hands="2">
+      <description>Full Interactive: Alle Synths können Ambient Ø steuern.</description>
     </workflow>
-    <workflow id="W05" scene="S03" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
-      <description>Performance Fokus: Vocals im Vordergrund. J-6 → S-1, Clock hält Sync. → Einfach nutzbar.</description>
+    <workflow id="W05" h4Preset="H4_P1" scene="S03" playable="true" hands="2">
+      <description>Vocal-Performance: E-4 im Fokus, Backing-Track läuft.</description>
     </workflow>
-    <workflow id="W06" scene="S03" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
-      <description>Performance Fokus: Ambient Ø Flächen, S-1 minimal. → Spielbar.</description>
+    <workflow id="W06" h4Preset="H4_P1" scene="S05" playable="false" hands="0">
+      <description>Recording-Session: Optimiert für Multitrack-Aufnahme.</description>
     </workflow>
   </workflows>
 
