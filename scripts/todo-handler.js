@@ -194,29 +194,78 @@
     window.MUSIKKOFFER_TODOS = todos;
   }
 
-  // Zeige TODO-Liste
+  // Zeige TODO-Liste im Modal
   async function showTodoList(){
     const todos = await getAllTodos();
     const pending = todos.filter(t => t.status === 'pending');
+    const processed = todos.filter(t => t.status === 'processed');
     const unsynced = loadUnsyncedTodos();
 
-    if(pending.length === 0) {
-      alert('Keine offenen TODOs vorhanden.\n\nErstelle TODOs indem du ein Kapitel öffnest und das Eingabefeld nutzt.');
+    const modal = document.getElementById('todoModal');
+    const title = document.getElementById('todoModalTitle');
+    const body = document.getElementById('todoModalBody');
+
+    if(!modal || !body) {
+      // Fallback auf alert wenn Modal nicht existiert
+      alert('Modal nicht gefunden');
       return;
     }
 
-    let msg = `📋 Offene TODOs (${pending.length}):\n\n`;
-    pending.forEach((todo, idx) => {
-      const prio = todo.priority === 'high' ? '⚠️ HOCH' : '📌';
-      const cat = todo.category ? ` [@${todo.category}]` : '';
-      const isUnsynced = unsynced.find(u => u.id === todo.id);
-      const syncStatus = isUnsynced ? ' 🔄' : ' ✓';
-      msg += `${idx + 1}. ${prio} ${todo.chapterFile}${cat}${syncStatus}\n`;
-      msg += `   ${todo.text}\n\n`;
-    });
+    if(pending.length === 0 && processed.length === 0) {
+      title.textContent = 'Keine TODOs';
+      body.innerHTML = '<p>Keine TODOs vorhanden.</p><p style="color:#666;font-size:0.9rem;">Erstelle TODOs indem du ein Kapitel öffnest und das Eingabefeld nutzt.</p>';
+      modal.classList.add('active');
+      return;
+    }
 
-    msg += '\n🔄 = neu (noch nicht synchronisiert)\n✓ = im Repository gespeichert';
-    alert(msg);
+    title.textContent = `TODOs (${pending.length} offen, ${processed.length} erledigt)`;
+
+    let html = '';
+
+    // Offene TODOs
+    if(pending.length > 0) {
+      html += '<div style="margin-bottom:16px;"><strong>Offen:</strong></div>';
+      pending.forEach(todo => {
+        const isUnsynced = unsynced.find(u => u.id === todo.id);
+        const syncLabel = isUnsynced ? '🔄 neu' : '✓ synchronisiert';
+        const prioClass = todo.priority === 'high' ? 'prio-high' : '';
+        const cat = todo.category ? ` <span style="color:#666;">@${todo.category}</span>` : '';
+
+        html += `<div class="todo-item">
+          <div class="chapter">${todo.chapterFile}${cat}</div>
+          <div class="text ${prioClass}">${todo.priority === 'high' ? '⚠️ ' : ''}${escapeHtml(todo.text)}</div>
+          <div class="sync-status">${syncLabel}</div>
+        </div>`;
+      });
+    }
+
+    // Erledigte TODOs (eingeklappt)
+    if(processed.length > 0) {
+      html += `<details style="margin-top:16px;">
+        <summary style="cursor:pointer;color:#666;">Erledigt (${processed.length})</summary>
+        <div style="margin-top:8px;">`;
+      processed.forEach(todo => {
+        html += `<div class="todo-item" style="opacity:0.7;">
+          <div class="chapter">${todo.chapterFile}</div>
+          <div class="text" style="text-decoration:line-through;">${escapeHtml(todo.text)}</div>
+          ${todo.result ? `<div class="sync-status">→ ${escapeHtml(todo.result)}</div>` : ''}
+        </div>`;
+      });
+      html += '</div></details>';
+    }
+
+    // Legende
+    html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid #ddd;font-size:0.85rem;color:#666;">🔄 = neu (noch nicht synchronisiert) · ✓ = im Repository</div>';
+
+    body.innerHTML = html;
+    modal.classList.add('active');
+  }
+
+  // HTML escapen
+  function escapeHtml(text){
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   // Zeige Fortschrittsbalken
