@@ -5,9 +5,9 @@ Dieses Kapitel beschreibt bewährte MIDI-Workflows für verschiedene Performance
 
 ## WF-M1: U6 Master + U6 Distribution (Standard-Jam)
 
-**Ziel:** Alle Geräte synchron spielen, J-6 steuert wahlweise S-1 oder Texture Lab.
+**Ziel:** Alle Geräte synchron spielen, J-6 steuert S-1.
 
-**Geräte:** T-8 (Clock), J-6, S-1, Texture Lab, CME U6 #1 + #2, Merge 5, Zoom L-6
+**Geräte:** T-8 (Clock), J-6, S-1, Ambient Ø, CME U6 #1 + #2, Merge 5, Zoom L-6
 
 **Setup-Zeit:** 5 Minuten (nach Initial-Setup)
 **Best für:** Standard-Jam-Sessions, Live-Performances, Sounddesign
@@ -23,7 +23,7 @@ Dieses Kapitel beschreibt bewährte MIDI-Workflows für verschiedene Performance
 1. **T-8:** Tempo einstellen (z.B. 110 BPM)
 2. **T-8:** Pattern auswählen → `PLAY` drücken
 3. **J-6:** Sollte jetzt Clock empfangen (LED blinkt synchron)
-4. **S-1 / TL:** Empfangen Clock, bereit zum Spielen
+4. **S-1 / Ambient Ø:** Empfangen Clock, bereit zum Spielen
 
 **Live-Routing wechseln:**
 
@@ -32,11 +32,10 @@ Während der Performance kannst du das Note-Routing ändern:
 | U6 Preset | J-6 Notes → | Sound-Charakter |
 |-----------|-------------|-----------------|
 | P01 | S-1 | Klare Lead-Synth-Melodien |
-| P02 | Texture Lab | Granulare Texturen |
-| P03 | S-1 + TL | Layer (komplex) |
+| P02 | S-1 + Ambient Ø | Layer mit Pads |
 
 **Preset wechseln:**
-- Am CME U6: Preset-Taste drücken (P1, P2, P3)
+- Am CME U6: Preset-Taste drücken (P1, P2)
 - Oder: Program Change senden (falls konfiguriert)
 
 **L-6 Scene-Wechsel via MIDI:**
@@ -48,33 +47,33 @@ Während der Performance kannst du das Note-Routing ändern:
 
 ---
 
-## WF-M2: Texture Lab Solo via J-6
+## WF-M2: Ambient Ø Pad-Performance
 
-**Ziel:** J-6 Akkorde treiben Texture Lab für massive Granular-Texturen.
+**Ziel:** Ambient Ø für atmosphärische Pads und Drones, synchron mit dem Setup.
 
-**Geräte:** T-8 (Clock), J-6, Texture Lab, CME U6 #2
+**Geräte:** T-8 (Clock), J-6, S-1, Ambient Ø, Zoom L-6
 
 **Setup-Zeit:** 3 Minuten
 **Best für:** Ambient-Performances, Soundscapes, Drone-Musik
 
 ### Schritt-für-Schritt Anleitung
 
-**Preset aktivieren:**
-1. CME U6 #2: Preset **P02** (Texture-Fokus) laden
-2. Routing: J-6 Notes → Texture Lab (Ch. 4)
-3. S-1 empfängt nur Clock (kein Note-Input)
+**Setup:**
+1. Ambient Ø via USB an L-6 anschließen
+2. S-1 empfängt J-6 Notes (Preset P01)
+3. Ambient Ø intern spielen (eigene Sequenzen)
 
-**Texture Lab vorbereiten:**
-1. TL einschalten, Preset mit langem Decay wählen
-2. **Grain Size:** 50-100ms (für warme Texturen)
-3. **Position Random:** 30% (leichte Variation)
-4. **Pitch Shift:** 0 oder +12 (Oktave)
+**Ambient Ø vorbereiten:**
+1. Ambient Ø einschalten, Pad-Preset wählen
+2. **Decay:** Lang (für evolvierende Pads)
+3. **Reverb:** 60-80%
+4. **LFO:** Subtile Modulation
 
 **Performance-Flow:**
 1. **T-8:** Langsames Tempo (60-80 BPM)
-2. **J-6:** Chord Mode, spiele Akkorde
-3. **TL:** Transformiert Akkorde in Granular-Wolken
-4. **S-1:** Läuft nur mit Clock (optionaler Bass-Drone)
+2. **J-6:** Chord Mode, spiele Akkorde → S-1
+3. **S-1:** Arpeggiator für melodische Patterns
+4. **Ambient Ø:** Manuelle Pads und Drones dazu
 
 **Akkord-Tipps für Ambient:**
 
@@ -85,8 +84,8 @@ Während der Performance kannst du das Note-Routing ändern:
 | Dm → Bb → F → C | Cinematisch |
 
 **Layering-Idee:**
-- TL: Granular-Pad (Lautstärke 70%)
-- Ambient Ø: Zusätzlicher Drone (Lautstärke 30%)
+- S-1: Arpeggio-Melodien (Lautstärke 50%)
+- Ambient Ø: Drone-Pads (Lautstärke 50%)
 - Ergebnis: Tiefe, evolvierende Soundscapes
 
 ---
@@ -206,7 +205,7 @@ Song 3 (Vocal-Feature):
 
 **Ziel:** "Ode to Joy" Melodie auf allen Geräten synchron spielen, generative Variationen.
 
-**Geräte:** Alle (T-8, J-6, S-1, Texture Lab, Ambient Ø, L-6)
+**Geräte:** Alle (T-8, J-6, S-1, E-4, Ambient Ø, L-6)
 
 **Setup-Zeit:** 10 Minuten
 **Best für:** Konzept-Performances, Ambient-Versionen klassischer Melodien
@@ -239,10 +238,9 @@ C   C   F   G   | G   F   C   G   | Am  Am  G   C   | C   G   G   - |
    - Arpeggiator: ON (8tel-Noten)
    - Arpeggio Mode: Up-Down
 
-4. **Texture Lab (Texturen):**
-   - Empfängt J-6 Notes (Preset P02 wechseln!)
-   - Grain: 200ms, Random Position 50%
-   - Erstellt "Geistermelodie"
+4. **E-4 (Vocoder/Effekte):**
+   - Kann für Vocal-Effekte genutzt werden
+   - Oder als Effekt-Unit für andere Quellen
 
 5. **Ambient Ø (Drone):**
    - Intern: C2 gehalten (Grundton Pedal)
@@ -260,23 +258,23 @@ C   C   F   G   | G   F   C   G   | Am  Am  G   C   | C   G   G   - |
 ├── J-6 spielt Akkordfolge
 ├── S-1 Arpeggio beginnt (Melodie-Fragmente)
 ├── L-6 Scene 1 (Full)
-└── Texture Lab dazu (P02)
+└── E-4 optional dazu (Vocal-Effekte)
 
 [3:00-5:00] Entwicklung
 ├── T-8 volles Pattern
-├── Wechsel zwischen P01/P02 (S-1 vs TL)
+├── S-1 Lead-Melodien
 └── L-6 Scene 3 (Synth Fokus)
 
 [5:00-6:00] Climax
 ├── Alle Geräte, volle Lautstärke
-├── P03 (Layer S-1 + TL)
+├── S-1 + Ambient Ø zusammen
 └── L-6 Scene 1
 
 [6:00-7:00] Outro
 ├── T-8 fade out (Mute am L-6)
-├── P02 (nur Texture Lab)
+├── Ambient Ø allein (Drone)
 ├── J-6 einzelne Akkorde
-└── Zurück zu Ambient Ø Drone
+└── Sanftes Fade-Out
 ```
 
 **Tipp:** Nutze die `Freude2025.wav` Audio-Datei als Referenz oder Backing-Track.
@@ -324,12 +322,11 @@ C   C   F   G   | G   F   C   G   | Am  Am  G   C   | C   G   G   - |
 
 | Preset | Spielbar? | Warum |
 |--------|-----------|-------|
-| P01 | Ja | J-6 steuert S-1, TL nur Drone |
-| P02 | Ja | J-6 steuert TL, S-1 nur Bass |
-| P03 | Nein! | J-6 steuert beide → zu viel parallel |
+| P01 | Ja | J-6 steuert S-1, Ambient Ø Pads |
+| P02 | Ja | J-6 + S-1 Layer |
 
 **Performance-Tipps:**
-- Vermeide Preset P03 für Live (zu viele Parameter gleichzeitig)
+- Beide Presets sind gut spielbar mit 2 Händen
 - Nutze J-6 Arpeggiator für automatische Patterns
 - S-1 Sequencer kann auch autonom laufen
 - L-6 Limiter aktivieren (Übersteuerung vermeiden)
@@ -341,7 +338,7 @@ C   C   F   G   | G   F   C   G   | Am  Am  G   C   | C   G   G   - |
 | Workflow | Fokus | Hände | Komplexität | Best für |
 |----------|-------|-------|-------------|----------|
 | **WF-M1:** Standard-Jam | Alle Geräte | 2+ | Mittel | Jam-Sessions |
-| **WF-M2:** TL Solo | Granular | 2 | Niedrig | Ambient |
+| **WF-M2:** Ambient Ø | Pads/Drones | 2 | Niedrig | Ambient |
 | **WF-M3:** T-8 Drums | Rhythmus | 2 | Niedrig | Dance |
 | **WF-M4:** L-6 Scenes | Automation | 1 | Hoch (Setup) | Konzerte |
 | **WF-M5:** Freude 2025 | Konzept | 2 | Hoch | Shows |

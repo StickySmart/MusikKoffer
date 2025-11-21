@@ -45,7 +45,7 @@ Das MusikKoffer-System besteht aus sorgfältig ausgewählten Geräten, die zusam
 
 **Rolle im System:**
 - **Akkord-Generator** für Harmonie
-- Steuert S-1 oder Texture Lab via MIDI Notes
+- Steuert S-1 via MIDI Notes
 - Arpeggiator für automatische Melodien
 
 **Anschlüsse:**
@@ -134,31 +134,6 @@ Das MusikKoffer-System besteht aus sorgfältig ausgewählten Geräten, die zusam
 
 ---
 
-### Sonicware LIVEN Texture Lab
-
-**Typ:** Granular Synthesizer
-**Hersteller:** Sonicware
-
-**Eigenschaften:**
-- Granular-Engine für Texturen
-- Sample-Import via SD-Karte
-- 4 LFOs für Modulation
-- Eingebaute Effekte
-- DIN-MIDI (kein TRS!)
-
-**Rolle im System:**
-- **Granular-Texturen** aus J-6 Akkorden
-- Empfängt Notes im Preset P02
-- Erzeugt evolvierende Klangwolken
-
-**Anschlüsse:**
-| Port | Typ | Verwendung |
-|------|-----|------------|
-| Line Out | 3,5mm | → L-6 (wenn nicht J-6 genutzt) |
-| MIDI In | 5-pol DIN | ← U6 #2 Out1 |
-
----
-
 ## Audio-Zentrale
 
 ### Zoom L-6 (Mixer/Recorder)
@@ -207,7 +182,7 @@ Das MusikKoffer-System besteht aus sorgfältig ausgewählten Geräten, die zusam
 
 **Rolle im System:**
 - **U6 #1:** Clock-Distribution an J-6, S-1
-- **U6 #2:** Notes an Texture Lab, PC/MMC an L-6
+- **U6 #2:** PC/MMC an L-6 für Scene-Automation
 
 **Anschlüsse:**
 | Port | Typ | Verwendung |
@@ -250,10 +225,9 @@ Das MusikKoffer-System besteht aus sorgfältig ausgewählten Geräten, die zusam
 | S-1 | Synth | Kanal 6 | → Merge 5 | ← U6 #1 |
 | E-4 | Vocals | Kanal 5 | - | - |
 | Ambient Ø | Pads | USB | - | (USB) |
-| Texture Lab | Granular | (Kanal 3+4) | - | ← U6 #2 |
 | L-6 | Mixer | - | - | ← U6 #2 |
 | U6 #1 | MIDI | - | → J-6, S-1 | ← Merge 5 |
-| U6 #2 | MIDI | - | → TL, L-6 | ← Merge 5 |
+| U6 #2 | MIDI | - | → L-6 | ← Merge 5 |
 | Merge 5 | MIDI | - | → U6 ×2 | ← TR/J/S |
 
 ---
@@ -267,7 +241,6 @@ Das MusikKoffer-System besteht aus sorgfältig ausgewählten Geräten, die zusam
 | S-1 | USB oder 4× AA | 500mA |
 | E-4 | USB oder 4× AA | 500mA |
 | Ambient Ø | USB-C oder 4× AA | 500mA |
-| Texture Lab | USB-C oder 4× AA | 500mA |
 | L-6 | Netzteil (12V DC) | 1A |
 | U6 ×2 | USB | 100mA |
 | Merge 5 | Netzteil (9V DC) | 100mA |

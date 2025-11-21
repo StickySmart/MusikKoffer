@@ -24,7 +24,6 @@ Kabel-Checkliste:
 │ [ ] 3× TRS-A auf DIN Adapter (für T-8, J-6, S-1)│
 │ [ ] 2× DIN-DIN MIDI-Kabel (Merge → U6s)         │
 │ [ ] 2× DIN auf TRS-A Adapter (U6 → J-6, S-1)    │
-│ [ ] 1× DIN-DIN MIDI-Kabel (U6 #2 → Texture Lab) │
 │ [ ] 1× DIN auf TRS-A Adapter (U6 #2 → L-6)      │
 └─────────────────────────────────────────────────┘
 ```
@@ -78,12 +77,12 @@ U6 #1 verteilt die Clock an J-6 und S-1.
 
 ```
 CME U6 #2:
-├── OUT1 ──→ DIN-Kabel ──→ Texture Lab MIDI In
+├── OUT1 ──→ (frei für Erweiterung)
 ├── OUT2 ──→ DIN/TRS-A Adapter ──→ Zoom L-6 MIDI In
 └── OUT3 ──→ (frei für Erweiterung)
 ```
 
-U6 #2 sendet Clock + Notes an Texture Lab und PC/MMC an L-6.
+U6 #2 sendet PC/MMC an L-6 für Scene-Automation.
 
 **Schritt 2.5 – Verkabelung prüfen**
 
@@ -102,12 +101,12 @@ Komplettes MIDI-Routing (Überblick):
         │            ↓          ↓                    │
         │      ┌─────────┐ ┌─────────┐               │
         │      │ U6 #1   │ │ U6 #2   │               │
-        │      │ OUT1→J-6│ │OUT1→TL  │               │
+        │      │ OUT1→J-6│ │OUT1→frei│               │
         │      │ OUT2→S-1│ │OUT2→L-6 │               │
         │      └─────────┘ └─────────┘               │
         │                                            │
         │              ZIELE (IN)                    │
-        │   J-6 ←──    S-1 ←──    TL ←──    L-6 ←── │
+        │   J-6 ←──    S-1 ←──         L-6 ←──      │
         └─────────────────────────────────────────────┘
 ```
 
@@ -143,18 +142,7 @@ Komplettes MIDI-Routing (Überblick):
    - MIDI Ch: **2**
 4. Bestätige mit **ENTER**
 
-**Schritt 3.4 – Texture Lab konfigurieren**
-
-1. Texture Lab einschalten
-2. Halte **FUNC** + drücke **MENU**
-3. Navigiere zu **MIDI Settings**
-4. Setze:
-   - Sync: **MIDI**
-   - MIDI Ch: **4**
-   - Clock Receive: **ON**
-5. Bestätige mit **OK**
-
-**Schritt 3.5 – Zoom L-6 MIDI-Empfang aktivieren**
+**Schritt 3.4 – Zoom L-6 MIDI-Empfang aktivieren**
 
 1. L-6: Drücke **MENU**
 2. Navigiere zu **SYSTEM** → **MIDI**
@@ -173,7 +161,6 @@ Komplettes MIDI-Routing (Überblick):
 2. Beobachte:
    - J-6: Tempo-LED blinkt synchron? ✅
    - S-1: Clock-Indikator aktiv? ✅
-   - Texture Lab: BPM-Anzeige zeigt T-8 Tempo? ✅
 
 **Wenn nicht synchron:**
 - Prüfe: Alle Geräte auf "External" außer T-8?
@@ -200,7 +187,7 @@ Komplettes MIDI-Routing (Überblick):
 
 Die CME U6-Einheiten können verschiedene Routing-Presets speichern.
 
-**Preset P01 einrichten (S-1 Fokus):**
+**Preset P01 einrichten (Standard-Jam):**
 
 1. U6 #1: Via CME Software (Windows/Mac)
 2. Routing konfigurieren:
@@ -210,12 +197,11 @@ Die CME U6-Einheiten können verschiedene Routing-Presets speichern.
    ```
 3. Preset speichern als "P01"
 
-**Preset P02 einrichten (Texture Fokus):**
+**Preset P02 einrichten (L-6 Automation):**
 
 1. U6 #2: Via CME Software
 2. Routing konfigurieren:
    ```
-   IN1 (Merged) → OUT1 (TL): Clock + Ch.1 Notes
    IN1 (Merged) → OUT2 (L-6): PC + MMC only
    ```
 3. Preset speichern als "P02"
@@ -233,7 +219,6 @@ Die CME U6-Einheiten können verschiedene Routing-Presets speichern.
 | T-8 | Internal | 10 | ON | Master |
 | J-6 | External | 1 | OFF | Slave |
 | S-1 | External | 2 | OFF | Slave |
-| Texture Lab | MIDI | 4 | OFF | Slave |
 | L-6 | - | Omni | - | Empfänger |
 
 ---

@@ -18,8 +18,8 @@ Das MusikKoffer-System verwendet eine **Hub-basierte MIDI-Architektur** mit zwei
 
 **CME U6 #2 (Preset/Control-Distribution)**
 - Empfängt gemergtes MIDI vom Merge 5
-- Sendet Clock + Notes an Texture Lab
 - Sendet Program Change + MMC an Zoom L-6
+- OUT1 frei für Erweiterungen
 
 **Doremidi Merge 5 (MIDI-Sammelpunkt)**
 - 5 MIDI-Inputs, 2 MIDI-Outputs
@@ -59,17 +59,17 @@ Das MusikKoffer-System verwendet eine **Hub-basierte MIDI-Architektur** mit zwei
 │   │   (Master)  │       │ (Presets)   │                            │
 │   │ [IN1]       │       │ [IN1]       │                            │
 │   │  ↓          │       │  ↓          │                            │
-│   │ [OUT1→J-6]  │       │ [OUT1→TL]   │                            │
+│   │ [OUT1→J-6]  │       │ [OUT1→frei] │                            │
 │   │ [OUT2→S-1]  │       │ [OUT2→L-6]  │                            │
 │   │ [OUT3→frei] │       │ [OUT3→frei] │                            │
 │   └─────────────┘       └─────────────┘                            │
-│         │  │                  │  │                                 │
-│         ↓  ↓                  ↓  ↓                                 │
-│      ┌─────┐ ┌─────┐    ┌──────┐ ┌──────┐                          │
-│      │ J-6 │ │ S-1 │    │  TL  │ │ L-6  │                          │
-│      │Clock│ │Clock│    │Clock │ │PC+MMC│                          │
-│      │ IN  │ │ IN  │    │+Notes│ │      │                          │
-│      └─────┘ └─────┘    └──────┘ └──────┘                          │
+│         │  │                       │                               │
+│         ↓  ↓                       ↓                               │
+│      ┌─────┐ ┌─────┐          ┌──────┐                             │
+│      │ J-6 │ │ S-1 │          │ L-6  │                             │
+│      │Clock│ │Clock│          │PC+MMC│                             │
+│      │ IN  │ │ IN  │          │      │                             │
+│      └─────┘ └─────┘          └──────┘                             │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 
@@ -88,7 +88,6 @@ DIN   = 5-pol DIN-Buchse (klassisch)
 | Merge 5 → U6 #2 | DIN auf DIN | Standard MIDI-Kabel |
 | U6 #1 → J-6 | DIN auf TRS-A | Adapter erforderlich |
 | U6 #1 → S-1 | DIN auf TRS-A | Adapter erforderlich |
-| U6 #2 → TL | DIN auf DIN | Texture Lab hat DIN |
 | U6 #2 → L-6 | DIN auf TRS-A | L-6 nutzt TRS-A |
 
 **Wichtig:** TRS-A und TRS-B sind NICHT kompatibel! Roland, Korg, und Zoom verwenden TRS-A. Achte beim Kauf von Adaptern auf den korrekten Standard.
@@ -102,7 +101,7 @@ Im MusikKoffer-System fungiert der **Roland T-8** als primärer Clock-Master:
 1. T-8 sendet MIDI Clock (24 PPQN) + Start/Stop/Continue
 2. Merge 5 leitet Clock an beide U6 weiter
 3. U6 #1 verteilt Clock an J-6 und S-1
-4. U6 #2 verteilt Clock an Texture Lab
+4. U6 #2 sendet PC/MMC an L-6
 
 **Alle Geräte laufen synchron zum selben Tempo!**
 
@@ -121,10 +120,6 @@ Im MusikKoffer-System fungiert der **Roland T-8** als primärer Clock-Master:
 **S-1 (Clock Slave)**
 - Sync Mode: **External**
 - Arpeggiator und Sequencer folgen Clock
-
-**Texture Lab (Clock Slave)**
-- Sync Mode: **External MIDI**
-- Granular-Engine und LFOs folgen Clock
 
 **Ambient Ø (Sonderfall)**
 - Kann Clock via USB empfangen
@@ -148,7 +143,6 @@ Im MusikKoffer-System fungiert der **Roland T-8** als primärer Clock-Master:
 | J-6 | 1 | Clock, Notes | Notes, CC |
 | S-1 | 2 | Clock, Notes | Notes, CC |
 | E-4 | 3 | Notes (optional) | - |
-| Texture Lab | 4 | Clock, Notes | - |
 | Ambient Ø | 5 | CC (optional) | - |
 | L-6 | Omni | PC, MMC | Pad Notes |
 
@@ -183,38 +177,26 @@ Der L-6 reagiert auf MMC-Befehle:
 
 ## Presets und Routing-Szenarien
 
-Das System unterstützt drei Grund-Presets für unterschiedliche musikalische Szenarien:
+Das System unterstützt zwei Grund-Presets für unterschiedliche musikalische Szenarien:
 
-### Preset P01: S-1 Fokus
+### Preset P01: Standard-Jam
 
 ```
 T-8 Clock ──→ alle Geräte
 J-6 Notes ──→ S-1 (spielt J-6 Akkorde)
-Texture Lab: nur Clock (Hintergrund-Drone)
 ```
 
 **Ideal für:** Lead-Synth-fokussierte Performances, S-1 steht im Vordergrund
 
-### Preset P02: Texture-Fokus
+### Preset P02: Ambient
 
 ```
 T-8 Clock ──→ alle Geräte
-J-6 Notes ──→ Texture Lab (Granular-Texturen)
-S-1: nur Clock (Bass-Pattern)
+J-6 + Ambient Ø: Pads und Flächen
+S-1: Bass-Lines
 ```
 
-**Ideal für:** Ambient-Texturen, Granular-Experimente
-
-### Preset P03: Layer (S-1 + Texture Lab)
-
-```
-T-8 Clock ──→ alle Geräte
-J-6 Notes ──→ S-1 UND Texture Lab (parallel)
-```
-
-**Ideal für:** Komplexe Klangschichten, erfordert aber mehr Aufmerksamkeit
-
-**Hinweis:** Preset P03 ist mit 2 Händen schwer zu bedienen - besser für Studio-Recording als Live-Performance.
+**Ideal für:** Ambient-Performances, Soundscapes
 
 ## Troubleshooting MIDI
 
@@ -240,12 +222,6 @@ J-6 Notes ──→ S-1 UND Texture Lab (parallel)
 1. **MIDI-Kanal prüfen:** L-6 auf "Omni" oder passenden Kanal einstellen
 2. **PC-Bereich prüfen:** L-6 akzeptiert nur PC 1-9 für Scenes
 3. **Verkabelung prüfen:** U6 #2 Out2 → L-6 MIDI In
-
-### Problem: Texture Lab empfängt keine Noten
-
-1. **MIDI-Kanal:** TL auf Kanal 4 einstellen
-2. **Preset prüfen:** Ist P02 oder P03 aktiv? (P01 sendet keine Noten an TL)
-3. **Note-Range:** TL erwartet Noten im Bereich C1-C5
 
 ---
 

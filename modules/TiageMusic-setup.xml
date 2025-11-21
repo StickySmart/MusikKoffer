@@ -81,15 +81,6 @@
       </ports>
     </device>
 
-    <device id="texture_lab" manufacturer="Sonicware" type="Granular Synth">
-      <name>Sonicware LIVEN Texture Lab</name>
-      <ports>
-        <port id="in" type="MIDI In" connector="DIN" status="active"/>
-        <port id="out" type="MIDI Out" connector="DIN" status="not-in-use"/>
-      </ports>
-      <notes>Wird hier ausschließlich als MIDI-Empfänger genutzt.</notes>
-    </device>
-
   </devices>
 
   <!-- Grundverkabelung -->
@@ -101,20 +92,16 @@
     <connection id="conn_merge_u6_2" fromDevice="merge5" fromPort="outB" toDevice="cme_u6_2" toPort="in1" signal="All merged"/>
     <connection id="conn_u6_1_out1_j6" fromDevice="cme_u6_1" fromPort="out1" toDevice="j6" toPort="in" signal="Clock"/>
     <connection id="conn_u6_1_out2_s1" fromDevice="cme_u6_1" fromPort="out2" toDevice="s1" toPort="in" signal="Clock"/>
-    <connection id="conn_u6_2_out1_tl" fromDevice="cme_u6_2" fromPort="out1" toDevice="texture_lab" toPort="in" signal="Clock+Notes"/>
     <connection id="conn_u6_2_out2_zoom" fromDevice="cme_u6_2" fromPort="out2" toDevice="zoom_l6" toPort="midi_in" signal="PC+MMC"/>
   </connections>
 
   <!-- Presets -->
   <presets>
-    <preset id="P01" name="S-1 Fokus">
-      <description>T-8 Clock an alle; J-6 Notes → S-1; TL erhält nur Clock.</description>
+    <preset id="P01" name="Standard-Jam">
+      <description>T-8 Clock an alle; J-6 Notes → S-1.</description>
     </preset>
-    <preset id="P02" name="Texture-Fokus">
-      <description>T-8 Clock an alle; J-6 Notes → Texture Lab; S-1 nur Clock.</description>
-    </preset>
-    <preset id="P03" name="Layer S-1 + Texture Lab">
-      <description>J-6 Notes gedoppelt → S-1 + TL; T-8 Clock an alle.</description>
+    <preset id="P02" name="Ambient">
+      <description>T-8 Clock an alle; J-6 + Ambient Ø Pads; S-1 Bass-Lines.</description>
     </preset>
   </presets>
 
@@ -128,31 +115,22 @@
   <!-- Workflows -->
   <workflows>
     <workflow id="W01" scene="S01" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
-      <description>Jam Setup: J-6 spielt S-1, Clock an alle. Texture Lab nur Clock. → Gut spielbar mit 2 Händen.</description>
+      <description>Jam Setup: J-6 spielt S-1, Clock an alle. → Gut spielbar mit 2 Händen.</description>
     </workflow>
     <workflow id="W02" scene="S01" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
-      <description>Jam Setup: Texture-Fokus. J-6 Noten gehen ins TL, S-1 läuft nur im Sync. → Live gut machbar.</description>
+      <description>Jam Setup: Ambient-Fokus. J-6 + Ambient Ø Pads, S-1 Bass. → Live gut machbar.</description>
     </workflow>
-    <workflow id="W03" scene="S01" presetU6_1="P03" presetU6_2="P03" playable="false" hands="3">
-      <description>Jam Setup: Layer von J-6 → S-1 + TL gleichzeitig. → Zu viel parallel, kaum mit 2 Händen machbar.</description>
+    <workflow id="W03" scene="S02" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
+      <description>Instrumental Fokus: Vocals gemutet. J-6 → S-1. → Gut live spielbar.</description>
     </workflow>
-    <workflow id="W04" scene="S02" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
-      <description>Instrumental Fokus: Vocals gemutet. J-6 → S-1, TL bleibt im Hintergrund. → Gut live spielbar.</description>
+    <workflow id="W04" scene="S02" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
+      <description>Instrumental Fokus: Ambient Ø Pads, S-1 minimal. → Sehr spielbar.</description>
     </workflow>
-    <workflow id="W05" scene="S02" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
-      <description>Instrumental Fokus: TL übernimmt Melodie, S-1 nur Clock. → Sehr spielbar.</description>
-    </workflow>
-    <workflow id="W06" scene="S02" presetU6_1="P03" presetU6_2="P03" playable="false" hands="3">
-      <description>Instrumental Fokus: Layer von J-6 → S-1 + TL, dazu Szeneumschaltung am L-6. → Live kaum bedienbar.</description>
-    </workflow>
-    <workflow id="W07" scene="S03" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
+    <workflow id="W05" scene="S03" presetU6_1="P01" presetU6_2="P01" playable="true" hands="2">
       <description>Performance Fokus: Vocals im Vordergrund. J-6 → S-1, Clock hält Sync. → Einfach nutzbar.</description>
     </workflow>
-    <workflow id="W08" scene="S03" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
-      <description>Performance Fokus: TL übernimmt Flächen, S-1 minimal. → Spielbar.</description>
-    </workflow>
-    <workflow id="W09" scene="S03" presetU6_1="P03" presetU6_2="P03" playable="false" hands="3">
-      <description>Performance Fokus: Layer + Vocals im Vordergrund. → Zu viele Layer gleichzeitig, nicht sinnvoll mit 2 Händen.</description>
+    <workflow id="W06" scene="S03" presetU6_1="P02" presetU6_2="P02" playable="true" hands="2">
+      <description>Performance Fokus: Ambient Ø Flächen, S-1 minimal. → Spielbar.</description>
     </workflow>
   </workflows>
 
