@@ -225,16 +225,17 @@
     // Offene TODOs
     if(pending.length > 0) {
       html += '<div style="margin-bottom:16px;"><strong>Offen:</strong></div>';
-      pending.forEach(todo => {
+      pending.forEach((todo, idx) => {
         const isUnsynced = unsynced.find(u => u.id === todo.id);
         const syncLabel = isUnsynced ? '🔄 neu' : '✓ synchronisiert';
         const prioClass = todo.priority === 'high' ? 'prio-high' : '';
         const cat = todo.category ? ` <span style="color:#666;">@${todo.category}</span>` : '';
+        const dateStr = todo.createdAt ? formatDate(todo.createdAt) : '';
 
         html += `<div class="todo-item">
-          <div class="chapter">${todo.chapterFile}${cat}</div>
+          <div class="chapter"><strong>#${idx + 1}</strong> · ${todo.chapterFile}${cat}</div>
           <div class="text ${prioClass}">${todo.priority === 'high' ? '⚠️ ' : ''}${escapeHtml(todo.text)}</div>
-          <div class="sync-status">${syncLabel}</div>
+          <div class="sync-status">${syncLabel}${dateStr ? ` · ${dateStr}` : ''}</div>
         </div>`;
       });
     }
@@ -244,11 +245,12 @@
       html += `<details style="margin-top:16px;">
         <summary style="cursor:pointer;color:#666;">Erledigt (${processed.length})</summary>
         <div style="margin-top:8px;">`;
-      processed.forEach(todo => {
+      processed.forEach((todo, idx) => {
+        const dateStr = todo.processedAt ? formatDate(todo.processedAt) : (todo.createdAt ? formatDate(todo.createdAt) : '');
         html += `<div class="todo-item" style="opacity:0.7;">
-          <div class="chapter">${todo.chapterFile}</div>
+          <div class="chapter"><strong>#${idx + 1}</strong> · ${todo.chapterFile}</div>
           <div class="text" style="text-decoration:line-through;">${escapeHtml(todo.text)}</div>
-          ${todo.result ? `<div class="sync-status">→ ${escapeHtml(todo.result)}</div>` : ''}
+          <div class="sync-status">${todo.result ? `→ ${escapeHtml(todo.result)}` : ''}${dateStr ? ` · ${dateStr}` : ''}</div>
         </div>`;
       });
       html += '</div></details>';
@@ -266,6 +268,21 @@
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  // Datum formatieren (deutsch)
+  function formatDate(isoString){
+    try {
+      const date = new Date(isoString);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const mins = date.getMinutes().toString().padStart(2, '0');
+      return `${day}.${month}.${year} ${hours}:${mins}`;
+    } catch(e) {
+      return '';
+    }
   }
 
   // Zeige Fortschrittsbalken
