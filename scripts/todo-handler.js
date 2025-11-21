@@ -320,68 +320,11 @@
     }, 600);
   }
 
-  // Verarbeite hochgeladene Ergebnis-Datei (processed-todos.json)
-  async function handleProcessedUpload(file){
-    if(!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async function(e){
-      try {
-        const processed = JSON.parse(e.target.result);
-        if(!processed.todos || !Array.isArray(processed.todos)) {
-          alert('Ungültiges Format: Die Datei enthält kein "todos" Array.');
-          return;
-        }
-
-        // Aktualisiere lokale ungesyncte TODOs
-        const unsynced = loadUnsyncedTodos();
-        let updated = 0;
-
-        unsynced.forEach(todo => {
-          if(todo.status === 'pending') {
-            const match = processed.todos.find(p =>
-              p.id === todo.id ||
-              (p.chapterFile === todo.chapterFile &&
-               (p.text === todo.text || todo.text.includes(p.text) || p.text.includes(todo.text)))
-            );
-            if(match && match.status === 'processed') {
-              todo.status = 'processed';
-              todo.processedAt = processed.processedAt || new Date().toISOString();
-              todo.result = match.result;
-              updated++;
-            }
-          }
-        });
-
-        if(updated > 0) {
-          saveUnsyncedTodos(unsynced);
-        }
-
-        // Sync mit Datei und aktualisiere Cache
-        await syncWithFile();
-        await updateStats();
-
-        alert(
-          `✅ Synchronisierung abgeschlossen!\n\n` +
-          `Die TODO-Zähler wurden aktualisiert.\n\n` +
-          `Hinweis: Die vollständige Liste ist jetzt in\n` +
-          `modules/todos.json im Repository gespeichert.`
-        );
-      } catch(err) {
-        console.error('Fehler beim Verarbeiten:', err);
-        alert('Fehler beim Lesen der Datei:\n' + err.message);
-      }
-    };
-    reader.readAsText(file);
-  }
-
   // Setup Event Listeners
   async function setup(){
     const btnAddTodo = document.getElementById('btnAddTodo');
     const btnListTodos = document.getElementById('btnListTodos');
     const btnProcessTodos = document.getElementById('btnProcessTodos');
-    const btnUploadProcessed = document.getElementById('btnUploadProcessed');
-    const processedFileInput = document.getElementById('processedFileInput');
 
     if(btnAddTodo){
       btnAddTodo.addEventListener('click', addTodo);
@@ -393,19 +336,6 @@
 
     if(btnProcessTodos){
       btnProcessTodos.addEventListener('click', processTodos);
-    }
-
-    // Upload-Button für Ergebnisse
-    if(btnUploadProcessed && processedFileInput){
-      btnUploadProcessed.addEventListener('click', () => {
-        processedFileInput.click();
-      });
-      processedFileInput.addEventListener('change', (e) => {
-        if(e.target.files && e.target.files[0]){
-          handleProcessedUpload(e.target.files[0]);
-          e.target.value = '';
-        }
-      });
     }
 
     // Initial: Synchronisiere mit Datei und aktualisiere Anzeige
