@@ -5,6 +5,7 @@
   'use strict';
 
   const STORAGE_KEY = 'musikkoffer_todos';
+  const PENDING_FILE = 'modules/pending-todos.json';
   const PROCESSED_FILE = 'modules/processed-todos.json';
   let currentChapterFile = null;
   let currentChapterId = null;
@@ -228,8 +229,9 @@
     const confirmed = confirm(
       `TODOs exportieren?\n\n` +
       `${pending.length} offene TODO(s) werden als JSON-Datei heruntergeladen.\n\n` +
-      `Danach kannst du die Datei an Claude Code senden,\n` +
-      `der dann die Inhalte automatisch generiert.\n\n` +
+      `Die Datei heißt "pending-todos.json" und muss in\n` +
+      `den Ordner "modules/" gelegt werden.\n\n` +
+      `Claude liest sie automatisch und aktualisiert die Zähler.\n\n` +
       `Fortfahren?`
     );
 
@@ -239,10 +241,9 @@
     showProgress(10);
     await new Promise(r => setTimeout(r, 200));
 
-    // Exportiere TODOs als JSON-Datei
+    // Exportiere TODOs als JSON-Datei (fester Name!)
     showProgress(30);
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `musikkoffer-todos-${timestamp}.json`;
+    const filename = 'pending-todos.json';
     const data = {
       exported: new Date().toISOString(),
       totalTodos: pending.length,
@@ -282,11 +283,11 @@
       alert(
         `TODOs exportiert: ${filename}\n\n` +
         `NÄCHSTE SCHRITTE:\n\n` +
-        `1. Öffne die heruntergeladene JSON-Datei\n` +
-        `2. Kopiere den Inhalt\n` +
-        `3. Sende ihn an Claude Code mit:\n` +
-        `   "Verarbeite diese TODOs"\n\n` +
-        `Claude fügt die Inhalte dann in die Kapitel ein.`
+        `1. Verschiebe die Datei nach:\n` +
+        `   modules/pending-todos.json\n\n` +
+        `2. Sage Claude: "Verarbeite die TODOs"\n\n` +
+        `3. Nach der Verarbeitung: Seite neu laden\n` +
+        `   → Zähler werden automatisch aktualisiert`
       );
     }, 600);
   }
