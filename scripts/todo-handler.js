@@ -5,6 +5,7 @@
   'use strict';
 
   const STORAGE_KEY = 'musikkoffer_todos';
+  const PROCESSED_FILE = 'modules/processed-todos.json';
   let currentChapterFile = null;
   let currentChapterId = null;
 
@@ -27,6 +28,46 @@
     } catch (e) {
       console.error('Fehler beim Speichern der TODOs:', e);
       return false;
+    }
+  }
+
+  // Prüfe auf verarbeitete TODOs und aktualisiere Status
+  async function syncProcessedTodos(){
+    try {
+      const response = await fetch(PROCESSED_FILE + '?t=' + Date.now());
+      if(!response.ok) return;
+
+      const processed = await response.json();
+      if(!processed.todos || !Array.isArray(processed.todos)) return;
+
+      const todos = loadTodos();
+      let updated = false;
+
+      // Markiere passende TODOs als processed
+      todos.forEach(todo => {
+        if(todo.status === 'pending') {
+          const match = processed.todos.find(p =>
+            p.chapterFile === todo.chapterFile &&
+            (p.text === todo.text || todo.text.includes(p.text) || p.text.includes(todo.text))
+          );
+          if(match && match.status === 'processed') {
+            todo.status = 'processed';
+            todo.processedAt = processed.processedAt;
+            todo.result = match.result;
+            updated = true;
+            console.log('✅ TODO als erledigt markiert:', todo.text.substring(0, 50));
+          }
+        }
+      });
+
+      if(updated) {
+        saveTodos(todos);
+        updateStats();
+        console.log('📋 TODOs synchronisiert mit processed-todos.json');
+      }
+    } catch(e) {
+      // Datei existiert nicht oder Fehler - ignorieren
+      console.log('ℹ️ Keine processed-todos.json gefunden');
     }
   }
 
@@ -268,11 +309,13 @@
       btnProcessTodos.addEventListener('click', processTodos);
     }
 
-    // Exportiere initial gespeicherte TODOs
-    exportTodosForClaude(loadTodos());
-
-    // Aktualisiere Statistik-Anzeige
-    updateStats();
+    // Synchronisiere mit processed-todos.json (von Claude generiert)
+    syncProcessedTodos().then(() => {
+      // Exportiere initial gespeicherte TODOs
+      exportTodosForClaude(loadTodos());
+      // Aktualisiere Statistik-Anzeige
+      updateStats();
+    });
   }
 
   // Öffentliche API für workflow-loader.js
@@ -280,7 +323,9 @@
     showInput: showTodoInput,
     hideInput: hideTodoInput,
     loadTodos: loadTodos,
-    saveTodos: saveTodos
+    saveTodos: saveTodos,
+    syncProcessed: syncProcessedTodos,
+    updateStats: updateStats
   };
 
   // Initialize
