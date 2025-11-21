@@ -292,11 +292,60 @@
     }, 600);
   }
 
+  // Verarbeite hochgeladene processed-todos.json
+  function handleProcessedUpload(file){
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try {
+        const processed = JSON.parse(e.target.result);
+        if(!processed.todos || !Array.isArray(processed.todos)) {
+          alert('Ungültiges Format: Die Datei enthält kein "todos" Array.');
+          return;
+        }
+
+        const todos = loadTodos();
+        let updated = 0;
+
+        // Markiere passende TODOs als processed
+        todos.forEach(todo => {
+          if(todo.status === 'pending') {
+            const match = processed.todos.find(p =>
+              p.chapterFile === todo.chapterFile &&
+              (p.text === todo.text || todo.text.includes(p.text) || p.text.includes(todo.text))
+            );
+            if(match && match.status === 'processed') {
+              todo.status = 'processed';
+              todo.processedAt = processed.processedAt || new Date().toISOString();
+              todo.result = match.result;
+              updated++;
+            }
+          }
+        });
+
+        if(updated > 0) {
+          saveTodos(todos);
+          updateStats();
+          alert(`✅ ${updated} TODO(s) als erledigt markiert!\n\nDie Zähler wurden aktualisiert.`);
+        } else {
+          alert('Keine passenden TODOs gefunden.\n\nMögliche Ursachen:\n- Die TODOs wurden bereits als erledigt markiert\n- Die Datei enthält keine passenden Einträge');
+        }
+      } catch(err) {
+        console.error('Fehler beim Verarbeiten:', err);
+        alert('Fehler beim Lesen der Datei:\n' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
   // Setup Event Listeners
   function setup(){
     const btnAddTodo = document.getElementById('btnAddTodo');
     const btnListTodos = document.getElementById('btnListTodos');
     const btnProcessTodos = document.getElementById('btnProcessTodos');
+    const btnUploadProcessed = document.getElementById('btnUploadProcessed');
+    const processedFileInput = document.getElementById('processedFileInput');
 
     if(btnAddTodo){
       btnAddTodo.addEventListener('click', addTodo);
@@ -308,6 +357,19 @@
 
     if(btnProcessTodos){
       btnProcessTodos.addEventListener('click', processTodos);
+    }
+
+    // Upload-Button für processed-todos.json
+    if(btnUploadProcessed && processedFileInput){
+      btnUploadProcessed.addEventListener('click', () => {
+        processedFileInput.click();
+      });
+      processedFileInput.addEventListener('change', (e) => {
+        if(e.target.files && e.target.files[0]){
+          handleProcessedUpload(e.target.files[0]);
+          e.target.value = ''; // Reset für erneuten Upload
+        }
+      });
     }
 
     // Synchronisiere mit processed-todos.json (von Claude generiert)
