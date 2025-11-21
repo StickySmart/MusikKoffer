@@ -52,7 +52,6 @@
   // Füge TODO hinzu
   function addTodo(){
     const input = document.getElementById('todoInput');
-    const highPriority = document.getElementById('todoHighPriority');
     const category = document.getElementById('todoCategory');
     const successMsg = document.getElementById('todoSuccess');
 
@@ -72,7 +71,6 @@
       chapterFile: currentChapterFile,
       chapterId: currentChapterId,
       text: input.value.trim(),
-      priority: highPriority?.checked ? 'high' : 'normal',
       category: category?.value.trim() || null,
       createdAt: new Date().toISOString(),
       status: 'pending'
@@ -91,7 +89,6 @@
 
     // Leere Eingabefelder
     input.value = '';
-    if(highPriority) highPriority.checked = false;
     if(category) category.value = '';
 
     // Exportiere TODOs in Datei für Claude
@@ -142,11 +139,10 @@
       return;
     }
 
-    let msg = `📋 Offene TODOs (${pending.length}):\n\n`;
+    let msg = `Offene TODOs (${pending.length}):\n\n`;
     pending.forEach((todo, idx) => {
-      const prio = todo.priority === 'high' ? '⚠️ HOCH' : '📌';
-      const cat = todo.category ? ` [@${todo.category}]` : '';
-      msg += `${idx + 1}. ${prio} ${todo.chapterFile}${cat}\n`;
+      const cat = todo.category ? ` [${todo.category}]` : '';
+      msg += `${idx + 1}. ${todo.chapterFile}${cat}\n`;
       msg += `   ${todo.text}\n\n`;
     });
 
@@ -209,7 +205,6 @@
         chapterFile: t.chapterFile,
         chapterId: t.chapterId,
         text: t.text,
-        priority: t.priority,
         category: t.category,
         createdAt: t.createdAt
       }))
