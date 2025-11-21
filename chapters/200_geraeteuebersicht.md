@@ -169,66 +169,79 @@ Das MusikKoffer-System besteht aus sorgfältig ausgewählten Geräten, die zusam
 
 ## MIDI-Infrastruktur
 
-### CME U6 MIDI Interface (×2)
+### CME H4 WIDI CORE
 
-**Typ:** USB MIDI Interface
+**Typ:** MIDI Hub / Router
 **Hersteller:** CME (WIDI Serie)
 
 **Eigenschaften:**
-- 3× MIDI In, 3× MIDI Out (DIN)
+- 2× MIDI In, 2× MIDI Out (DIN)
+- USB-A Host für bis zu 3 USB-MIDI Geräte
+- 4 speicherbare Presets für Routing-Konfigurationen
+- Bluetooth MIDI (optional)
 - USB-Powered
-- Preset-Speicher für Routing-Konfigurationen
-- Software-Editor für komplexe Setups
 
 **Rolle im System:**
-- **U6 #1:** Clock-Distribution an J-6, S-1
-- **U6 #2:** PC/MMC an L-6 für Scene-Automation
+- **Zentraler MIDI-Hub** für alle Geräte
+- **Clock-Distribution** von TR-6S an alle Synths
+- **USB-Host** für S-1, J-6, E-4
+- **Preset-Umschaltung** via L-6 Pads
 
 **Anschlüsse:**
 | Port | Typ | Verwendung |
 |------|-----|------------|
-| MIDI In 1 | DIN | ← Merge 5 |
-| MIDI Out 1-3 | DIN | → Zielgeräte |
-| USB | Type-B | Strom + Editor |
+| MIDI 1 IN | DIN | ← L-6 Pads (Preset-Wechsel) |
+| MIDI 1 OUT | DIN | → L-6 (PC/MMC für Scenes) |
+| MIDI 2 IN | DIN | ← TR-6S (Clock Master) |
+| MIDI 2 OUT | DIN | → Ambient Ø (Clock + Notes) |
+| USB-A | Host | ← S-1, J-6, E-4 (via Hub) |
 
 ---
 
-### Doremidi Merge 5
+## MIDI Routing-Übersicht
 
-**Typ:** MIDI Merge Box
-**Hersteller:** Doremidi
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     CME H4 WIDI CORE                            │
+│                                                                 │
+│   MIDI 2 IN ◄── TR-6S (CLOCK MASTER, Notes, Drums)              │
+│                                                                 │
+│   MIDI 1 IN ◄── L-6 Pads (schalten H4 Presets 1-4)              │
+│   MIDI 1 OUT ──► L-6 (PC/MMC für Scenes, Transport)             │
+│                                                                 │
+│   MIDI 2 OUT ──► Liven Ambient Ø (Clock + Notes von USB-Geräten)│
+│                                                                 │
+│   USB-A ◄──────► USB Hub (Clock + individuelle Steuerung)       │
+│                    ├── S-1 (Ch 2) ───┐                          │
+│                    ├── J-6 (Ch 1) ───┼──► können Ambient spielen│
+│                    └── E-4 (Ch 3) ───┘                          │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-**Eigenschaften:**
-- 5× MIDI In, 2× MIDI Out
-- Mergt alle Eingänge auf beide Ausgänge
-- LED-Aktivitätsanzeige
-- Kompakt und robust
+### Signal-Fluss
 
-**Rolle im System:**
-- **MIDI-Sammelpunkt** für T-8, J-6, S-1
-- Verteilt gemergtes Signal an beide U6
-
-**Anschlüsse:**
-| Port | Typ | Verwendung |
-|------|-----|------------|
-| MIDI In 1-5 | DIN | ← Klangerzeuger (via Adapter) |
-| MIDI Out A/B | DIN | → U6 #1 und U6 #2 |
+| Von | Nach | Signal |
+|-----|------|--------|
+| TR-6S | H4 | Clock (Master), Drum-Notes |
+| H4 | S-1, J-6, E-4 (USB) | Clock |
+| H4 | Ambient Ø | Clock + Notes (von USB-Geräten) |
+| H4 | L-6 | PC (Scenes), MMC (Transport) |
+| L-6 Pads | H4 | Note-On → Preset-Wechsel (1-4) |
+| S-1/J-6/E-4 | Ambient Ø (via H4) | Notes (optional) |
 
 ---
 
 ## Übersichtstabelle
 
-| Gerät | Typ | Audio → L-6 | MIDI Out | MIDI In |
-|-------|-----|-------------|----------|---------|
-| TR-6S | Drums | Kanal 1+2 | → Merge 5 | - |
-| J-6 | Chords | Kanal 3+4 | → Merge 5 | ← U6 #1 |
-| S-1 | Synth | Kanal 6 | → Merge 5 | ← U6 #1 |
-| E-4 | Vocals | Kanal 5 | - | - |
-| Ambient Ø | Pads | USB | - | (USB) |
-| L-6 | Mixer | - | - | ← U6 #2 |
-| U6 #1 | MIDI | - | → J-6, S-1 | ← Merge 5 |
-| U6 #2 | MIDI | - | → L-6 | ← Merge 5 |
-| Merge 5 | MIDI | - | → U6 ×2 | ← TR/J/S |
+| Gerät | Typ | Audio → L-6 | MIDI |
+|-------|-----|-------------|------|
+| TR-6S | Drums (Clock Master) | Kanal 7/8 | → H4 MIDI 2 IN |
+| J-6 | Chords (Ch 1) | Kanal 5/6 | ← H4 USB (Clock) |
+| S-1 | Synth (Ch 2) | Kanal 3/4 | ← H4 USB (Clock) |
+| E-4 | Vocals (Ch 3) | Kanal 2 | ← H4 USB (Clock) |
+| Ambient Ø | Pads (Ch 5) | Kanal 9/10 | ← H4 MIDI 2 OUT |
+| L-6 | Mixer | Kanal 1 = Mic | ↔ H4 MIDI 1 |
+| H4 | MIDI Router | - | Zentrale |
 
 ---
 
