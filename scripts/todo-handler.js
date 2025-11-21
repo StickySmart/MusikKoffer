@@ -66,12 +66,13 @@
     }
 
     const todos = loadTodos();
+    const kuerzel = category?.value.trim().toUpperCase() || null;
     const newTodo = {
       id: Date.now(),
       chapterFile: currentChapterFile,
       chapterId: currentChapterId,
       text: input.value.trim(),
-      category: category?.value.trim() || null,
+      kuerzel: kuerzel,
       createdAt: new Date().toISOString(),
       status: 'pending'
     };
@@ -141,8 +142,8 @@
 
     let msg = `Offene TODOs (${pending.length}):\n\n`;
     pending.forEach((todo, idx) => {
-      const cat = todo.category ? ` [${todo.category}]` : '';
-      msg += `${idx + 1}. ${todo.chapterFile}${cat}\n`;
+      const id = todo.kuerzel ? ` [${todo.kuerzel}]` : '';
+      msg += `${idx + 1}. ${todo.chapterFile}${id}\n`;
       msg += `   ${todo.text}\n\n`;
     });
 
@@ -205,7 +206,7 @@
         chapterFile: t.chapterFile,
         chapterId: t.chapterId,
         text: t.text,
-        category: t.category,
+        kuerzel: t.kuerzel,
         createdAt: t.createdAt
       }))
     };
