@@ -86,7 +86,7 @@ Das Zoom L-6 bietet 48V Phantom-Power für Kondensatormikrofone. **Für das Musi
 ### Kanal-spezifische Einstellungen
 
 **Kanal 1 (Mikrofon):**
-- Phantom: **ON** ✅ (falls Kondensatormikrofon)
+- Phantom: **OFF** ❌ (kein Kondensatormikrofon im Setup)
 - Input Type: MIC
 - Pad: Nach Bedarf
 - Grund: Einziger Kanal mit Mikrofon-Eingang
