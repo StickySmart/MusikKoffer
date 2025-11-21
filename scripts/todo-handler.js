@@ -116,9 +116,7 @@
   // Füge TODO hinzu (wird in localStorage gespeichert bis Claude synct)
   async function addTodo(){
     const input = document.getElementById('todoInput');
-    const highPriority = document.getElementById('todoHighPriority');
     const category = document.getElementById('todoCategory');
-    const authorTag = document.getElementById('todoAuthorTag');
     const successMsg = document.getElementById('todoSuccess');
 
     if(!input || !input.value.trim()) {
@@ -131,14 +129,13 @@
       return;
     }
 
+    const kuerzel = category?.value.trim().toUpperCase() || null;
     const newTodo = {
       id: 'todo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
       chapterFile: currentChapterFile,
       chapterId: currentChapterId,
       text: input.value.trim(),
-      priority: highPriority?.checked ? 'high' : 'normal',
-      category: category?.value.trim() || null,
-      authorTag: authorTag?.value.trim().toUpperCase().substring(0, 4) || null,
+      kuerzel: kuerzel,
       createdAt: new Date().toISOString(),
       status: 'pending',
       synced: false
@@ -159,9 +156,7 @@
 
     // Leere Eingabefelder
     input.value = '';
-    if(highPriority) highPriority.checked = false;
     if(category) category.value = '';
-    if(authorTag) authorTag.value = '';
 
     // Aktualisiere Anzeige
     await updateStats();
@@ -231,15 +226,13 @@
       pending.forEach((todo, idx) => {
         const isUnsynced = unsynced.find(u => u.id === todo.id);
         const syncLabel = isUnsynced ? '🔄 neu' : '✓';
-        const prioClass = todo.priority === 'high' ? 'prio-high' : '';
-        const cat = todo.category ? ` <span style="color:#666;">@${todo.category}</span>` : '';
         const dateStr = todo.createdAt ? formatDate(todo.createdAt) : '';
-        const authorLabel = todo.authorTag ? `<span style="background:#000;color:#fff;padding:1px 4px;border-radius:2px;font-size:0.75rem;margin-right:4px;">${escapeHtml(todo.authorTag)}</span>` : '';
+        const kuerzelLabel = todo.kuerzel ? `<span style="background:#000;color:#fff;padding:1px 4px;border-radius:2px;font-size:0.75rem;margin-right:4px;">${escapeHtml(todo.kuerzel)}</span>` : '';
 
         html += `<div class="todo-item">
-          <div class="chapter"><strong>#${idx + 1}</strong> · ${todo.chapterFile}${cat}</div>
-          <div class="text ${prioClass}">${todo.priority === 'high' ? '⚠️ ' : ''}${escapeHtml(todo.text)}</div>
-          <div class="sync-status">${authorLabel}${syncLabel}${dateStr ? ` · ${dateStr}` : ''}</div>
+          <div class="chapter"><strong>#${idx + 1}</strong> · ${todo.chapterFile}</div>
+          <div class="text">${escapeHtml(todo.text)}</div>
+          <div class="sync-status">${kuerzelLabel}${syncLabel}${dateStr ? ` · ${dateStr}` : ''}</div>
         </div>`;
       });
     }
@@ -345,9 +338,7 @@
         chapterFile: t.chapterFile,
         chapterId: t.chapterId,
         text: t.text,
-        priority: t.priority,
-        category: t.category,
-        authorTag: t.authorTag,
+        kuerzel: t.kuerzel,
         createdAt: t.createdAt
       }))
     };
