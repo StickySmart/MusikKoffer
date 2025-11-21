@@ -572,6 +572,11 @@
       repoRoot = deriveRepoRoot(usedUrl);
       state.manifest = manifest;
       renderTOC(manifest);
+      // Revision anzeigen
+      const revBadge = document.getElementById('revisionBadge');
+      if(revBadge && manifest.revision != null){
+        revBadge.textContent = `r${manifest.revision}`;
+      }
       setStatus('Bereit. Kapitel wählen …');
       if(failures.length){
         setErr(`Manifest-Fallback aktiv:\n${failures.join('\n')}\nVerwende ${usedUrl}.`);
