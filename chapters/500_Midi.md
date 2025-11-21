@@ -7,25 +7,27 @@ Dieses Dokument beschreibt die MIDI-Architektur des MusikKoffer-Systems - von de
 
 ## MIDI-Routing-Architektur
 
-Das MusikKoffer-System verwendet eine **Hub-basierte MIDI-Architektur** mit dem CME H4 Core als zentralem MIDI-Router. Der Doremidi Merge 5 sammelt alle MIDI-Ausgänge der Instrumente und leitet sie an den H4 Core weiter.
+Das MusikKoffer-System verwendet eine **Hub-basierte MIDI-Architektur** mit dem CME H4 WIDI Core als zentralem MIDI-Router. Die USB-fähigen Geräte (S-1, J-6, E-4) sind über einen USB-Hub direkt am H4 angeschlossen.
 
 ### Geräte-Rollen im MIDI-System
 
-**CME H4 Core (Master MIDI-Router)**
-- Empfängt gemergtes MIDI vom Merge 5
-- Verteilt Clock an J-6 und S-1
-- Sendet Program Change + MMC an Zoom L-6
-- Fungiert als zentraler MIDI-Hub
+**CME H4 WIDI Core (Master MIDI-Router)**
+- Empfängt Clock vom TR-6S (MIDI 2 IN)
+- Verteilt Clock an alle Geräte via USB-Hub und MIDI 2 OUT
+- Sendet Program Change + MMC an Zoom L-6 (MIDI 1 OUT)
+- Empfängt Pad-Noten vom L-6 für Preset-Wechsel (MIDI 1 IN)
+- 4 speicherbare Routing-Presets
 
-**Doremidi Merge 5 (MIDI-Sammelpunkt)**
-- 5 MIDI-Inputs, 2 MIDI-Outputs
-- Sammelt MIDI von T-8, J-6, S-1
-- Leitet Signal an CME H4 Core weiter
+**Roland TR-6S (Clock Master)**
+- Sendet MIDI Clock (24 PPQN) + Start/Stop/Continue
+- Verbunden mit H4 Core MIDI 2 IN (TRS-A → DIN)
+- Steuert das Tempo des gesamten Systems
 
-**Zoom L-6 (MIDI-Empfänger)**
+**Zoom L-6 (MIDI-Empfänger & Controller)**
 - TRS-A MIDI-Input
 - Reagiert auf Program Change (PC 1-9) → Szenenwechsel
 - Reagiert auf MMC → Start/Stop/Rec
+- Pads senden Notes zur H4 Preset-Umschaltung
 
 ### MIDI-Verkabelungs-Diagramm
 
@@ -33,37 +35,33 @@ Das MusikKoffer-System verwendet eine **Hub-basierte MIDI-Architektur** mit dem 
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    MIDI-SIGNAL-FLUSS                                │
 │                                                                     │
-│   ┌─────────┐   ┌─────────┐   ┌─────────┐                          │
-│   │  T-8    │   │  J-6    │   │  S-1    │                          │
-│   │(Clock)  │   │(Notes)  │   │(Notes)  │                          │
-│   └────┬────┘   └────┬────┘   └────┬────┘                          │
-│        │TRS-A        │TRS-A        │TRS-A                          │
-│        ↓             ↓             ↓                               │
-│   ┌────────────────────────────────────────┐                       │
-│   │          DOREMIDI MERGE 5              │                       │
-│   │   [IN1]    [IN2]    [IN3]   [IN4][IN5] │                       │
-│   │            ↓ ↓ ↓                       │                       │
-│   │         [MERGED]                       │                       │
-│   │            ↓                           │                       │
-│   │          [OUT]                         │                       │
-│   └───────────┬────────────────────────────┘                       │
-│               │                                                    │
-│               ↓                                                    │
-│   ┌───────────────────────┐                                        │
-│   │     CME H4 Core       │                                        │
-│   │   (Master Router)     │                                        │
-│   │        [IN]           │                                        │
-│   │         ↓             │                                        │
-│   │ [OUT1→J-6] [OUT2→S-1] │                                        │
-│   │ [OUT3→L-6] [OUT4→frei]│                                        │
-│   └───────────────────────┘                                        │
-│         │  │  │                                                    │
-│         ↓  ↓  ↓                                                    │
-│      ┌─────┐ ┌─────┐ ┌──────┐                                      │
-│      │ J-6 │ │ S-1 │ │ L-6  │                                      │
-│      │Clock│ │Clock│ │PC+MMC│                                      │
-│      │ IN  │ │ IN  │ │      │                                      │
-│      └─────┘ └─────┘ └──────┘                                      │
+│   ┌─────────────┐                                                   │
+│   │   TR-6S     │                                                   │
+│   │(Clock+Notes)│                                                   │
+│   └──────┬──────┘                                                   │
+│          │ TRS-A→DIN                                                │
+│          ↓                                                          │
+│   ┌──────────────────────────────────────────────────────────┐      │
+│   │              CME H4 WIDI CORE (Master Router)            │      │
+│   │                                                          │      │
+│   │  [MIDI 2 IN] ←── TR-6S (Clock Master)                    │      │
+│   │  [MIDI 2 OUT] ──► Ambient Ø (Clock + Notes)              │      │
+│   │                                                          │      │
+│   │  [MIDI 1 IN] ←── L-6 Pads (Preset-Wechsel)               │      │
+│   │  [MIDI 1 OUT] ──► L-6 (PC/MMC für Scenes)                │      │
+│   │                                                          │      │
+│   │  [USB-A] ◄───► USB-Hub                                   │      │
+│   │                 ├── S-1 (Ch 2) ── Clock + Notes          │      │
+│   │                 ├── J-6 (Ch 1) ── Clock + Notes          │      │
+│   │                 └── E-4 (Ch 3) ── Clock + Notes          │      │
+│   └──────────────────────────────────────────────────────────┘      │
+│          │              │                     │                     │
+│          ↓              ↓                     ↓                     │
+│   ┌───────────┐  ┌───────────┐         ┌──────────┐                 │
+│   │Ambient Ø  │  │   L-6     │         │ USB-Hub  │                 │
+│   │Clock+Notes│  │ PC + MMC  │         │ S-1,J-6  │                 │
+│   │           │  │ Pads→H4   │         │   E-4    │                 │
+│   └───────────┘  └───────────┘         └──────────┘                 │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 
@@ -75,56 +73,57 @@ DIN   = 5-pol DIN-Buchse (klassisch)
 
 | Verbindung | Kabeltyp | Bemerkung |
 |------------|----------|-----------|
-| T-8 → Merge 5 | TRS-A auf DIN | Roland-Geräte nutzen TRS-A |
-| J-6 → Merge 5 | TRS-A auf DIN | Roland-Geräte nutzen TRS-A |
-| S-1 → Merge 5 | TRS-A auf DIN | Roland-Geräte nutzen TRS-A |
-| Merge 5 → H4 Core | DIN auf DIN | Standard MIDI-Kabel |
-| H4 Core → J-6 | DIN auf TRS-A | Adapter erforderlich |
-| H4 Core → S-1 | DIN auf TRS-A | Adapter erforderlich |
-| H4 Core → L-6 | DIN auf TRS-A | L-6 nutzt TRS-A |
+| TR-6S → H4 Core MIDI 2 IN | TRS-A auf DIN | Clock Master |
+| H4 Core MIDI 2 OUT → Ambient Ø | DIN auf TRS-A | Clock + Notes |
+| H4 Core MIDI 1 OUT → L-6 | DIN auf TRS-A | PC/MMC für Scenes |
+| L-6 → H4 Core MIDI 1 IN | TRS-A auf DIN | Pad Notes für Preset-Wechsel |
+| H4 Core USB-A → USB-Hub | USB-A | S-1, J-6, E-4 per USB |
 
 **Wichtig:** TRS-A und TRS-B sind NICHT kompatibel! Roland, Korg, und Zoom verwenden TRS-A. Achte beim Kauf von Adaptern auf den korrekten Standard.
+
+**USB-Verbindung:** S-1, J-6 und E-4 sind via USB-Hub direkt am H4 Core angeschlossen - kein separates MIDI-Kabel nötig!
 
 ## Clock-Synchronisation
 
 ### Clock-Quelle und -Verteilung
 
-Im MusikKoffer-System fungiert der **Roland T-8** als primärer Clock-Master:
+Im MusikKoffer-System fungiert der **Roland TR-6S** als primärer Clock-Master:
 
-1. T-8 sendet MIDI Clock (24 PPQN) + Start/Stop/Continue
-2. Merge 5 leitet Clock an H4 Core weiter
-3. H4 Core verteilt Clock an J-6 und S-1
-4. H4 Core sendet PC/MMC an L-6
+1. TR-6S sendet MIDI Clock (24 PPQN) + Start/Stop/Continue an H4 Core (MIDI 2 IN)
+2. H4 Core verteilt Clock an S-1, J-6, E-4 via USB-Hub
+3. H4 Core sendet Clock an Ambient Ø via MIDI 2 OUT
+4. H4 Core sendet PC/MMC an L-6 via MIDI 1 OUT
 
 **Alle Geräte laufen synchron zum selben Tempo!**
 
 ### Clock-Einstellungen pro Gerät
 
-**T-8 (Clock Master)**
+**TR-6S (Clock Master)**
 - Sync Mode: **Internal** (erzeugt Clock)
 - Tempo: 60-200 BPM einstellbar
 - Clock Output: **ON**
 
 **J-6 (Clock Slave)**
-- Sync Mode: **External** (empfängt Clock)
-- Folgt automatisch dem T-8 Tempo
+- Sync Mode: **External** (empfängt Clock via USB)
+- Folgt automatisch dem TR-6S Tempo
 - Sequencer startet bei MIDI Start
 
 **S-1 (Clock Slave)**
-- Sync Mode: **External**
+- Sync Mode: **External** (empfängt Clock via USB)
 - Arpeggiator und Sequencer folgen Clock
 
-**Ambient Ø (Sonderfall)**
-- Kann Clock via USB empfangen
+**Ambient Ø (Clock Slave via MIDI)**
+- Empfängt Clock via H4 Core MIDI 2 OUT
+- Kann auch Notes von S-1/J-6 empfangen (über H4 Routing)
 - Oder: Intern mit manuellem Tempo
 
 ### Tempo-Wechsel während Performance
 
-1. Am T-8: Tempo-Encoder drehen
+1. Am TR-6S: Tempo-Encoder drehen
 2. Alle Slaves passen sich sofort an
 3. Keine Unterbrechung der Wiedergabe
 
-**Tipp:** Für sanfte Tempo-Übergänge: T-8 Tempo langsam ändern, nicht springen!
+**Tipp:** Für sanfte Tempo-Übergänge: TR-6S Tempo langsam ändern, nicht springen!
 
 ## MIDI-Kanäle und Zuordnung
 
@@ -132,11 +131,11 @@ Im MusikKoffer-System fungiert der **Roland T-8** als primärer Clock-Master:
 
 | Gerät | MIDI-Kanal | Empfängt | Sendet |
 |-------|------------|----------|--------|
-| T-8 | 10 (Drums) | - | Notes, Clock |
+| TR-6S | 10 (Drums) | - | Notes, Clock |
 | J-6 | 1 | Clock, Notes | Notes, CC |
 | S-1 | 2 | Clock, Notes | Notes, CC |
 | E-4 | 3 | Notes (optional) | - |
-| Ambient Ø | 5 | CC (optional) | - |
+| Ambient Ø | 5 | Clock, Notes (optional) | - |
 | L-6 | Omni | PC, MMC | Pad Notes |
 
 ### Program Change für L-6 Scenes
@@ -151,7 +150,7 @@ Der Zoom L-6 wechselt Scenes über MIDI Program Change:
 | PC 4-9 | Scene 4-9 | Benutzerdefiniert |
 
 **So sendest du Program Change:**
-- Vom T-8: Pattern wechseln (wenn konfiguriert)
+- Vom TR-6S: Pattern wechseln (wenn konfiguriert)
 - Vom J-6: Bank-Wechsel kann PC senden
 - Oder: Externes Controller-Pedal
 
@@ -166,30 +165,47 @@ Der L-6 reagiert auf MMC-Befehle:
 | MMC Record | Startet Aufnahme |
 | MMC Pause | Pausiert |
 
-**Nutzung:** T-8 kann so den L-6 Recorder fernsteuern - Record startet automatisch mit dem Beat!
+**Nutzung:** TR-6S kann so den L-6 Recorder fernsteuern - Record startet automatisch mit dem Beat!
 
 ## Presets und Routing-Szenarien
 
-Das System unterstützt zwei Grund-Presets für unterschiedliche musikalische Szenarien:
+Das System unterstützt vier H4 Core Presets für unterschiedliche musikalische Szenarien:
 
-### Preset P01: Standard-Jam
-
-```
-T-8 Clock ──→ alle Geräte
-J-6 Notes ──→ S-1 (spielt J-6 Akkorde)
-```
-
-**Ideal für:** Lead-Synth-fokussierte Performances, S-1 steht im Vordergrund
-
-### Preset P02: Ambient
+### H4 Preset 1: Standard Jam
 
 ```
-T-8 Clock ──→ alle Geräte
-J-6 + Ambient Ø: Pads und Flächen
-S-1: Bass-Lines
+TR-6S Clock ──→ alle Geräte
+USB-Geräte isoliert (kein Note-Routing)
 ```
 
-**Ideal für:** Ambient-Performances, Soundscapes
+**Ideal für:** Freies Jammen, jedes Gerät spielt unabhängig
+
+### H4 Preset 2: J-6 → Ambient
+
+```
+TR-6S Clock ──→ alle Geräte
+J-6 Notes ──→ Ambient Ø (über H4 MIDI 2 OUT)
+```
+
+**Ideal für:** Ambient-Performances, J-6 Akkorde steuern Ambient Ø Pads
+
+### H4 Preset 3: S-1 → Ambient
+
+```
+TR-6S Clock ──→ alle Geräte
+S-1 Notes ──→ Ambient Ø
+```
+
+**Ideal für:** Lead-fokussierte Performances mit Ambient-Unterstützung
+
+### H4 Preset 4: Full Route
+
+```
+TR-6S Clock ──→ alle Geräte
+Alle USB-Geräte ──→ Ambient Ø
+```
+
+**Ideal für:** Komplexe Soundscapes, alle Synths steuern Ambient Ø
 
 ## Troubleshooting MIDI
 
@@ -198,12 +214,13 @@ S-1: Bass-Lines
 **Ursachen und Lösungen:**
 
 1. **Clock-Quelle nicht eindeutig**
-   - Prüfe: Ist NUR T-8 auf "Internal"?
+   - Prüfe: Ist NUR TR-6S auf "Internal"?
    - Alle anderen Geräte MÜSSEN auf "External" stehen
 
 2. **Kabel nicht verbunden**
-   - Merge 5 LED leuchtet bei MIDI-Aktivität
+   - H4 Core LEDs zeigen MIDI-Aktivität
    - Prüfe alle Verbindungen systematisch
+   - USB-Hub-Verbindung zum H4 prüfen
 
 3. **Falscher TRS-Standard**
    - Roland/Korg/Zoom: TRS-A
@@ -214,7 +231,13 @@ S-1: Bass-Lines
 
 1. **MIDI-Kanal prüfen:** L-6 auf "Omni" oder passenden Kanal einstellen
 2. **PC-Bereich prüfen:** L-6 akzeptiert nur PC 1-9 für Scenes
-3. **Verkabelung prüfen:** H4 Core Out3 → L-6 MIDI In
+3. **Verkabelung prüfen:** H4 Core MIDI 1 OUT → L-6 MIDI In
+
+### Problem: USB-Geräte empfangen keine Clock
+
+1. **USB-Hub prüfen:** Alle Geräte am Hub angeschlossen?
+2. **H4 USB-A Verbindung prüfen:** Hub mit H4 Core verbunden?
+3. **Sync-Einstellung prüfen:** S-1/J-6/E-4 auf "External" stellen
 
 ---
 
