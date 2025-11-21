@@ -1,74 +1,87 @@
 ---
-description: Verarbeitet TODOs aus localStorage und fügt sie in Kapitel-Dateien ein
+description: Verarbeitet TODOs aus modules/todos.json und aktualisiert Kapitel-Dateien
 ---
 
-# TODO-Verarbeitung aus UI
+# TODO-Verarbeitung (Datei-basiert)
 
 ## Aufgabe
 
-Hole TODOs aus der Browser localStorage der Workbench und verarbeite sie vollständig.
+Lese und verarbeite TODOs aus `modules/todos.json`. Diese Datei ist die zentrale Quelle für alle TODOs und funktioniert geräteübergreifend.
 
 ## Ablauf
 
-### Schritt 1: TODOs aus localStorage holen
+### Schritt 1: TODOs aus Datei laden
 
-Der Benutzer hat TODOs über die Workbench-UI erstellt. Diese sind gespeichert unter:
-- localStorage key: `musikkoffer_todos`
-- Alternativ: `window.MUSIKKOFFER_TODOS` (falls verfügbar)
+1. Lese `modules/todos.json`
+2. Filtere alle TODOs mit `"status": "pending"`
+3. Falls keine pending TODOs: Frage den User, ob er TODOs per JSON-Export (Copy/Paste) übergeben möchte
 
-Frage den Benutzer nach den gespeicherten TODOs:
-```
-Bitte öffne in deinem Browser die Workbench und drücke F12 (Developer Console).
-Gib dort ein:
-JSON.stringify(JSON.parse(localStorage.getItem('musikkoffer_todos')), null, 2)
+Falls der User TODOs per JSON übergibt:
+- Parse das JSON
+- Extrahiere die `todos` Array
 
-Kopiere die komplette Ausgabe und füge sie hier ein.
-```
-
-### Schritt 2: TODOs in Markdown-Dateien einfügen
+### Schritt 2: TODOs verarbeiten
 
 Für jedes TODO:
 1. Identifiziere die Ziel-Datei aus `chapterFile`
-2. Lese die Kapitel-Datei
-3. Füge den TODO-Marker ein:
-   - Format: `<!-- TODO: {text} -->`
-   - Bei Hoch-Priorität: `<!-- TODO(hoch): {text} -->`
-   - Bei Kategorie: `<!-- TODO @{category}: {text} -->`
-4. Platzierung: Am Ende des Kapitels (vor dem letzten Absatz)
+2. Lese die Kapitel-Datei (falls vorhanden)
+3. Führe die gewünschte Aktion aus:
+   - Text-Änderungen direkt umsetzen
+   - Neue Inhalte generieren
+   - Entfernungen durchführen
+4. Dokumentiere was getan wurde
 
-### Schritt 3: Inhalte generieren
+### Schritt 3: todos.json aktualisieren
 
-Für jedes eingefügte TODO:
-1. Lese Kontext (30 Zeilen vor/nach)
-2. Analysiere verwandte Kapitel
-3. Generiere deutschen, technisch korrekten Inhalt
-4. Ersetze TODO-Marker durch generierten Content
+1. Ändere Status der verarbeiteten TODOs auf `"processed"`
+2. Füge `processedAt` Timestamp hinzu
+3. Füge `result` Beschreibung hinzu (was wurde gemacht)
+4. Schreibe aktualisierte `modules/todos.json`
 
-### Schritt 4: Cleanup
+Beispiel für aktualisiertes TODO:
+```json
+{
+  "id": "todo_123...",
+  "chapterFile": "200_geraeteuebersicht.md",
+  "text": "Texture Lab entfernen",
+  "status": "processed",
+  "processedAt": "2025-11-21T...",
+  "result": "Texture Lab aus Geräteliste und MIDI-Routing entfernt"
+}
+```
 
-1. Markiere TODOs in localStorage als `"status": "processed"`
-2. Committe alle Änderungen:
-   ```
-   git commit -m "docs: Verarbeite UI-TODOs in [Kapitel-Liste]
+### Schritt 4: Commit
 
-   - TODO 1: [Beschreibung]
-   - TODO 2: [Beschreibung]
+Committe alle Änderungen:
+```
+git commit -m "docs: Verarbeite TODOs aus Workbench
 
-   Verarbeitet: [N] TODOs aus Workbench-UI"
-   ```
+- TODO 1: [Beschreibung]
+- TODO 2: [Beschreibung]
+
+Verarbeitet: [N] TODOs"
+```
+
+## Workflow für User
+
+1. TODOs in Workbench erstellen (beliebiges Gerät)
+2. "TODOs exportieren" klicken → JSON wird kopiert
+3. Claude-Session starten, JSON einfügen
+4. Claude verarbeitet und aktualisiert `modules/todos.json`
+5. Nach Push: Seite neu laden → Zähler sind aktualisiert
 
 ## Qualitätsstandards
 
 - Deutsche Sprache
-- Mindestens 50 Zeilen für konzeptuelle TODOs
-- Praktische Beispiele
+- Praktische, umsetzbare Änderungen
 - Technisch korrekt
-- Markdown-formatiert
+- Klare Dokumentation was getan wurde
 
 ## Wichtig
 
 - Verarbeite ALLE pending TODOs in einem Durchlauf
 - Zeige Fortschritt für jedes TODO
-- Erstelle einen aussagekräftigen Commit
+- Aktualisiere `modules/todos.json` mit Ergebnissen
+- Erstelle aussagekräftigen Commit
 
-Beginne mit Schritt 1: Bitte den Benutzer um die localStorage-Daten!
+Beginne: Lese `modules/todos.json` oder frage nach JSON-Export!

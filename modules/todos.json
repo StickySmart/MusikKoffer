@@ -1,0 +1,65 @@
+{
+  "lastUpdated": "2025-11-21T10:45:00.000Z",
+  "todos": [
+    {
+      "id": "todo_1763714431219_yu31jjo6i",
+      "chapterFile": "200_geraeteuebersicht.md",
+      "chapterId": "200",
+      "text": "bitte korrigiere hier das Midi equipment ( wir haben den CME h4)",
+      "priority": "normal",
+      "category": null,
+      "createdAt": "2025-11-21T08:40:31.219Z",
+      "status": "processed",
+      "processedAt": "2025-11-21T09:30:00.000Z",
+      "result": "CME U6 durch CME H4 WIDI CORE ersetzt, Eigenschaften und Anschlüsse aktualisiert"
+    },
+    {
+      "id": "todo_1763714515531_zs07zzk0u",
+      "chapterFile": "200_geraeteuebersicht.md",
+      "chapterId": "200",
+      "text": "als übersichtstablle orientiere dich hier dran : Finales Routing-Konzept...",
+      "priority": "normal",
+      "category": null,
+      "createdAt": "2025-11-21T08:41:55.531Z",
+      "status": "processed",
+      "processedAt": "2025-11-21T09:30:00.000Z",
+      "result": "MIDI Routing-Übersicht mit CME H4 Diagramm und Signal-Fluss Tabelle erstellt"
+    },
+    {
+      "id": "todo_1763714901755_vvflf3ucc",
+      "chapterFile": "300_Audio.md",
+      "chapterId": "300",
+      "text": "bitte hier korrigieren : ZOOM L-6 Belegung...",
+      "priority": "normal",
+      "category": null,
+      "createdAt": "2025-11-21T08:48:21.755Z",
+      "status": "processed",
+      "processedAt": "2025-11-21T09:30:00.000Z",
+      "result": "Audio-Routing komplett korrigiert: Mic=1, E4=2, S1=3/4, J6=5/6, TR6S=7/8, Ambient=9/10"
+    },
+    {
+      "id": "todo_1763718468867_kf8i5dw3j",
+      "chapterFile": "500_Midi.md",
+      "chapterId": "500",
+      "text": "falsch : ### Geräte-Rollen im MIDI-System - CME U6 durch CME H4 Core ersetzen",
+      "priority": "normal",
+      "category": null,
+      "createdAt": "2025-11-21T09:47:48.867Z",
+      "status": "processed",
+      "processedAt": "2025-11-21T10:45:00.000Z",
+      "result": "CME U6 (2×) komplett durch CME H4 Core ersetzt: Geräte-Rollen, Diagramm, Kabeltabelle, Clock-Verteilung"
+    },
+    {
+      "id": "todo_1763718549458_c7c3smxnm",
+      "chapterFile": "300_Audio.md",
+      "chapterId": "300",
+      "text": "Phantom: **ON** (Kein Kondensatormikrofon) --> off",
+      "priority": "normal",
+      "category": null,
+      "createdAt": "2025-11-21T09:49:09.458Z",
+      "status": "processed",
+      "processedAt": "2025-11-21T10:45:00.000Z",
+      "result": "Phantom-Power für Kanal 1 auf OFF gesetzt (kein Kondensatormikrofon im Setup)"
+    }
+  ]
+}

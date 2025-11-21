@@ -1,33 +1,97 @@
 // scripts/todo-handler.js
 // Handhabt TODO-Eingabe und Verarbeitung
+// TODOs werden in modules/todos.json gespeichert (geräteübergreifend)
 
 (function(){
   'use strict';
 
-  const STORAGE_KEY = 'musikkoffer_todos';
+  const TODOS_FILE = 'modules/todos.json';
+  const LOCAL_STORAGE_KEY = 'musikkoffer_unsynced_todos';
   let currentChapterFile = null;
   let currentChapterId = null;
+  let cachedFileTodos = [];
+  let isLoaded = false;
 
-  // Lade gespeicherte TODOs aus localStorage
-  function loadTodos(){
+  // Lade TODOs aus der Repo-Datei (Source of Truth)
+  async function loadTodosFromFile(){
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch (e) {
-      console.error('Fehler beim Laden der TODOs:', e);
+      const response = await fetch(TODOS_FILE + '?t=' + Date.now());
+      if(!response.ok) {
+        console.log('ℹ️ todos.json nicht gefunden, starte leer');
+        return [];
+      }
+      const data = await response.json();
+      return data.todos || [];
+    } catch(e) {
+      console.error('Fehler beim Laden von todos.json:', e);
       return [];
     }
   }
 
-  // Speichere TODOs in localStorage
-  function saveTodos(todos){
+  // Lade ungesyncte TODOs aus localStorage (nur für neue, noch nicht commitete)
+  function loadUnsyncedTodos(){
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+      const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch(e) {
+      console.error('Fehler beim Laden ungesynceter TODOs:', e);
+      return [];
+    }
+  }
+
+  // Speichere ungesyncte TODOs in localStorage
+  function saveUnsyncedTodos(todos){
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
       return true;
-    } catch (e) {
-      console.error('Fehler beim Speichern der TODOs:', e);
+    } catch(e) {
+      console.error('Fehler beim Speichern:', e);
       return false;
     }
+  }
+
+  // Hole alle TODOs (Datei + ungesynct)
+  async function getAllTodos(){
+    if(!isLoaded) {
+      cachedFileTodos = await loadTodosFromFile();
+      isLoaded = true;
+    }
+    const unsynced = loadUnsyncedTodos();
+
+    // Merge: Datei-TODOs + ungesyncte (ohne Duplikate)
+    const all = [...cachedFileTodos];
+    unsynced.forEach(u => {
+      const exists = all.find(t => t.id === u.id);
+      if(!exists) {
+        all.push(u);
+      }
+    });
+
+    return all;
+  }
+
+  // Synchronisiere: Entferne aus localStorage was bereits in Datei ist
+  async function syncWithFile(){
+    const fileTodos = await loadTodosFromFile();
+    cachedFileTodos = fileTodos;
+    isLoaded = true;
+
+    const unsynced = loadUnsyncedTodos();
+    const stillUnsynced = unsynced.filter(u => {
+      // Prüfe ob dieser TODO bereits in der Datei ist
+      const inFile = fileTodos.find(f =>
+        f.id === u.id ||
+        (f.chapterFile === u.chapterFile && f.text === u.text)
+      );
+      return !inFile;
+    });
+
+    if(stillUnsynced.length !== unsynced.length) {
+      saveUnsyncedTodos(stillUnsynced);
+      console.log(`✅ ${unsynced.length - stillUnsynced.length} TODO(s) synchronisiert`);
+    }
+
+    return fileTodos;
   }
 
   // Zeige TODO-Eingabefeld wenn Kapitel ausgewählt
@@ -49,8 +113,8 @@
     }
   }
 
-  // Füge TODO hinzu
-  function addTodo(){
+  // Füge TODO hinzu (wird in localStorage gespeichert bis Claude synct)
+  async function addTodo(){
     const input = document.getElementById('todoInput');
     const category = document.getElementById('todoCategory');
     const successMsg = document.getElementById('todoSuccess');
@@ -65,20 +129,22 @@
       return;
     }
 
-    const todos = loadTodos();
     const kuerzel = category?.value.trim().toUpperCase() || null;
     const newTodo = {
-      id: Date.now(),
+      id: 'todo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
       chapterFile: currentChapterFile,
       chapterId: currentChapterId,
       text: input.value.trim(),
       kuerzel: kuerzel,
       createdAt: new Date().toISOString(),
-      status: 'pending'
+      status: 'pending',
+      synced: false
     };
 
-    todos.push(newTodo);
-    saveTodos(todos);
+    // Zu ungesyncten hinzufügen
+    const unsynced = loadUnsyncedTodos();
+    unsynced.push(newTodo);
+    saveUnsyncedTodos(unsynced);
 
     // Zeige Erfolgs-Nachricht
     if(successMsg) {
@@ -92,63 +158,128 @@
     input.value = '';
     if(category) category.value = '';
 
-    // Exportiere TODOs in Datei für Claude
-    exportTodosForClaude(todos);
+    // Aktualisiere Anzeige
+    await updateStats();
+
+    console.log('📝 TODO hinzugefügt (wartet auf Sync):', newTodo.text.substring(0, 50));
   }
 
   // Aktualisiere TODO-Statistik-Anzeige
-  function updateStats(){
-    const todos = loadTodos();
+  async function updateStats(){
+    const todos = await getAllTodos();
     const pending = todos.filter(t => t.status === 'pending');
     const processed = todos.filter(t => t.status === 'processed');
+    const unsynced = loadUnsyncedTodos();
 
     const pendingEl = document.getElementById('todoPendingCount');
     const processedEl = document.getElementById('todoProcessedCount');
 
     if(pendingEl) {
-      pendingEl.textContent = `${pending.length} offen`;
+      const unsyncedCount = unsynced.filter(u => u.status === 'pending').length;
+      let label = `${pending.length} offen`;
+      if(unsyncedCount > 0) {
+        label += ` (${unsyncedCount} neu)`;
+      }
+      pendingEl.textContent = label;
       pendingEl.style.background = pending.length > 0 ? '#ff9800' : '#9e9e9e';
     }
 
     if(processedEl) {
       processedEl.textContent = `${processed.length} bearbeitet`;
     }
+
+    // Für globalen Zugriff
+    window.MUSIKKOFFER_TODOS = todos;
   }
 
-  // Exportiere TODOs als JSON-Datei für Claude
-  function exportTodosForClaude(todos){
-    const pendingTodos = todos.filter(t => t.status === 'pending');
-    const content = JSON.stringify({ todos: pendingTodos }, null, 2);
-
-    // Speichere auch in einem globalen Objekt für einfachen Zugriff
-    window.MUSIKKOFFER_TODOS = pendingTodos;
-
-    console.log('📝 Gespeicherte TODOs:', pendingTodos.length);
-    console.log('Zugriff via: window.MUSIKKOFFER_TODOS');
-
-    // Aktualisiere Anzeige
-    updateStats();
-  }
-
-  // Zeige TODO-Liste
-  function showTodoList(){
-    const todos = loadTodos();
+  // Zeige TODO-Liste im Modal
+  async function showTodoList(){
+    const todos = await getAllTodos();
     const pending = todos.filter(t => t.status === 'pending');
+    const processed = todos.filter(t => t.status === 'processed');
+    const unsynced = loadUnsyncedTodos();
 
-    if(pending.length === 0) {
-      alert('Keine offenen TODOs vorhanden.\n\nErstelle TODOs indem du ein Kapitel öffnest und das Eingabefeld nutzt.');
+    const modal = document.getElementById('todoModal');
+    const title = document.getElementById('todoModalTitle');
+    const body = document.getElementById('todoModalBody');
+
+    if(!modal || !body) {
+      // Fallback auf alert wenn Modal nicht existiert
+      alert('Modal nicht gefunden');
       return;
     }
 
-    let msg = `Offene TODOs (${pending.length}):\n\n`;
-    pending.forEach((todo, idx) => {
-      const id = todo.kuerzel ? ` [${todo.kuerzel}]` : '';
-      msg += `${idx + 1}. ${todo.chapterFile}${id}\n`;
-      msg += `   ${todo.text}\n\n`;
-    });
+    if(pending.length === 0 && processed.length === 0) {
+      title.textContent = 'Keine TODOs';
+      body.innerHTML = '<p>Keine TODOs vorhanden.</p><p style="color:#666;font-size:0.9rem;">Erstelle TODOs indem du ein Kapitel öffnest und das Eingabefeld nutzt.</p>';
+      modal.classList.add('active');
+      return;
+    }
 
-    msg += '\nHinweis: Diese TODOs werden beim nächsten\n/process-todos Aufruf von Claude verarbeitet.';
-    alert(msg);
+    title.textContent = `TODOs (${pending.length} offen, ${processed.length} erledigt)`;
+
+    let html = '';
+
+    // Offene TODOs
+    if(pending.length > 0) {
+      html += '<div style="margin-bottom:16px;"><strong>Offen:</strong></div>';
+      pending.forEach((todo, idx) => {
+        const isUnsynced = unsynced.find(u => u.id === todo.id);
+        const syncLabel = isUnsynced ? '🔄 neu' : '✓';
+        const dateStr = todo.createdAt ? formatDate(todo.createdAt) : '';
+        const kuerzelLabel = todo.kuerzel ? `<span style="background:#000;color:#fff;padding:1px 4px;border-radius:2px;font-size:0.75rem;margin-right:4px;">${escapeHtml(todo.kuerzel)}</span>` : '';
+
+        html += `<div class="todo-item">
+          <div class="chapter"><strong>#${idx + 1}</strong> · ${todo.chapterFile}</div>
+          <div class="text">${escapeHtml(todo.text)}</div>
+          <div class="sync-status">${kuerzelLabel}${syncLabel}${dateStr ? ` · ${dateStr}` : ''}</div>
+        </div>`;
+      });
+    }
+
+    // Erledigte TODOs (eingeklappt)
+    if(processed.length > 0) {
+      html += `<details style="margin-top:16px;">
+        <summary style="cursor:pointer;color:#666;">Erledigt (${processed.length})</summary>
+        <div style="margin-top:8px;">`;
+      processed.forEach((todo, idx) => {
+        const dateStr = todo.processedAt ? formatDate(todo.processedAt) : (todo.createdAt ? formatDate(todo.createdAt) : '');
+        html += `<div class="todo-item" style="opacity:0.7;">
+          <div class="chapter"><strong>#${idx + 1}</strong> · ${todo.chapterFile}</div>
+          <div class="text" style="text-decoration:line-through;">${escapeHtml(todo.text)}</div>
+          <div class="sync-status">${todo.result ? `→ ${escapeHtml(todo.result)}` : ''}${dateStr ? ` · ${dateStr}` : ''}</div>
+        </div>`;
+      });
+      html += '</div></details>';
+    }
+
+    // Legende
+    html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid #ddd;font-size:0.85rem;color:#666;">🔄 = neu (noch nicht synchronisiert) · ✓ = im Repository</div>';
+
+    body.innerHTML = html;
+    modal.classList.add('active');
+  }
+
+  // HTML escapen
+  function escapeHtml(text){
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Datum formatieren (deutsch)
+  function formatDate(isoString){
+    try {
+      const date = new Date(isoString);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const mins = date.getMinutes().toString().padStart(2, '0');
+      return `${day}.${month}.${year} ${hours}:${mins}`;
+    } catch(e) {
+      return '';
+    }
   }
 
   // Zeige Fortschrittsbalken
@@ -171,9 +302,9 @@
     }
   }
 
-  // Verarbeite TODOs (exportiert und zeigt Anleitung)
+  // Exportiere TODOs als JSON (alle offenen)
   async function processTodos(){
-    const todos = loadTodos();
+    const todos = await getAllTodos();
     const pending = todos.filter(t => t.status === 'pending');
 
     if(pending.length === 0) {
@@ -183,26 +314,27 @@
 
     const confirmed = confirm(
       `TODOs exportieren?\n\n` +
-      `${pending.length} offene TODO(s) werden als JSON-Datei heruntergeladen.\n\n` +
-      `Danach kannst du die Datei an Claude Code senden,\n` +
-      `der dann die Inhalte automatisch generiert.\n\n` +
+      `${pending.length} offene TODO(s) werden als JSON exportiert.\n\n` +
+      `WORKFLOW:\n` +
+      `1. Kopiere den JSON-Inhalt\n` +
+      `2. Füge ihn in den Claude-Chat ein\n` +
+      `3. Sage: "Verarbeite diese TODOs"\n` +
+      `4. Nach Verarbeitung: Seite neu laden\n\n` +
       `Fortfahren?`
     );
 
     if(!confirmed) return;
 
-    // Zeige Fortschritt
-    showProgress(10);
+    showProgress(30);
     await new Promise(r => setTimeout(r, 200));
 
-    // Exportiere TODOs als JSON-Datei
-    showProgress(30);
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `musikkoffer-todos-${timestamp}.json`;
+    // Erstelle Export-Daten
     const data = {
       exported: new Date().toISOString(),
+      source: window.location.href,
       totalTodos: pending.length,
       todos: pending.map(t => ({
+        id: t.id,
         chapterFile: t.chapterFile,
         chapterId: t.chapterId,
         text: t.text,
@@ -212,42 +344,46 @@
     };
 
     showProgress(60);
-    await new Promise(r => setTimeout(r, 300));
 
     // Download als Datei
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename;
+    a.download = 'pending-todos.json';
     document.body.appendChild(a);
     a.click();
     a.remove();
-
-    showProgress(100);
-    await new Promise(r => setTimeout(r, 400));
-
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 
-    // Verstecke Fortschritt
+    showProgress(100);
+    await new Promise(r => setTimeout(r, 300));
     hideProgress();
 
-    // Zeige Anleitung
+    // Zeige JSON auch in einem Dialog zum Kopieren
+    const jsonStr = JSON.stringify(data, null, 2);
+
     setTimeout(() => {
-      alert(
-        `TODOs exportiert: ${filename}\n\n` +
-        `NÄCHSTE SCHRITTE:\n\n` +
-        `1. Öffne die heruntergeladene JSON-Datei\n` +
-        `2. Kopiere den Inhalt\n` +
-        `3. Sende ihn an Claude Code mit:\n` +
-        `   "Verarbeite diese TODOs"\n\n` +
-        `Claude fügt die Inhalte dann in die Kapitel ein.`
+      const copyToClipboard = confirm(
+        `TODOs exportiert!\n\n` +
+        `Die Datei wurde heruntergeladen.\n\n` +
+        `Möchtest du den Inhalt auch in die Zwischenablage kopieren?\n` +
+        `(Praktisch für Handy-Nutzung)`
       );
+
+      if(copyToClipboard) {
+        navigator.clipboard.writeText(jsonStr).then(() => {
+          alert('✅ In Zwischenablage kopiert!\n\nFüge es jetzt in den Claude-Chat ein.');
+        }).catch(() => {
+          // Fallback: Zeige in Textfeld
+          prompt('Kopiere diesen Text:', jsonStr);
+        });
+      }
     }, 600);
   }
 
   // Setup Event Listeners
-  function setup(){
+  async function setup(){
     const btnAddTodo = document.getElementById('btnAddTodo');
     const btnListTodos = document.getElementById('btnListTodos');
     const btnProcessTodos = document.getElementById('btnProcessTodos');
@@ -264,19 +400,21 @@
       btnProcessTodos.addEventListener('click', processTodos);
     }
 
-    // Exportiere initial gespeicherte TODOs
-    exportTodosForClaude(loadTodos());
+    // Initial: Synchronisiere mit Datei und aktualisiere Anzeige
+    await syncWithFile();
+    await updateStats();
 
-    // Aktualisiere Statistik-Anzeige
-    updateStats();
+    console.log('📋 TODO-Handler initialisiert (Datei-basiert)');
   }
 
-  // Öffentliche API für workflow-loader.js
+  // Öffentliche API
   window.TODO_HANDLER = {
     showInput: showTodoInput,
     hideInput: hideTodoInput,
-    loadTodos: loadTodos,
-    saveTodos: saveTodos
+    getAllTodos: getAllTodos,
+    getUnsyncedTodos: loadUnsyncedTodos,
+    syncWithFile: syncWithFile,
+    updateStats: updateStats
   };
 
   // Initialize

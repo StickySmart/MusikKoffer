@@ -7,24 +7,20 @@ Dieses Dokument beschreibt die MIDI-Architektur des MusikKoffer-Systems - von de
 
 ## MIDI-Routing-Architektur
 
-Das MusikKoffer-System verwendet eine **Hub-basierte MIDI-Architektur** mit zwei CME U6 MIDI-Interfaces als zentrale Schaltstellen. Der Doremidi Merge 5 sammelt alle MIDI-Ausgänge der Instrumente und verteilt sie an die U6-Einheiten.
+Das MusikKoffer-System verwendet eine **Hub-basierte MIDI-Architektur** mit dem CME H4 Core als zentralem MIDI-Router. Der Doremidi Merge 5 sammelt alle MIDI-Ausgänge der Instrumente und leitet sie an den H4 Core weiter.
 
 ### Geräte-Rollen im MIDI-System
 
-**CME U6 #1 (Master/Clock-Distribution)**
+**CME H4 Core (Master MIDI-Router)**
 - Empfängt gemergtes MIDI vom Merge 5
 - Verteilt Clock an J-6 und S-1
-- Fungiert als primärer MIDI-Router
-
-**CME U6 #2 (Preset/Control-Distribution)**
-- Empfängt gemergtes MIDI vom Merge 5
 - Sendet Program Change + MMC an Zoom L-6
-- OUT1 frei für Erweiterungen
+- Fungiert als zentraler MIDI-Hub
 
 **Doremidi Merge 5 (MIDI-Sammelpunkt)**
 - 5 MIDI-Inputs, 2 MIDI-Outputs
 - Sammelt MIDI von T-8, J-6, S-1
-- Verteilt identisches Signal an beide U6
+- Leitet Signal an CME H4 Core weiter
 
 **Zoom L-6 (MIDI-Empfänger)**
 - TRS-A MIDI-Input
@@ -48,28 +44,26 @@ Das MusikKoffer-System verwendet eine **Hub-basierte MIDI-Architektur** mit zwei
 │   │   [IN1]    [IN2]    [IN3]   [IN4][IN5] │                       │
 │   │            ↓ ↓ ↓                       │                       │
 │   │         [MERGED]                       │                       │
-│   │            ↓ ↓                         │                       │
-│   │        [OUT A] [OUT B]                 │                       │
-│   └───────────┬───────┬────────────────────┘                       │
-│               │       │                                            │
-│      ┌────────┘       └────────┐                                   │
-│      ↓                         ↓                                   │
-│   ┌─────────────┐       ┌─────────────┐                            │
-│   │  CME U6 #1  │       │  CME U6 #2  │                            │
-│   │   (Master)  │       │ (Presets)   │                            │
-│   │ [IN1]       │       │ [IN1]       │                            │
-│   │  ↓          │       │  ↓          │                            │
-│   │ [OUT1→J-6]  │       │ [OUT1→frei] │                            │
-│   │ [OUT2→S-1]  │       │ [OUT2→L-6]  │                            │
-│   │ [OUT3→frei] │       │ [OUT3→frei] │                            │
-│   └─────────────┘       └─────────────┘                            │
-│         │  │                       │                               │
-│         ↓  ↓                       ↓                               │
-│      ┌─────┐ ┌─────┐          ┌──────┐                             │
-│      │ J-6 │ │ S-1 │          │ L-6  │                             │
-│      │Clock│ │Clock│          │PC+MMC│                             │
-│      │ IN  │ │ IN  │          │      │                             │
-│      └─────┘ └─────┘          └──────┘                             │
+│   │            ↓                           │                       │
+│   │          [OUT]                         │                       │
+│   └───────────┬────────────────────────────┘                       │
+│               │                                                    │
+│               ↓                                                    │
+│   ┌───────────────────────┐                                        │
+│   │     CME H4 Core       │                                        │
+│   │   (Master Router)     │                                        │
+│   │        [IN]           │                                        │
+│   │         ↓             │                                        │
+│   │ [OUT1→J-6] [OUT2→S-1] │                                        │
+│   │ [OUT3→L-6] [OUT4→frei]│                                        │
+│   └───────────────────────┘                                        │
+│         │  │  │                                                    │
+│         ↓  ↓  ↓                                                    │
+│      ┌─────┐ ┌─────┐ ┌──────┐                                      │
+│      │ J-6 │ │ S-1 │ │ L-6  │                                      │
+│      │Clock│ │Clock│ │PC+MMC│                                      │
+│      │ IN  │ │ IN  │ │      │                                      │
+│      └─────┘ └─────┘ └──────┘                                      │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 
@@ -84,11 +78,10 @@ DIN   = 5-pol DIN-Buchse (klassisch)
 | T-8 → Merge 5 | TRS-A auf DIN | Roland-Geräte nutzen TRS-A |
 | J-6 → Merge 5 | TRS-A auf DIN | Roland-Geräte nutzen TRS-A |
 | S-1 → Merge 5 | TRS-A auf DIN | Roland-Geräte nutzen TRS-A |
-| Merge 5 → U6 #1 | DIN auf DIN | Standard MIDI-Kabel |
-| Merge 5 → U6 #2 | DIN auf DIN | Standard MIDI-Kabel |
-| U6 #1 → J-6 | DIN auf TRS-A | Adapter erforderlich |
-| U6 #1 → S-1 | DIN auf TRS-A | Adapter erforderlich |
-| U6 #2 → L-6 | DIN auf TRS-A | L-6 nutzt TRS-A |
+| Merge 5 → H4 Core | DIN auf DIN | Standard MIDI-Kabel |
+| H4 Core → J-6 | DIN auf TRS-A | Adapter erforderlich |
+| H4 Core → S-1 | DIN auf TRS-A | Adapter erforderlich |
+| H4 Core → L-6 | DIN auf TRS-A | L-6 nutzt TRS-A |
 
 **Wichtig:** TRS-A und TRS-B sind NICHT kompatibel! Roland, Korg, und Zoom verwenden TRS-A. Achte beim Kauf von Adaptern auf den korrekten Standard.
 
@@ -99,9 +92,9 @@ DIN   = 5-pol DIN-Buchse (klassisch)
 Im MusikKoffer-System fungiert der **Roland T-8** als primärer Clock-Master:
 
 1. T-8 sendet MIDI Clock (24 PPQN) + Start/Stop/Continue
-2. Merge 5 leitet Clock an beide U6 weiter
-3. U6 #1 verteilt Clock an J-6 und S-1
-4. U6 #2 sendet PC/MMC an L-6
+2. Merge 5 leitet Clock an H4 Core weiter
+3. H4 Core verteilt Clock an J-6 und S-1
+4. H4 Core sendet PC/MMC an L-6
 
 **Alle Geräte laufen synchron zum selben Tempo!**
 
@@ -221,7 +214,7 @@ S-1: Bass-Lines
 
 1. **MIDI-Kanal prüfen:** L-6 auf "Omni" oder passenden Kanal einstellen
 2. **PC-Bereich prüfen:** L-6 akzeptiert nur PC 1-9 für Scenes
-3. **Verkabelung prüfen:** U6 #2 Out2 → L-6 MIDI In
+3. **Verkabelung prüfen:** H4 Core Out3 → L-6 MIDI In
 
 ---
 
