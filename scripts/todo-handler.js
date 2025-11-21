@@ -185,12 +185,10 @@
     }
 
     const confirmed = confirm(
-      `TODO-Verarbeitung starten?\n\n` +
-      `${pending.length} offene TODO(s) gefunden.\n\n` +
-      `Claude wird:\n` +
-      `• TODOs in die Kapitel-Dateien einfügen\n` +
-      `• Inhalte generieren\n` +
-      `• Änderungen committen\n\n` +
+      `TODOs exportieren?\n\n` +
+      `${pending.length} offene TODO(s) werden als JSON-Datei heruntergeladen.\n\n` +
+      `Danach kannst du die Datei an Claude Code senden,\n` +
+      `der dann die Inhalte automatisch generiert.\n\n` +
       `Fortfahren?`
     );
 
@@ -241,13 +239,13 @@
     // Zeige Anleitung
     setTimeout(() => {
       alert(
-        `✅ TODOs exportiert: ${filename}\n\n` +
+        `TODOs exportiert: ${filename}\n\n` +
         `NÄCHSTE SCHRITTE:\n\n` +
-        `1. Die Datei wurde heruntergeladen\n` +
-        `2. Öffne die Datei und kopiere den Inhalt\n` +
-        `3. Sende den Inhalt an Claude Code\n` +
-        `4. Claude wird die TODOs automatisch verarbeiten\n\n` +
-        `Die bearbeiteten TODOs werden dann in den Kapiteln erscheinen!`
+        `1. Öffne die heruntergeladene JSON-Datei\n` +
+        `2. Kopiere den Inhalt\n` +
+        `3. Sende ihn an Claude Code mit:\n` +
+        `   "Verarbeite diese TODOs"\n\n` +
+        `Claude fügt die Inhalte dann in die Kapitel ein.`
       );
     }, 600);
   }
