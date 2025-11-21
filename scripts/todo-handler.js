@@ -118,6 +118,7 @@
     const input = document.getElementById('todoInput');
     const highPriority = document.getElementById('todoHighPriority');
     const category = document.getElementById('todoCategory');
+    const authorTag = document.getElementById('todoAuthorTag');
     const successMsg = document.getElementById('todoSuccess');
 
     if(!input || !input.value.trim()) {
@@ -137,6 +138,7 @@
       text: input.value.trim(),
       priority: highPriority?.checked ? 'high' : 'normal',
       category: category?.value.trim() || null,
+      authorTag: authorTag?.value.trim().toUpperCase().substring(0, 4) || null,
       createdAt: new Date().toISOString(),
       status: 'pending',
       synced: false
@@ -159,6 +161,7 @@
     input.value = '';
     if(highPriority) highPriority.checked = false;
     if(category) category.value = '';
+    if(authorTag) authorTag.value = '';
 
     // Aktualisiere Anzeige
     await updateStats();
@@ -227,15 +230,16 @@
       html += '<div style="margin-bottom:16px;"><strong>Offen:</strong></div>';
       pending.forEach((todo, idx) => {
         const isUnsynced = unsynced.find(u => u.id === todo.id);
-        const syncLabel = isUnsynced ? '🔄 neu' : '✓ synchronisiert';
+        const syncLabel = isUnsynced ? '🔄 neu' : '✓';
         const prioClass = todo.priority === 'high' ? 'prio-high' : '';
         const cat = todo.category ? ` <span style="color:#666;">@${todo.category}</span>` : '';
         const dateStr = todo.createdAt ? formatDate(todo.createdAt) : '';
+        const authorLabel = todo.authorTag ? `<span style="background:#000;color:#fff;padding:1px 4px;border-radius:2px;font-size:0.75rem;margin-right:4px;">${escapeHtml(todo.authorTag)}</span>` : '';
 
         html += `<div class="todo-item">
           <div class="chapter"><strong>#${idx + 1}</strong> · ${todo.chapterFile}${cat}</div>
           <div class="text ${prioClass}">${todo.priority === 'high' ? '⚠️ ' : ''}${escapeHtml(todo.text)}</div>
-          <div class="sync-status">${syncLabel}${dateStr ? ` · ${dateStr}` : ''}</div>
+          <div class="sync-status">${authorLabel}${syncLabel}${dateStr ? ` · ${dateStr}` : ''}</div>
         </div>`;
       });
     }
@@ -343,6 +347,7 @@
         text: t.text,
         priority: t.priority,
         category: t.category,
+        authorTag: t.authorTag,
         createdAt: t.createdAt
       }))
     };
