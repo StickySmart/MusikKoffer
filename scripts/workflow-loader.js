@@ -342,7 +342,8 @@
       const { markdown } = await importFromMarkdown(entry.url);
       if(contentEl) contentEl.textContent = markdown;
       const store = ensureStore();
-      setStatus(`Fertig. ${unresolvedCount(store)} offene Kommentare.`);
+      const unresolved = unresolvedCount(store);
+      setStatus(unresolved > 0 ? `Kapitel geladen. ${unresolved} offene Anmerkungen.` : 'Kapitel geladen.');
 
       // Zeige TODO-Eingabefeld für ausgewähltes Kapitel
       if(window.TODO_HANDLER){
