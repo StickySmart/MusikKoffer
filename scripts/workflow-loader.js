@@ -343,7 +343,8 @@
       if(contentEl) contentEl.textContent = markdown;
       const store = ensureStore();
       const unresolved = unresolvedCount(store);
-      setStatus(unresolved > 0 ? `Kapitel geladen. ${unresolved} offene Anmerkungen.` : 'Kapitel geladen.');
+      const statusBase = `„${entry.label}" geladen.`;
+      setStatus(unresolved > 0 ? `${statusBase} ${unresolved} Anmerkungen.` : statusBase);
 
       // Zeige TODO-Eingabefeld für ausgewähltes Kapitel
       if(window.TODO_HANDLER){
