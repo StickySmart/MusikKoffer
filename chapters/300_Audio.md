@@ -11,31 +11,35 @@ Das Zoom L-6 fungiert als zentraler Audio-Hub für das gesamte MusikKoffer-Setup
 
 ### Geräte-Ausgänge zum Zoom L-6
 
-**TR-6S (Drum Machine)**
-- Main Out L/MONO → L-6 Kanal 1 (6,3mm Klinke, mono/TS)
-- Main Out R → L-6 Kanal 2 (6,3mm Klinke, mono/TS)
-- Pegel: Unity Gain (12 Uhr Position am Gerät)
-- L-6 Input Gain: -10 bis -6 dBu (LED sollte grün leuchten, nicht rot)
+**Kanal 1 – Mikrofon**
+- XLR-Eingang für Gesangsmikrofon
+- Phantom-Power: ON falls Kondensatormikrofon
+- L-6 Input Gain: nach Bedarf
 
-**J-6 (Chord Machine)**
-- Phones/Line Out → L-6 Kanal 3/4 (3,5mm Stereo auf 2× 6,3mm Klinke Y-Kabel)
-- Output Level am J-6: 70-80% (damit Headroom bleibt)
-- L-6 Input Gain: -12 dBu (J-6 hat relativ heißen Ausgang)
-
-**E-4 (Voice Tweaker)**
-- Line Out L/R → L-6 Kanal 5 (nur L bei Mono, beide bei Stereo-Effekten)
+**Kanal 2 – E-4 (Voice Tweaker)**
+- Line Out → L-6 Kanal 2 (6,3mm Klinke)
 - Pegel am E-4: Output Level auf 3/4
 - L-6 Input Gain: -8 dBu
 
-**S-1 (Synthesizer)**
-- Output → L-6 Kanal 6 (6,3mm Klinke, mono)
+**Kanal 3/4 – S-1 (Synthesizer)**
+- Output → L-6 Kanal 3/4 (Stereo oder 2× Mono)
 - Pegel am S-1: Volume-Regler auf 60%
 - L-6 Input Gain: -10 dBu
 
-**Sonicware Liven Ambient Ø**
-- Line Out L/R → L-6 via USB Audio (alternativ: 3,5mm auf Kanal 3/4 wenn J-6 nicht genutzt)
-- Bei USB: erscheint als separate Spur im L-6
-- Bei Klinke: Input Gain -15 dBu (sehr sauberes Signal)
+**Kanal 5/6 – J-6 (Chord Machine)**
+- Phones/Line Out → L-6 Kanal 5/6 (3,5mm Stereo auf 2× 6,3mm Klinke Y-Kabel)
+- Output Level am J-6: 70-80% (damit Headroom bleibt)
+- L-6 Input Gain: -12 dBu (J-6 hat relativ heißen Ausgang)
+
+**Kanal 7/8 – TR-6S (Drum Machine)**
+- Main Out L/R → L-6 Kanal 7/8 (2× 6,3mm Klinke, Stereo)
+- Pegel: Unity Gain (12 Uhr Position am Gerät)
+- L-6 Input Gain: -10 bis -6 dBu (LED sollte grün leuchten, nicht rot)
+
+**Kanal 9/10 – Sonicware Liven Ambient Ø**
+- Line Out L/R → L-6 Kanal 9/10 (3,5mm Stereo auf 2× 6,3mm)
+- Alternativ: USB Audio
+- L-6 Input Gain: -15 dBu (sehr sauberes Signal)
 
 ### Verkabelungs-Diagramm
 
@@ -43,34 +47,35 @@ Das Zoom L-6 fungiert als zentraler Audio-Hub für das gesamte MusikKoffer-Setup
 ┌─────────────────────────────────────────────────────────────┐
 │                    ZOOM L-6 (Mixer/Recorder)                │
 │                                                             │
-│  [1] ←──────── TR-6S Main L                                │
-│  [2] ←──────── TR-6S Main R                                │
-│  [3/4] ←────── J-6 Stereo Out (3,5mm → 2× 6,3mm)          │
-│  [5] ←──────── E-4 Line Out L                              │
-│  [6] ←──────── S-1 Output                                  │
-│  [USB] ←─────── Ambient Ø (alternativ zu 3/4)             │
+│  [1] ←──────── Mikrofon (XLR)                              │
+│  [2] ←──────── E-4 Line Out                                │
+│  [3/4] ←────── S-1 Output (Stereo)                         │
+│  [5/6] ←────── J-6 Stereo Out (3,5mm → 2× 6,3mm)          │
+│  [7/8] ←────── TR-6S Main L/R                              │
+│  [9/10] ←───── Ambient Ø (3,5mm → 2× 6,3mm)               │
 │                                                             │
 │  Main Out ────→ Kopfhörer / PA / Monitor                   │
-│  SD Card: Multitrack Recording (6 Spuren + Stereo Mix)     │
+│  SD Card: Multitrack Recording (10 Spuren + Stereo Mix)    │
 └─────────────────────────────────────────────────────────────┘
          ↑
          └── USB ──→ Computer (optional für DAW-Aufnahme)
 
 
 MIDI-Routing (separates Kapitel 500):
-CME H4 WC (Master Clock) → alle Geräte
+CME H4 WIDI CORE (Master Router) → alle Geräte
 ```
 
 ### Kabeltypen und Spezifikationen
 
-| Verbindung | Kabeltyp | Länge | Bemerkung |
-|------------|----------|-------|-----------|
-| TR-6S → L-6 | 2× 6,3mm Klinke TS (mono) | 50cm | Kurze Wege = weniger Störungen |
-| J-6 → L-6 | 3,5mm Stereo auf 2× 6,3mm | 30cm | Y-Kabel, achte auf Links/Rechts |
-| E-4 → L-6 | 6,3mm Klinke TS | 50cm | Mono ausreichend bei Vocoder |
-| S-1 → L-6 | 6,3mm Klinke TS | 50cm | Standard Instrumentenkabel |
-| Ambient Ø → L-6 | USB-C auf USB-A | 1m | Bevorzugt wegen Sync |
-| L-6 → Monitor | 2× 6,3mm Klinke / XLR | 2-3m | Je nach PA-System |
+| Verbindung | Kabeltyp | L-6 Kanal | Bemerkung |
+|------------|----------|-----------|-----------|
+| Mikrofon → L-6 | XLR | 1 | Gesang/Sprache |
+| E-4 → L-6 | 6,3mm Klinke TS | 2 | Voice Tweaker Out |
+| S-1 → L-6 | 2× 6,3mm Klinke TS | 3/4 | Stereo Synth |
+| J-6 → L-6 | 3,5mm Stereo auf 2× 6,3mm | 5/6 | Y-Kabel |
+| TR-6S → L-6 | 2× 6,3mm Klinke TS | 7/8 | Drums Stereo |
+| Ambient Ø → L-6 | 3,5mm Stereo auf 2× 6,3mm | 9/10 | Y-Kabel |
+| L-6 → Monitor | 2× 6,3mm Klinke / XLR | Main Out | Je nach PA-System |
 
 **Wichtig:** Verwende qualitativ hochwertige, geschirmte Kabel. Billige Kabel verursachen Brummen und Signalverlust.
 
@@ -80,29 +85,41 @@ Das Zoom L-6 bietet 48V Phantom-Power für Kondensatormikrofone. **Für das Musi
 
 ### Kanal-spezifische Einstellungen
 
-**Kanal 1-2 (TR-6S):**
-- Phantom: **OFF** ❌
-- Input Type: LINE
-- Pad: OFF (Signal ist bereits auf Line-Pegel)
-- Grund: Synthesizer/Drum-Machines haben Line-Ausgänge, Phantom würde sie beschädigen
+**Kanal 1 (Mikrofon):**
+- Phantom: **ON** ✅ (falls Kondensatormikrofon)
+- Input Type: MIC
+- Pad: Nach Bedarf
+- Grund: Einziger Kanal mit Mikrofon-Eingang
 
-**Kanal 3-4 (J-6):**
-- Phantom: **OFF** ❌
-- Input Type: LINE
-- Pad: OFF
-- Grund: Stereo-Line-Signal vom Chord-Synth
-
-**Kanal 5 (E-4):**
+**Kanal 2 (E-4):**
 - Phantom: **OFF** ❌
 - Input Type: LINE
 - Pad: OFF
 - Grund: Voice-Tweaker gibt Line-Signal aus
 
-**Kanal 6 (S-1):**
+**Kanal 3/4 (S-1):**
 - Phantom: **OFF** ❌
 - Input Type: LINE
 - Pad: OFF
 - Grund: Synthesizer, kein Mikrofon
+
+**Kanal 5/6 (J-6):**
+- Phantom: **OFF** ❌
+- Input Type: LINE
+- Pad: OFF
+- Grund: Stereo-Line-Signal vom Chord-Synth
+
+**Kanal 7/8 (TR-6S):**
+- Phantom: **OFF** ❌
+- Input Type: LINE
+- Pad: OFF
+- Grund: Drum-Machine hat Line-Ausgänge
+
+**Kanal 9/10 (Ambient Ø):**
+- Phantom: **OFF** ❌
+- Input Type: LINE
+- Pad: OFF
+- Grund: Synthesizer, sehr sauberes Signal
 
 ### Ausnahme: Mikrofon-Nutzung (optional)
 
