@@ -1,6 +1,6 @@
 {
   "manifest_version": 1,
-  "revision": 2,
+  "revision": 3,
   "project": "TiageMusic Geraetesetup",
   "chapters": [
     {
@@ -32,6 +32,11 @@
           "id": "330",
           "title": "Ambient0",
           "path": "chapters/330_ambient0.md"
+        },
+        {
+          "id": "340",
+          "title": "Computer-Integration",
+          "path": "chapters/340_computer_integration.md"
         }
       ]
     },
