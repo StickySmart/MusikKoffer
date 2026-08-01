@@ -1,2 +1,9 @@
 # Ableton Live analysis cache files — auto-regenerated, not source content
 *.asd
+
+.DS_Store
+Thumbs.db
+*.log
+__pycache__/
+*.pyc
+.env
