@@ -11,7 +11,7 @@ Dieses Kapitel beschreibt, wie der Computer optional in das MusikKoffer-System e
 
 ### Begründung
 
-Das MIDI-Clock-System (Kapitel 500) läuft vollständig autark in Hardware – der CME H4 WIDI Core routet Clock/Notes zwischen TR-6S, S-1, J-6, E-4 und Ambient Ø, ohne dass der Computer beteiligt ist. Der Computer kommt ausschließlich über den Zoom L-6 USB-Audio-Anschluss ins Spiel (siehe Kapitel 310, "Audio-Interface Modi").
+Das MIDI-Clock-System (Kapitel 500) läuft vollständig autark in Hardware – der MIDI-Hub (seit September 2026 der CME H12MIDI Pro, vorher der CME H4 WIDI Core) routet Clock/Notes zwischen TR-6S, S-1, J-6, E-4 und Ambient Ø, ohne dass der Computer beteiligt ist. Der Computer kommt ausschließlich über den Zoom L-6 USB-Audio-Anschluss ins Spiel (siehe Kapitel 310, "Audio-Interface Modi").
 
 Da nur eine einzelne USB-Audio-Schnittstelle (L-6) angebunden wird und kein Software-Patchbay mit mehreren synchronisierten Anwendungen benötigt wird, deckt PipeWire den Anwendungsfall vollständig ab:
 

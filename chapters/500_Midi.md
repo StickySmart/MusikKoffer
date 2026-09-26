@@ -5,6 +5,8 @@ Version: 2025-05-21
 
 Dieses Dokument beschreibt die MIDI-Architektur des MusikKoffer-Systems - von der Clock-Synchronisation bis zur Note-Verteilung.
 
+> **Stand September 2026:** Der CME H4 WIDI Core ist durch den **CME H12MIDI Pro** ersetzt (6× USB-Host, 6× TRS-MIDI In/Out, USB-Client mit 8 virtuellen Ports, läuft ohne Rechner). Die Port-Belegung des H12 ist noch nicht erfasst; die Routing-Tabellen und Presets unten beschreiben weiterhin das H4-Setup und werden nach der Belegung neu geschrieben.
+
 ## MIDI-Routing-Architektur
 
 Das MusikKoffer-System verwendet eine **Hub-basierte MIDI-Architektur** mit dem CME H4 WIDI Core als zentralem MIDI-Router. Die USB-fähigen Geräte (S-1, J-6, E-4) sind über einen USB-Hub direkt am H4 angeschlossen.
